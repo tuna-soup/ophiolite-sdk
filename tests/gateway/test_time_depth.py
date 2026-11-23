@@ -31,7 +31,7 @@ def test_upload_read_link_export_and_publish(web, tmp_path):
     bore = alice.create_entity('wellbore', 'PRW-06', provisional=True, part_of=well, statement='NLOG borehole PRW-06', command_id='e57-b')
     alice.of_entity(upload.asset_id, upload.revision, bore, statement='The NLOG workbook names PRW-06', command_id='e57-a')
     exported = alice.export([(upload.asset_id, upload.revision, None)], tmp_path / 'b')
-    assert exported.manifest['bundle_version'] == '2.10.0'  # E122 s5b: uploads carry their source records
+    assert exported.manifest['bundle_version'] == '2.18.0'  # E122 s5b: uploads carry their source records; E182 s2b: and senders
     offline = open_bundle(tmp_path / 'b')
     assert [(a.asset_id, a.revision) for a in offline.assets_of(bore.entity_id)] == [(upload.asset_id, upload.revision)]  # the link travels
     [step] = import_plan(offline, {})

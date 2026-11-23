@@ -21,5 +21,29 @@ and reading one of its inputs (refused `data_rules` otherwise). A declaration th
 byte for byte. They are run on the bound input versions after the validity and inputs checks and before the built-in
 rule; a record of such a version carries them in `data_rules`.
 
+From E178 slice 0 (version 1.2.0 of the record, `rules_version` 1.2.0) each rule lists in `rules.json` `measures` the
+numbers its evaluation records, and a record may carry them in `measures` (sorted by name, once each): a quantity in
+the result's display unit without rounding, or a whole count with no unit. For `well-residual-within/1`,
+`largest_residual` is the largest absolute residual over every computed row (not only the rows a record lists), and
+`computed`, `passing`, `failing` and `not_computed` count every row. The evaluator writes the block from E178 slice 2,
+only when rows were computed; a record written before, or one whose evaluation stopped at an earlier gate, has no
+block and keeps its key set byte for byte. A chain step's condition (`ophiolite.chain/1`) names one measure; over a
+record without it the condition cannot be decided. `fixtures/checks/with-measures.json` is a record with the block,
+counted by hand.
+
 `fixtures/valid/` holds declarations the server accepts; each file in `fixtures/invalid/` differs from
 `valid/tops-within-5m.json` in one field and names the reason it is refused (`fixtures/expected.json`).
+
+From E176 a candidate result can be tried before it is published: `outcomes/try` takes the header
+`publications/derive` would take and the candidate's bytes, and answers `outcome-trial-schema.json`
+(`ophiolite.outcome-trial/1`) with `trial: true`. It names, per enabled outcome of the kind, what the outcome would say:
+`accepted`, `rejected`, `not_compared` (the record's verdicts and reasons), `not_evaluated` (the declarer cannot read a
+bound input) or `not_tried` (reserved for rules that run as tools). Rows are one projection of the record's rows,
+`{key, measure, value, unit, limit, pass, reason}`, with `value` in the tolerance's unit, complete counts and at most 20
+per list. A trial writes nothing. Each entry is one variant of a union discriminated by `would`, so the schema states
+which reason, sentence and rows a verdict may carry. From E178 slice 2 (version 1.2.0) an accepted, rejected or not
+compared entry may carry `measures`, the record's own block under the same rules, absent when the evaluation stopped at
+an earlier gate and never served to the Python SDK or command line up to release 2026.11.19, whose reader is strict
+(`fixtures/trial/valid/measured.json`). `fixtures/trial/valid/` holds answers both readers take;
+`fixtures/trial/invalid/cases.json` changes one of them in one place per case. Until slice 1 the operation answers
+that it is not available on this deployment yet.

@@ -1,0 +1,18 @@
+{
+  "note": "E179 s0 C2: answers the contract refuses, one defect each on the first answer of answers.json (passed). `set` replaces top-level fields, `row` replaces fields of its first row, `drop_row` removes them; `raw` is the whole file as text. A shape case is refused by the published JSON Schema and by the model; a semantic case passes the JSON Schema and is refused by the model (strategy §3.2: consistency is the model's). read_answer makes answer_malformed of every one.",
+  "cases": [
+    {"name": "an unknown field", "layer": "shape", "set": {"verified": true}},
+    {"name": "a numeric string", "layer": "shape", "row": {"value": "6.1"}},
+    {"name": "a boolean value", "layer": "shape", "row": {"value": true}},
+    {"name": "a missing pass", "layer": "shape", "drop_row": ["pass"]},
+    {"name": "another schema", "layer": "shape", "set": {"schema": "check-answer"}},
+    {"name": "a control character in a key", "layer": "shape", "row": {"key": "W-1\nTop"}},
+    {"name": "passed with a failing row", "layer": "semantic", "row": {"pass": false}},
+    {"name": "passed with no row", "layer": "semantic", "set": {"rows": []}},
+    {"name": "failed with no failing row", "layer": "semantic", "set": {"state": "failed"}},
+    {"name": "not_compared without a reason", "layer": "semantic", "set": {"state": "not_compared"}},
+    {"name": "a reason beside passed", "layer": "semantic", "set": {"reason": "Compared every well"}},
+    {"name": "a non-finite number", "layer": "semantic",
+     "raw": "{\"schema\": \"ophiolite.check-answer/1\", \"state\": \"passed\", \"reason\": null, \"rows\": [{\"key\": \"W-1 Top Brent\", \"measure\": \"residual\", \"value\": 1e999, \"unit\": \"m\", \"limit\": 5, \"pass\": true}]}"}
+  ]
+}

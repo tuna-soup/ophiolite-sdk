@@ -22,7 +22,8 @@
       "properties": {
         "outcome": {"enum": ["proceeds", "refused"]},
         "effects": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/effect"}},
-        "refusal": {"$ref": "#/$defs/refusal"}
+        "refusal": {"$ref": "#/$defs/refusal"},
+        "due_stops": {"type": "integer", "minimum": 0, "description": "E178 s2a: a chain enable's count of due lines the caller could read before it that would no longer be listed; served only to clients after release 2026.11.19"}
       },
       "if": {"properties": {"outcome": {"const": "refused"}}},
       "then": {"required": ["refusal"], "properties": {"effects": {"maxItems": 0}}},

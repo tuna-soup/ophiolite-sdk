@@ -7,16 +7,34 @@ DATE, UWI, API, the curve descriptions and `~Params` are left empty. `WELL` is t
 exact revision that you may read; else the `well=` you give; else empty. It is never taken from the original header or
 a display name.
 
+E183 s2d: a read in the well log form (`Client.read(..., form='ophiolite.well-log-curve/1')`) is written from its strict
+part and the file's header as received. `VERS` 2.0, `WRAP` NO and the delimiter are those of the bytes lasio writes;
+`~Curve` is `DEPT` and each selected curve in the caller's order with its unit; `WELL` is the declared well, `STRT` and
+`STOP` the first and last depth, `STEP` the spacing when it is the same between every pair of depths (else 0, as LAS
+2.0 says), `NULL` -999.25; the declared datum is a line of `~Other` beside Project, Asset and Revision. Every other
+header entry as received follows in file order, repeats kept: the other `~V` and `~W` entries, every `~P` entry and
+every `~O` line. The received `VERS`, `WRAP`, `DLM`, `WELL`, `STRT`, `STOP`, `STEP`, `NULL` and every received `~C`
+line stay in the stored header and are not written. No entry is compared with the strict part or read to decide
+anything; nothing is converted or resampled.
+
 `lasio_bytes` writes a `LASFile` for `Client.upload_las` with every sample spelled exactly, and re-reads its header
-with the SDK's own reader before returning. `curves_from_lasio` turns a `LASFile` into the `WrittenOriginal` that
+with the SDK's own reader before returning; for a file `to_lasio` made from a well log it also re-reads the entries
+written as received, in order, and returns nothing when lasio wrote them otherwise. `curves_from_lasio` turns a `LASFile` into the `WrittenOriginal` that
 `Client.publish_derived` takes, with the file's `NULL` as missing. lasio is imported only when one of these is called;
 the SDK's core (`import ophiolite`, `ophiolite.exchange`) never imports it.
 """
 import io
 import math
-from .errors import Busy, MissingExtra, OphioliteError, PermissionRefused, Unavailable, ValidationFailed, VerificationFailed
+import re
+from decimal import Decimal
+from .errors import Busy, MissingExtra, OphioliteError, PermissionRefused, Refused, Unavailable, ValidationFailed, VerificationFailed
 
 NULL = -999.25
+# E183 s2d (D2, D8, Q4): the entries the output's own structure or the strict part states. A received entry with one of
+# these mnemonics in its section, and every received ~C line, is not written; the list is fixed, never a comparison.
+STRUCTURAL = {'V': ('VERS', 'WRAP', 'DLM'), 'W': ('WELL', 'STRT', 'STOP', 'STEP', 'NULL')}
+_WELL_LOG = '_ophiolite_well_log'  # set on a LASFile made from a well log: how many ~Other lines it generated
+_SEPARATOR = re.compile(r':(?=[ \t]|$)')
 
 
 def _lasio():
@@ -70,9 +88,10 @@ def to_lasio(data, *, well=None):
     """One exact read (`Client.read(...)`) as a reconstructed `lasio.LASFile`; see the module text for what it carries."""
     lasio = _lasio()
     import numpy as np
-    from .scientific import descriptor
+    from .scientific import WellLog, descriptor
     from .windows import refuse_window
     refuse_window(data)  # E100a: blocks are not samples
+    if any(isinstance(view, WellLog) for view in data.curves): return _well_log_las(lasio, data, well)  # E183 s2d
     meta = descriptor(data)  # one axis and one exact source (AxisMismatch otherwise)
     for view in data.curves: _no_marker(view.curve, view.values, NULL)
     linked = _linked_well(data)
@@ -84,6 +103,81 @@ def to_lasio(data, *, well=None):
     las.well['WELL'].value = linked if linked is not None else (well or '')
     las.other = '\n'.join([f'Project {meta.project}', f'Asset {meta.asset_id}', f'Revision {meta.revision}'])
     return las
+
+
+def _extent(depth):
+    """E183 s2d: STRT, STOP and STEP from the depth itself, each as text a float reads back exactly. STEP is the spacing
+    only when every pair of neighbouring depths, as the numbers are written, is that far apart; else 0 (LAS 2.0)."""
+    depth = [float(d) for d in depth]
+    steps = {Decimal(repr(b)) - Decimal(repr(a)) for a, b in zip(depth, depth[1:])}
+    return repr(depth[0]), repr(depth[-1]), str(steps.pop()) if len(steps) == 1 else '0'
+
+
+def _well_log_las(lasio, data, well):
+    """E183 s2d: a read in the well log form as a LASFile (the module text says what it holds)."""
+    import numpy as np
+    from .scientific import well_log_descriptor
+    if well is not None: raise Refused("A well log's well is the declaration stored with it; well= is not taken.")
+    meta = well_log_descriptor(data)  # depth, depth unit, kind, datum, well and source agree, before anything is built
+    for log in data.curves: _no_marker(log.curve, log.values, NULL)
+    received = data.curves[0].header.entries
+    las = lasio.LASFile()
+    las.append_curve('DEPT', np.array(meta.depth, dtype='float64'), unit=meta.depth_unit)
+    for log in data.curves:
+        las.append_curve(log.curve, np.array([np.nan if v is None else v for v in log.values], dtype='float64'), unit=log.unit)
+    las.sections['Well'] = lasio.SectionItems([item for item in las.well if item.mnemonic in STRUCTURAL['W']])
+    las.well['STRT'].value, las.well['STOP'].value, las.well['STEP'].value = _extent(meta.depth)
+    las.well['NULL'].value = NULL
+    las.well['WELL'].value = meta.well
+    sections = {'V': las.version, 'W': las.well, 'P': las.params}
+    for entry in received:
+        if entry['section'] in sections and entry['mnemonic'] not in STRUCTURAL.get(entry['section'], ()):
+            sections[entry['section']].append(lasio.HeaderItem(entry['mnemonic'], entry['unit'], entry['value'], entry['description']))
+    generated = [f'Project {meta.project}', f'Asset {meta.asset_id}', f'Revision {meta.revision}', f'Depth datum {meta.depth_datum}']
+    las.other = '\n'.join(generated + [entry['value'] for entry in received if entry['section'] == 'O'])
+    setattr(las, _WELL_LOG, len(generated))
+    return las
+
+
+def _entry(section, line):
+    """One written header line as (section, mnemonic, unit, value, description): the mnemonic before the first period,
+    the unit up to the first space or tab, the description after the last colon followed by a space, a tab or the end."""
+    mnemonic, period, rest = line.partition('.')
+    if not period: mnemonic, rest = '', line
+    unit = re.match(r'[^ \t]*', rest).group(0) if period else ''
+    rest = rest[len(unit):]
+    cut = list(_SEPARATOR.finditer(rest))
+    value, description = (rest[:cut[-1].start()], rest[cut[-1].end():]) if cut else (rest, '')
+    return (section, mnemonic.strip(), unit, value.strip(), description.strip())
+
+
+def _received(las, generated):
+    """The entries a well log's LASFile holds beside its structure, in the order they are written."""
+    out = []
+    for section, items in (('V', las.version), ('W', las.well), ('P', las.params)):
+        out += [(section, str(i.original_mnemonic).strip(), str(i.unit).strip(), str(i.value).strip(), str(i.descr).strip())
+                for i in items if i.original_mnemonic not in STRUCTURAL.get(section, ())]
+    lines = [line.strip() for line in las.other.splitlines()][generated:]
+    return out + [('O', '', '', line, '') for line in lines if line and not line.startswith('#')]
+
+
+def _written(text, generated):
+    """The same entries as read back from the written text (sections before ~A; titles, blanks and # lines skipped)."""
+    out, section, other = [], None, 0
+    for line in text.split('\n'):
+        written = line.strip()
+        if written.startswith('~'):
+            section = written[1:2]
+            if section == 'A': break
+            continue
+        if section in (None, 'C') or not written or written.startswith('#'): continue
+        if section == 'O':
+            other += 1
+            if other > generated: out.append(('O', '', '', written, ''))
+            continue
+        entry = _entry(section, line)
+        if entry[1] not in STRUCTURAL.get(section, ()): out.append(entry)
+    return out
 
 
 def _null(las):
@@ -108,12 +202,19 @@ def lasio_bytes(las):
         if any(math.isinf(v) for v in values): raise ValidationFailed([f'Curve {curve.mnemonic} must be finite; write a missing sample as NaN.'])
         _no_marker(curve.mnemonic, values, marker)
     out = io.StringIO()
-    las.write(out, version=2.0, fmt='%.17g')
+    generated = getattr(las, _WELL_LOG, None)
+    if generated is None: las.write(out, version=2.0, fmt='%.17g')
+    else:  # E183 s2d: STRT, STOP and STEP from the depth as written, never lasio's rounded first difference
+        meant = _received(las, generated)  # before writing: lasio's writer edits some header values in place
+        strt, stop, step = _extent(_exact(las.curves[0]))
+        las.write(out, version=2.0, fmt='%.17g', STRT=strt, STOP=stop, STEP=step)
     raw = out.getvalue().encode()
     try: read = [(c.mnemonic, c.unit) for c in las_header.curves(raw)]
     except OphioliteError: read = None
     if read != [(c.mnemonic, c.unit) for c in las.curves]:
         raise VerificationFailed('lasio wrote a header the SDK reads differently; nothing was returned.')
+    if generated is not None and _written(raw.decode(), generated) != meant:
+        raise VerificationFailed('lasio wrote the header entries as received differently or out of order; nothing was returned.')
     return raw
 
 

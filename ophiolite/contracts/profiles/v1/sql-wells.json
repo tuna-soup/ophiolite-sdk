@@ -12,6 +12,9 @@
     "history": "current-only"
   },
   "role": "artifact",
+  "serves": [
+    "ophiolite.original/1"
+  ],
   "media_types": [
     "application/json"
   ],

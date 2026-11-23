@@ -96,8 +96,9 @@ class Sync:
         """E31: the answer as documented, handed on unchanged."""
         from pydantic import ValidationError
         from .errors import VerificationFailed
+        from .models.answers import refusal  # E187 s0
         try: model.model_validate(page)
-        except (ValidationError, ValueError, TypeError): raise VerificationFailed('The project event log answered outside its documented shape.') from None
+        except (ValidationError, ValueError, TypeError) as error: raise refusal(error, VerificationFailed('The project event log answered outside its documented shape.')) from None
         return page
 
     @staticmethod

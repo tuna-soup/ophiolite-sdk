@@ -3,10 +3,16 @@ product and version only (no host name, no path, no user text), and `traceparent
 OpenTelemetry trace when there is one. The gateway shows it as "Through the Python library 0.1.0"; it is a report
 from the client, never an authorisation (the server resolves the credential on its own)."""
 import contextvars
+import re
 
 from ._version import __version__
+from .errors import Refused
 
 HEADER = 'X-Ophiolite-Client'
+LIMIT = 128  # the gateway drops a longer report (record.CLIENT_LIMIT)
+TOKEN = re.compile(r'[A-Za-z0-9][A-Za-z0-9._+-]{0,39}')  # the gateway's grammar (record._TOKEN); widened there first, never here
+NAMED = 'Name the application and its version as two short words, such as ("ophiolite-opendtect", "0.1.0").'
+HOSTED = 'Name the application before the host it runs in.'
 _NAME = contextvars.ContextVar('ophiolite_client_name', default='ophiolite-python')
 
 
@@ -17,6 +23,23 @@ def name(product):
 
 def value():
     return '%s/%s' % (_NAME.get(), __version__)
+
+
+def _pair(given):
+    if not (isinstance(given, tuple) and len(given) == 2 and all(isinstance(p, str) and TOKEN.fullmatch(p) for p in given)): raise Refused(NAMED)
+    return '%s/%s' % given
+
+
+def sender(application=None, host=None):
+    """E182 s1: the report of a program that names itself and, when it knows it, the application it runs in, as
+    `name/version[; host=name/version]`; None names nothing (this library's own report). Refused before any request
+    when it would not reach the gateway as given."""
+    if application is None:
+        if host is not None: raise Refused(HOSTED)
+        return None
+    said = _pair(application) + ('' if host is None else '; host=' + _pair(host))
+    if len(said) > LIMIT: raise Refused(NAMED)
+    return said
 
 
 def traceparent():
@@ -30,11 +53,12 @@ def traceparent():
     return '00-%032x-%016x-%02x' % (context.trace_id, context.span_id, int(context.trace_flags))
 
 
-def headers():
+def headers(sender=None):
     trace = traceparent()
-    return {HEADER: value(), **({'traceparent': trace} if trace else {})}
+    return {HEADER: sender or value(), **({'traceparent': trace} if trace else {})}
 
 
-def stamp(given):
-    """`given` (authorization and the like) with this program's report added; a caller's own value is not replaced."""
-    return {**headers(), **(given or {})}
+def stamp(given, sender=None):
+    """`given` (authorization and the like) with this program's report added (SENDER, a client's own name, before the
+    context's); a caller's own value is not replaced."""
+    return {**headers(sender), **(given or {})}

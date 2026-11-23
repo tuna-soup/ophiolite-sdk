@@ -51,6 +51,12 @@
        "expect": {"state": "verified", "id": "verification-000000000000000000000000000000e1", "line": "Verified by Ben against a run Ophiolite made on 6 November 2026"}},
       {"add": {"id": "verification-000000000000000000000000000000e2", "kind": "withdrawn", "by": "ben", "at": 1794009600, "withdraws": "verification-000000000000000000000000000000e1"},
        "expect": {"state": "verified", "id": "verification-000000000000000000000000000000a1", "line": "Verified by Anna against Depth shift against hand-picked tops on 5 November 2026"}}]},
+    {"name": "E180 s0: a reference-cases verification says its counts; a withdrawal of it says so", "digest": "O",
+     "steps": [
+      {"add": {"id": "verification-000000000000000000000000000000f1", "kind": "reference-cases", "by": "cleo", "at": 1795001200, "passed": 2, "counted": 3},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000f1", "line": "Verified by Cleo against 2 of 3 reference cases run by Ophiolite on 18 November 2026"}},
+      {"add": {"id": "verification-000000000000000000000000000000f2", "kind": "withdrawn", "by": "cleo", "at": 1795087600, "withdraws": "verification-000000000000000000000000000000f1"},
+       "expect": {"state": "withdrawn", "id": "verification-000000000000000000000000000000f2", "line": "Verification withdrawn by Cleo on 19 November 2026"}}]},
     {"name": "R-V3: another digest has none", "digest": "O",
      "steps": [{"expect": {"state": "none", "id": null, "line": "Not verified"}}]}
   ]

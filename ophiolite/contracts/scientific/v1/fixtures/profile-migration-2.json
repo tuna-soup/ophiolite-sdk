@@ -1,0 +1,18 @@
+{
+  "schema": "ophiolite.profile-migration/2",
+  "asset_id": "synthetic-log",
+  "from_revision": "2e6d5f7c3a1b0f9e8d7c6b5a4938271605f4e3d2c1b0a99887766554433221100",
+  "from_storage": "synthetic-log",
+  "from_profile": "ophiolite.application-curve/1",
+  "to_profile": "ophiolite.well-log-curve/1",
+  "to_revision": "a0b1c2d3e4f5061728394a5b6c7d8e9fa0b1c2d3e4f5061728394a5b6c7d8e9f",
+  "to_storage": "migrated-fedcba9876543210fedcba9876543210",
+  "mapping": "ophiolite.mapping/application-curve-to-well-log-curve/1",
+  "representations": [
+    {"from": "curve:GR", "from_sha256": "1111111111111111111111111111111111111111111111111111111111111111", "to": "well-log-curve:GR", "to_sha256": "2222222222222222222222222222222222222222222222222222222222222222"},
+    {"from": "curve:RHOB", "from_sha256": "3333333333333333333333333333333333333333333333333333333333333333", "to": "well-log-curve:RHOB", "to_sha256": "4444444444444444444444444444444444444444444444444444444444444444"}
+  ],
+  "release": {"number": "2026.11.21", "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+  "actor": "system:profile-migration",
+  "at": "2026-11-21T09:00:00Z"
+}

@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.37.0",
+    "version": "1.38.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -5886,6 +5886,188 @@
       "title": "SelectionDescriptor",
       "type": "object"
     },
+    "Sender": {
+      "additionalProperties": false,
+      "description": "What a version says sent it: a report, never a proof; no access, trust or verification decision reads it.",
+      "else": {
+        "if": {
+          "properties": {
+            "state": {
+              "const": "not recorded"
+            }
+          },
+          "required": [
+            "state"
+          ]
+        },
+        "properties": {
+          "client": {
+            "type": "null"
+          },
+          "host": {
+            "type": "null"
+          }
+        },
+        "then": {
+          "properties": {
+            "transport": {
+              "type": "null"
+            },
+            "accepted_as": {
+              "type": "null"
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "state": {
+            "const": "reported"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "properties": {
+        "schema": {
+          "const": "ophiolite.sender/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "reported",
+            "not reported",
+            "not recorded"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "client": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SenderClient"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "host": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SenderHost"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,15}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transport"
+        },
+        "accepted_as": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Accepted As"
+        }
+      },
+      "required": [
+        "schema",
+        "state",
+        "client",
+        "host",
+        "transport",
+        "accepted_as"
+      ],
+      "then": {
+        "properties": {
+          "client": {
+            "type": "object"
+          }
+        }
+      },
+      "title": "Sender",
+      "type": "object"
+    },
+    "SenderClient": {
+      "additionalProperties": false,
+      "properties": {
+        "product": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Product"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        }
+      },
+      "required": [
+        "product",
+        "version"
+      ],
+      "title": "SenderClient",
+      "type": "object"
+    },
+    "SenderHost": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 40,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 40,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "SenderHost",
+      "type": "object"
+    },
     "SourcedBy": {
       "additionalProperties": false,
       "description": "E108 (1.25.0): the source procedure version that made this uploaded file on the person's computer from a team's\nsystem, as the server derived it from the project's catalogue (label, version and rules), the runner, the person's\nlabel for the system (never its address or credentials) and the output role it was sent as.",
@@ -7669,6 +7851,9 @@
       ],
       "default": null,
       "title": "Osdu Kind Reason"
+    },
+    "sender": {
+      "$ref": "#/$defs/Sender"
     }
   },
   "required": [

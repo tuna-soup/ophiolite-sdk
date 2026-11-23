@@ -182,3 +182,10 @@ move (`null` when the deployment names none), the system actor `system:profile-m
 The two profiles are of the same kind and never equal. One record per item, from revision and to profile; a revision is
 the `to` of at most one record. Fixtures are in `fixtures/profile-migration/` (`valid.json`; `same-profile.json`, which
 a consumer refuses).
+
+`profile-migration-2.json` (E183 s1b): the successor for a move of several representations under one registered
+mapping, such as an uploaded LAS item's curves moved to the well log form. It keeps `/1`'s fields except the two
+digests, and adds `mapping` (a registered mapping document from the from profile to the to profile) and
+`representations`: each `{from, from_sha256, to, to_sha256}`, 1 to 64, with `from` and `to` each named once. The new
+revision keeps every row of the old one unchanged and adds the rows listed. `/1` is unchanged; a move key is recorded in
+at most one of the two. Fixture: `fixtures/profile-migration-2.json` (synthetic).

@@ -1,0 +1,52 @@
+{
+  "schema": "ophiolite.transfer-codes/1",
+  "id": "ophiolite.transfer-codes/1",
+  "version": "1.0.0",
+  "title": "Transfer codes: what a connector's get or send may say it kept, changed and did not carry, per capability route (E184)",
+  "description": "The ceiling of a transfer receipt (R-K3): a receipt row's code must be listed here for the receipt's capability route and in the row's own list, and its sentence is the template filled with the row's own measure. A changed code carries the difference the connector's independent check allows (exact; float32: one float32 unit; z-step: half of one of 65,534 steps of the inline's range of values plus one float32 unit, as OpendTect stores a horizon). A route without a row here has no receipt. The capability files are not changed by this document. Version 1.0.0 lists the three horizon routes the J-mvp journey runs.",
+  "routes": [
+    {
+      "capability": "opendtect",
+      "profile": "points-csv/1",
+      "data": "Horizon",
+      "direction": "publish",
+      "contract": "points-csv/1",
+      "codes": [
+        {"code": "nodes-on-grid", "list": "kept", "measure": "count", "sentence": "Nodes of the horizon's grid, at the survey's positions: {count:,}"},
+        {"code": "z-as-stored", "list": "kept", "measure": "none", "sentence": "Z as OpendTect stores it, in milliseconds of two-way time, positive down, below SRD"},
+        {"code": "crs", "list": "kept", "measure": "value", "sentence": "The survey's coordinate system, {value}"},
+        {"code": "grid-to-points", "list": "changed", "measure": "count", "bound": "exact", "sentence": "The grid becomes one point per node, with its inline and crossline: {count:,}"},
+        {"code": "undefined-to-empty", "list": "changed", "measure": "count", "bound": "exact", "sentence": "Nodes without a value, sent with an empty z: {count:,}"},
+        {"code": "display-settings", "list": "not_carried", "measure": "none", "sentence": "The horizon's colour and display settings"}
+      ]
+    },
+    {
+      "capability": "opendtect",
+      "profile": "points-csv/1",
+      "data": "Horizon",
+      "direction": "write",
+      "contract": "points-csv/1",
+      "codes": [
+        {"code": "nodes-on-grid", "list": "kept", "measure": "count", "sentence": "Nodes on the survey's grid, written as a new horizon beside yours: {count:,}"},
+        {"code": "crs", "list": "kept", "measure": "value", "sentence": "The coordinate system, {value}"},
+        {"code": "empty-to-undefined", "list": "changed", "measure": "count", "bound": "exact", "sentence": "Points without a height, which become nodes without a value: {count:,}"},
+        {"code": "outside-points-undefined", "list": "changed", "measure": "count", "bound": "exact", "sentence": "Nodes inside the horizon's box that no point names, which have no value: {count:,}"},
+        {"code": "z-step", "list": "changed", "measure": "count", "bound": "z-step", "sentence": "Values that move by up to half of OpendTect's Z step for their inline: {count:,}"}
+      ]
+    },
+    {
+      "capability": "qgis",
+      "profile": "points-csv/1",
+      "data": "Point set",
+      "direction": "read",
+      "contract": "points-csv/1",
+      "codes": [
+        {"code": "points", "list": "kept", "measure": "count", "sentence": "Points at their positions, with their values: {count:,}"},
+        {"code": "crs", "list": "kept", "measure": "value", "sentence": "The coordinate system, {value}"},
+        {"code": "no-height-flat", "list": "changed", "measure": "count", "bound": "exact", "sentence": "Points without a height, drawn flat: {count:,}"},
+        {"code": "local-copy", "list": "changed", "measure": "none", "bound": "exact", "sentence": "Opened as a GeoPackage copy on this computer"},
+        {"code": "display-settings", "list": "not_carried", "measure": "none", "sentence": "Display styling stays in QGIS and is not returned"}
+      ]
+    }
+  ]
+}

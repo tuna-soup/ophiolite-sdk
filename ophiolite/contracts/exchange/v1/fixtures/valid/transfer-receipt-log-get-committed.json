@@ -1,0 +1,41 @@
+{
+  "schema": "ophiolite.transfer-receipt/1",
+  "direction": "get",
+  "capability": "opendtect",
+  "route": {
+    "profile": "las2/1",
+    "data": "Well log curve",
+    "direction": "write"
+  },
+  "contract": "las2/1",
+  "state": "committed",
+  "base": {
+    "item": "log-gr",
+    "revision": "r1",
+    "number": 1
+  },
+  "made": {
+    "copy": "3f0c2a9d61e4b857"
+  },
+  "fingerprints": {
+    "source": "version r1 of log-gr: the form read, depths, values, unit, mnemonic and basis",
+    "target": "survey Syn_Survey files and facts, the well's head and log names before the write",
+    "converter": "ophiolite-opendtect las2/1"
+  },
+  "codes": {
+    "id": "ophiolite.transfer-codes/1",
+    "version": "1.1.0"
+  },
+  "kept": [
+    {"code": "samples", "sentence": "Samples at their measured depths: 5", "count": 5},
+    {"code": "depth-declared", "sentence": "Measured depth in metres below the kelly bushing, as the sender declared it"},
+    {"code": "gamma-api", "sentence": "The gamma-ray curve (GR) in API units"}
+  ],
+  "changed": [
+    {"code": "stored-float32", "sentence": "Stored as 32-bit numbers; values that differ: 0", "count": 0},
+    {"code": "null-to-undefined", "sentence": "Samples without a value, stored as OpendTect's undefined value: 1", "count": 1}
+  ],
+  "not_carried": [
+    {"code": "as-received", "sentence": "The file's header as received, and any curve other than the gamma-ray curve"}
+  ]
+}

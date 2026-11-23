@@ -73,13 +73,24 @@ def schemas():
     from project_gateway.volume_windows import VolumeWindow2  # E140 s3
     from project_gateway.org_search import SearchRequest, SearchAnswer, SearchAnswerByMeaning  # E145 (s2b: by meaning)
     from project_gateway.profile_migration import ProfileMigration  # E148 s3
+    from project_gateway.profile_migration import ProfileMigration2; write(CONTRACTS / ProfileMigration2.CONTRACT['path'], ProfileMigration2.model_json_schema())  # E183 s1b: one line, apart from the shared tuple
     from project_gateway.survey_contract import SurveyRevision, SurveyPage  # E142 s0
     from project_gateway.held_copies import HeldCopies  # E171 s0
     from project_gateway.work_turns import WorkTurn; write(CONTRACTS / WorkTurn.CONTRACT['path'], WorkTurn.model_json_schema())  # E160 s0: one line, apart from the shared tuple
     from project_gateway.tool_verifications import ToolVerification  # E165 s0
     from project_gateway.sandbox import ProcedureBox; write(CONTRACTS / ProcedureBox.CONTRACT['path'], ProcedureBox.model_json_schema())  # E113 s1: one line, apart from the shared tuple
+    from project_gateway.outcome_tools import CheckAnswer; write(CONTRACTS / CheckAnswer.CONTRACT['path'], CheckAnswer.model_json_schema())  # E179 s0: one line, apart from the shared tuple
     from project_gateway.scientific_assets import SeismicVolumePublished; from project_gateway.volume_windows import VolumeWindow3  # E175 s0
     for model in (SeismicVolumePublished, VolumeWindow3): write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())  # E175 s0: apart from the shared tuple
+    from project_gateway.affected import Affected; write(CONTRACTS / Affected.CONTRACT['path'], Affected.model_json_schema())  # E177 s0: one line, apart from the shared tuple
+    from project_gateway.outcome_trials import OutcomeTrial; write(CONTRACTS / OutcomeTrial.CONTRACT['path'], OutcomeTrial.model_json_schema())  # E176 s0: one line, apart from the shared tuple
+    from project_gateway.chains import ChainDeclaration, ChainRun, ChainDue  # E178 s0: one line, apart from the shared tuple
+    for model in (ChainDeclaration, ChainRun, ChainDue): write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())  # E178 s0
+    from project_gateway.reference_cases import ReferenceCases, ReferenceRun  # E180 s0: one line, apart from the shared tuple
+    for model in (ReferenceCases, ReferenceRun): write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())  # E180 s0
+    from project_gateway.sender import Sender; write(CONTRACTS / Sender.CONTRACT['path'], Sender.model_json_schema())  # E182 s0: one line, apart from the shared tuple
+    from project_gateway.well_log_curve import WellLogCurve; write(CONTRACTS / WellLogCurve.CONTRACT['path'], WellLogCurve.model_json_schema())  # E183 s0: one line, apart from the shared tuple
+    from project_gateway.host_qualification import HostQualification; write(CONTRACTS / HostQualification.CONTRACT['path'], HostQualification.model_json_schema())  # E185 s0: one line, apart from the shared tuple
     for model in (CheckRecord, DerivationRecord, DerivationRecordV2, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
                   Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2, CurveColumnsHeader, TableFile, SourceProvenance, WellPath, BasisGrouping, WellSet,
@@ -353,7 +364,8 @@ class Unsupported(ValueError):
 ANNOTATIONS = {'$schema', '$id', 'x-ophiolite', 'title', 'description', 'default', 'examples', 'deprecated',
                'minLength', 'maxLength', 'pattern', 'format', 'minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum',
                'multipleOf', 'minItems', 'maxItems', 'uniqueItems', 'discriminator',
-               'if', 'then', 'else'}  # E54: a conditional bound (only an original may exceed 32 MiB) is a value rule, not a type; E100b: else
+               'if', 'then', 'else',  # E54: a conditional bound (only an original may exceed 32 MiB) is a value rule, not a type; E100b: else
+               'maxProperties'}  # E176 s0: a trial row's key names at most four values; a value rule, as maxItems
 SCALARS = {'string': 'string', 'integer': 'number', 'number': 'number', 'boolean': 'boolean', 'null': 'null'}
 
 

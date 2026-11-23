@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateSchema, validateDescriptor, verifyPair, sha256 } from "../src/verify.js";
+import { NEWER_WORD, validateSchema, validateDescriptor, verifyPair, sha256 } from "../src/verify.js";
 import { profiles } from "../src/generated/schemas.js";
 import { adapt } from "../src/api-types.js";
 import { Incompatible, VerificationFailed } from "../src/errors.js";
@@ -18,6 +18,26 @@ test("schema interpreter refuses wrong types, bounds, missing fields and union d
   ];
   for(const [value,schema] of cases)assert.throws(()=>validateSchema(value,schema),VerificationFailed);
   validateSchema({new_field:"tolerated"},{type:"object",additionalProperties:false});validateSchema(1,true);
+});
+
+test("E187 s0: a word this release does not know names the upgrade; unknown fields pass at every depth",async()=>{
+  // Mutations: requireWord always generic → every word case red; the union rule dropped → the union cases red.
+  const newer=(value:unknown,schema:unknown)=>assert.throws(()=>validateSchema(value,schema),(e:unknown)=>e instanceof VerificationFailed && e.message.startsWith(NEWER_WORD));
+  const generic=(value:unknown,schema:unknown)=>assert.throws(()=>validateSchema(value,schema),(e:unknown)=>e instanceof VerificationFailed && !e.message.startsWith(NEWER_WORD));
+  const state={type:"object",required:["state"],properties:{state:{enum:["running","waiting"]},schema:{const:"ophiolite.agent-job/1"}}};
+  newer({state:"paused"},state);newer({state:"running",schema:"ophiolite.agent-job/2"},state);
+  newer("later",{anyOf:[{const:"tried"},{enum:["not_tried"]}]});newer("later",{oneOf:[{const:"a"},{const:"b"}]});
+  generic({state:7},state);generic({},state);generic(false,{const:true});generic(3,{enum:[1,2]});
+  generic("later",{anyOf:[{const:"a"},{type:"number"}]});  // a word in one branch, a type in the other: mixed
+  validateSchema("a",{anyOf:[{const:"a"},{type:"number"}]});
+  validateSchema({state:"running",later:{x:1},nested:{later:[1]}},{type:"object",required:["state"],properties:{state:state.properties.state,nested:{type:"object",properties:{}}}});
+  const rows=(await fixture("recordings/applications-workflow.json")).exchanges;
+  const binding=rows[0].response;
+  assert.throws(()=>adapt("binding",{...binding,publication_profile:"later-profile/1"}),(e:unknown)=>e instanceof VerificationFailed && e.message.startsWith(NEWER_WORD));
+  assert.throws(()=>adapt("binding",{...binding,kind:"later"}),(e:unknown)=>e instanceof VerificationFailed && !e.message.startsWith(NEWER_WORD));
+  const published=rows.find((r:any)=>r.path.endsWith("/publish")).response;
+  const later=adapt("run",{...published,later:1,receipt:{...published.receipt,later:1,manifest:{...published.receipt.manifest,later:1}}}) as any;
+  assert.deepEqual(later,adapt("run",published));
 });
 
 test("valid derived descriptor and explicit reader differences retain truthful semantics",async()=>{

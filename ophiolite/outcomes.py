@@ -26,6 +26,18 @@ def residual_declaration(label, tolerance, unit, procedure, destination, not_com
             'inputs': list(INPUTS), 'destination': {'procedure': procedure, 'label': destination}}
 
 
+TOOL_RULE = 'tool-check/1'
+
+
+def tool_declaration(label, kind, digest, manifest, settings, procedure, destination):
+    """E179 s1: the declaration of an outcome whose rule is a tool version (`digest`, a verified check tool of the
+    project): the tool's answer decides. Its inputs are the kinds the tool's manifest reads; `settings` go to the tool
+    as it declares them. `OutcomeClient.tool_declaration` resolves the digest and manifest from the catalogue."""
+    inputs = sorted({k for i in manifest['inputs'] if isinstance(i, dict) and i.get('class') == 'version' for k in i['kinds']})
+    return {'schema': 'ophiolite.outcome/1', 'label': label, 'kind': kind, 'rule': {'name': TOOL_RULE, 'tool': {'digest': digest}, 'settings': dict(settings)},
+            'inputs': inputs, 'destination': {'procedure': procedure, 'label': destination}}
+
+
 def state_lines(answer):
     """A result version's outcome states in words: one line per outcome, its earlier publications and versions below."""
     lines = []
@@ -33,6 +45,42 @@ def state_lines(answer):
         lines.append('%s: %s' % (o['label'], o['line']))
         lines += ['  ' + more for more in o['earlier_publications'] + o['earlier_versions']]
     return '\n'.join(lines) or 'No outcome is declared over this kind of result.'
+
+
+def _checks():
+    """The words of a record's reason (`outcome-reasons.json` `checks`), as `state_lines` reads them from the server."""
+    import importlib.resources
+    import json
+    return json.loads(importlib.resources.files('ophiolite').joinpath('contracts/vocabulary/v1/outcome-reasons.json').read_bytes())['checks']
+
+
+def _reason_words(reason):
+    """A reason's words; a phrase that needs the record (the kinds, the units) keeps its words before the colon."""
+    text = _checks()[reason]
+    if '{' not in text: return text
+    return text.split(':')[0] if ':' in text else 'made without an input kind it reads'
+
+
+def trial_lines(answer):
+    """E176 s1: a trial in words, one line per outcome; no row identifiers or reason codes (those are in --json)."""
+    if not answer['outcomes']: return answer['sentence']
+    lines = []
+    for o in answer['outcomes']:
+        if o['would'] == 'accepted': said = 'would be accepted'
+        elif o['would'] == 'rejected' and o['reason'] is None:
+            rows = o['rows']  # E176 s2a (R4): the not-computed list is capped at 20, so required rows are counted from the counts
+            missing = rows['passing'] + rows['failing_count'] - rows['computed'] if any(not r['pass'] for r in rows['not_computed']) else 0
+            over = rows['failing_count'] - missing
+            limit = (rows['failing'] or rows['not_computed'])[0]
+            parts = ['%d %s over %s %s' % (over, 'row' if over == 1 else 'rows', '%g' % limit['limit'], limit['unit'])] if over else []
+            parts += ['%d required %s not computed' % (missing, 'row' if missing == 1 else 'rows')] if missing else []
+            said = 'would be rejected: ' + ', '.join(parts)
+        elif o['would'] == 'rejected': said = 'would be rejected: ' + _reason_words(o['reason'])
+        elif o['would'] == 'not_compared': said = 'would not be compared: ' + _reason_words(o['reason'])
+        elif o['would'] == 'not_evaluated': said = 'would not be evaluated: ' + o['sentence'].removeprefix('Would not be evaluated: ')
+        else: said = 'not tried: ' + o['sentence'].removeprefix('Not tried: ')
+        lines.append('%s: %s' % (o['label'], said))
+    return '\n'.join(lines)
 
 
 def summary_line(o):
@@ -58,6 +106,16 @@ class OutcomeClient:
         found = [o for o in self.outcome_list() if o['state'] != 'withdrawn' and o['label'].casefold() == label.casefold()]
         if not found: raise Refused('This project has no outcome named "%s".' % label)
         return found[0]
+
+    def tool_declaration(self, label, tool, version, settings, procedure, destination, kind=KIND):
+        """E179 s1: `tool_declaration` for "<tool> version <version>" of the catalogue (`procedure_list`, by its name),
+        refused before anything is sent when the project lists no such version or more than one."""
+        from .errors import Refused
+        found = [v for v in self.procedure_list(tool) if v['version'] == version]
+        if not found: raise Refused('This project lists no version %d of the tool "%s".' % (version, tool))
+        if len(found) > 1: raise Refused('This project lists more than one version %d of the tool "%s"; declare it through the API by its digest.' % (version, tool))
+        digest = found[0]['digest']
+        return tool_declaration(label, kind, digest, self.procedure_get(digest)['manifest'], settings, procedure, destination)
 
     def _outcome_write(self, operation, body, command_id):
         return self._post('outcomes', operation, {'command_id': command_id or '%s-%s' % (operation, uuid.uuid4().hex), **body}, retry=True)
@@ -90,6 +148,49 @@ class OutcomeClient:
     def outcome_evaluate(self, asset_id, revision):
         """Evaluate again where no record exists yet (a missed evaluation), then the states; a record is never changed."""
         return self._post('outcomes', 'evaluate', {'asset_id': asset_id, 'revision': revision}, retry=True)
+
+    # --- E176 s1: try a result before publishing it ---------------------------------------------------------------------
+
+    def try_output(self, raw, header, *, report=None, role=None, outcome_ids=None):
+        """What each enabled outcome of the result's kind would say about these bytes, were they published: the
+        `ophiolite.outcome-trial/1` answer. `header` is the publications/derive header (`publish.derive_request`'s
+        body): with its `run` for a reported run, or without it and with `report` (the procedure-runs/report body) and
+        `role` for a run not yet reported. Nothing is published, reported or kept."""
+        import base64
+        from .publish import json_bytes
+        body = {'header': base64.b64encode(json_bytes(header)).decode(), 'content_base64': base64.b64encode(raw).decode()}
+        if report is not None: body['run'] = {'report': report, 'role': role}
+        if outcome_ids is not None: body['outcome_ids'] = list(outcome_ids)
+        return self._post('outcomes', 'try', body, retry=True)
+
+    def try_result(self, folder, *, role=None, outcomes=None):
+        """Try a run folder's outputs before `procedure_publish`: read as it reads them (each output's SHA-256 checked),
+        and for each output whose kind outcomes are declared over (or the one `role` names) the header publication
+        would carry and the report it would send. `outcomes` names outcomes (by name) to try; every enabled one of the
+        kind when None. Nothing is reported, so the folder and a later `procedure_publish` of it are unchanged.
+        Returns {role: the outcome-trial answer}."""
+        import uuid
+        from pathlib import Path
+        from .procedures import local_run, method_of, report_inputs, run_parents
+        from .publish import derive_request
+        from .writers import WrittenOriginal
+        folder = Path(folder)
+        record, outputs = local_run(folder)
+        version = self.procedure_get(record['procedure']['digest'])
+        report = {'command_id': 'try-' + uuid.uuid4().hex, 'procedure': {'digest': record['procedure']['digest']}, 'settings': record['settings'],
+                  'inputs': report_inputs(record), 'outputs': outputs}
+        method, parents = method_of(version, record['settings']), run_parents(version['manifest'], record)
+        ids = None if outcomes is None else [self.outcome_named(name)['outcome_id'] for name in outcomes]
+        chosen = [o['role'] for o in outputs if (o['role'] == role if role is not None else record['outputs'][o['role']]['profile'] == KIND)]
+        answers = {}
+        for name in chosen:
+            local = record['outputs'][name]
+            raw = (folder / local['file']).read_bytes()
+            title = (version['label'] if len(outputs) == 1 else '%s: %s' % (version['label'], name))[:160]
+            header, _ = derive_request(self.project, WrittenOriginal(raw, local['profile'], dict(local['declared'] or {})), name=title, from_=parents,
+                                       method=method, command_id='try-' + uuid.uuid4().hex)
+            answers[name] = self.try_output(raw, header, report=report, role=name, outcome_ids=ids)
+        return answers
 
     # --- E120 s3: the claims "Deliver as" made -------------------------------------------------------------------------
 

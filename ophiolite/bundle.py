@@ -53,6 +53,17 @@ SOURCE_OTHER = 'A source record belongs to another exact revision.'
 SOURCE_SHAPE = 'A source record is not an ophiolite.source-provenance/1 record.'
 SOURCE_MINOR = 'A source record needs bundle version 1.10 or 2.10.'
 SOURCE_TOO_LARGE = "The selection's records exceed the supported bundle manifest size."
+# E182 s2b (bundle 1.18 / 2.18): an entry may carry `sender`, what the request that made its version said sent it
+# (`ophiolite.sender/1`'s served view), taken from the same provenance answer as the source record and carried beside it,
+# never inside it. Only the entry carries it: a descriptor file is written without the served `sender` key, so its bytes
+# and checksum are what they were. Shape only; nothing is verified or reconciled with `exporter`.
+SENDER_MINOR = 18
+SENDER_SCHEMA = 'ophiolite.sender/1'
+SENDER_NEEDS_MINOR = 'A sender needs bundle version 1.18 or 2.18.'
+SENDER_SHAPE = 'A sender is not an ophiolite.sender/1 view.'
+_SENDER_TOKEN = re.compile(r'[A-Za-z0-9][A-Za-z0-9._+-]{0,39}')  # sender.json: a client's or host's name or version
+_SENDER_TRANSPORT = re.compile(r'[a-z][a-z0-9-]{0,15}')
+_SENDER_PROFILE = re.compile(r'[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+')  # the registry's id grammar, at most 128
 # E116 s1 (bundle 2.12): a project folder block (ophiolite.project-folder/1) lists the files ophiolite-mapper write adds
 # beside the assets; with it, and only with it, assets and selection may be empty, since a folder the box writes alone
 # holds no exact server revision. The block is checked by the contract's own validator, mapper/v1/mapper.py.
@@ -236,6 +247,7 @@ class BundleAsset:
         self.package = None  # 2.8 (E23c): the source package, its companions and interpretation (bundle_package.Package)
         self.provenance, self.read_by = None, None  # 2.9 (E107a): the kept original a file read on a computer was read from, and that reading
         self.source_record = None  # 1.10/2.10 (E122 s5b): the version's source-provenance/1 record as served, or None
+        self.sender = None  # 1.18/2.18 (E182 s2b): what the version's request said sent it (ophiolite.sender/1) as served, or None
 
 
 class WellTable:
@@ -581,6 +593,7 @@ def open_bundle(path):
     selection = manifest.get('selection')
     if not isinstance(selection, list) or len(selection) != len(entries): raise VerificationFailed('The selection and the assets disagree.')
     records = [_source_record_of(manifest, entry) for entry in entries]  # E122 s5b (D4): before any content is used
+    senders = [_sender_of(manifest, entry) for entry in entries]  # E182 s2b: likewise
     seen, total, loaded = set(), 0, []
     for index, entry in enumerate(entries):
         files = entry.get('files')
@@ -652,7 +665,7 @@ def open_bundle(path):
     if refused is not None: raise refused
     listed = seen | {'manifest.json'} | {row['path'] for row in folder} | {row['path'] for row in cited}
     unlisted = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and p.relative_to(root).as_posix() not in listed)
-    for asset, record in zip(loaded, records): asset.source_record = record  # one loaded asset per entry, in order
+    for asset, record, sent in zip(loaded, records, senders): asset.source_record, asset.sender = record, sent  # one loaded asset per entry, in order
     bundle = Bundle(root, manifest, loaded, unlisted)
     bundle.entities, bundle.relationships = entities, relationships
     bundle.folder = folder
@@ -698,6 +711,47 @@ def _source_record_of(manifest, entry):
     if (held['asset_id'], held['revision']) != (entry.get('asset_id'), entry.get('revision')): raise VerificationFailed(SOURCE_OTHER)
     if not source_record_valid(held['record']): raise VerificationFailed(SOURCE_SHAPE)  # its lengths bound its size
     return held['record']
+
+
+def _sender_token(value, nullable=False):
+    return (nullable and value is None) or (isinstance(value, str) and _SENDER_TOKEN.fullmatch(value) is not None)
+
+
+def sender_valid(sent):
+    """E182 s2b: `ophiolite.sender/1`'s served view as its schema says, on the parsed dict, which it never changes: every
+    object closed, every key present, the constant, the states, the token, transport and profile grammars, and the three
+    state rules (a reported sender names its client; any other names neither client nor host; a version without a
+    record says nothing else). The generated models are open, so they are not the check here."""
+    if not _closed(sent, ('schema', 'state', 'client', 'host', 'transport', 'accepted_as')) or sent['schema'] != SENDER_SCHEMA: return False
+    state, client, host, transport, profile = sent['state'], sent['client'], sent['host'], sent['transport'], sent['accepted_as']
+    if not (isinstance(state, str) and state in ('reported', 'not reported', 'not recorded')): return False
+    if client is not None and not (_closed(client, ('product', 'version')) and _sender_token(client['product'], True) and _sender_token(client['version'], True)):
+        return False
+    if host is not None and not (_closed(host, ('name', 'version')) and _sender_token(host['name']) and _sender_token(host['version'])): return False
+    if transport is not None and not (isinstance(transport, str) and _SENDER_TRANSPORT.fullmatch(transport)): return False
+    if profile is not None and not (isinstance(profile, str) and len(profile) <= 128 and _SENDER_PROFILE.fullmatch(profile)): return False
+    if state == 'reported': return client is not None
+    return client is None and host is None and (state == 'not reported' or (transport is None and profile is None))
+
+
+def _sender_of(manifest, entry):
+    """E182 s2b: an entry's `sender`, checked: a valid view in a bundle whose version says it may carry one; None when
+    the entry has none."""
+    if not isinstance(entry, dict) or 'sender' not in entry: return None
+    if int(manifest['bundle_version'].split('.')[1]) < SENDER_MINOR: raise VerificationFailed(SENDER_NEEDS_MINOR)
+    if not sender_valid(entry['sender']): raise VerificationFailed(SENDER_SHAPE)
+    return entry['sender']
+
+
+def _carried(read):
+    """The object an item's source record and sender ride on: the volume of a slice export, else the read itself."""
+    return read[0] if isinstance(read, tuple) else read
+
+
+def _without_sender(descriptor):
+    """E182 s2b: a served descriptor as a descriptor file holds it: without the `sender` key a gateway after E182 s2a
+    serves, so the file's bytes and checksum are today's; the sender travels in the entry only."""
+    return {key: value for key, value in descriptor.items() if key != 'sender'}
 
 
 def _check_graph(manifest, entries):
@@ -899,6 +953,9 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
     for _, read in items:  # E139 s3 (O1): a horizon a bundle file cannot hold is refused by number before anything is written
         too_large = horizon_too_large(read)
         if too_large: raise Refused(too_large)
+    for _, read in items:  # E182 s2b: a sender the gateway served is checked before anything is written
+        sent = getattr(_carried(read), 'sender', None)
+        if sent is not None and not sender_valid(sent): raise VerificationFailed(SENDER_SHAPE)
     parent = destination.parent; parent.mkdir(parents=True, exist_ok=True)
     for stale in parent.glob('.' + destination.name + '.staging-*'):  # abandoned interrupted exports only
         try: owner = int((stale / '.owner').read_text())
@@ -930,7 +987,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if isinstance(read, tuple):  # E16: (volume description, [slices]) — the original is named, not carried
                 volume, slices = read; first = volume._wire_descriptor
                 original = next(r for r in first['representations'] if r['kind'] != 'normalized')
-                files = [put(folder + 'descriptor.json', (json.dumps(first, indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
+                files = [put(folder + 'descriptor.json', (json.dumps(_without_sender(first), indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
                          put(folder + 'volume.json', volume._wire_data_bytes, 'normalized')]
                 files += [put(folder + 'slice-%s-%d.json' % (x.axis, x.label), x.raw, 'slice') for x in slices]
                 assets.append({'asset_id': first['asset_id'], 'revision': first['revision'], 'origin': first['origin'], 'profile': first['profile'],
@@ -952,7 +1009,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if hasattr(read, '_wire_data_bytes'):  # E11 typed data: exact original, descriptor and data as served
                 first = read._wire_descriptor
                 files = [put(folder + TYPED_ORIGINALS[first['profile']], read.original, 'original'),
-                         put(folder + 'descriptor.json', (json.dumps(first, indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
+                         put(folder + 'descriptor.json', (json.dumps(_without_sender(first), indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
                          put(folder + data_file_of(first), read._wire_data_bytes, 'normalized')]  # E139 s2: named by its codec
                 block = None
                 if first.get('package') is not None:  # E23c (2.8): the package, its companions and the interpretation travel too
@@ -971,7 +1028,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             first = read._wire_descriptors[0]
             for wire_descriptor, wire_curve, body in zip(read._wire_descriptors, read._wire_curves, read._wire_curve_bytes):
                 name = wire_curve['curve']; safe = _safe_name(name)
-                files.append(put(folder + 'descriptor-' + safe + '.json', (json.dumps(wire_descriptor, indent=2, allow_nan=False) + '\n').encode(), 'descriptor', name))
+                files.append(put(folder + 'descriptor-' + safe + '.json', (json.dumps(_without_sender(wire_descriptor), indent=2, allow_nan=False) + '\n').encode(), 'descriptor', name))
                 files.append(put(folder + 'curve-' + safe + '.json', body, 'normalized', name))  # exact served bytes (digest in the descriptor)
             omissions = list(first.get('provenance', {}).get('omissions', []))
             losses = sorted({loss for r in first.get('representations', []) for loss in r.get('losses', [])})
@@ -984,8 +1041,10 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if kept is not None: files.append(put(folder + kept[2], kept[0], 'provenance')); assets[-1]['read_by'] = kept[1]  # 2.9 (E107a)
             selection.append(chosen)
         for (_, read), entry in zip(items, assets):  # E122 s5b (D1): the served record, as the client was answered for this version
-            held = getattr(read[0] if isinstance(read, tuple) else read, 'source_record', None)
+            held = getattr(_carried(read), 'source_record', None)
             if held is not None: entry['source_record'] = held
+            sent = getattr(_carried(read), 'sender', None)  # E182 s2b: from the same answer, its own entry field
+            if sent is not None: entry['sender'] = sent
         observations = {**({'groups': groups} if groups else {}), **({'groups_omitted': groups_omitted} if groups_omitted else {}),
                         **({'entities_omitted': entities_omitted} if entities_omitted else {}),  # E22b: why no wells travel
                         **({'source_records_omitted': source_records_omitted} if source_records_omitted else {})}  # E122 s5b: why no records travel
@@ -994,7 +1053,8 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
         minor = max([1 if observations else 0, 4 if graph else 0] + [max(NEWER_TYPES.get(a.get('type'), 0), NEWER_PROFILES.get(a.get('profile'), 0)) for a in assets]
                     + [PACKAGE_MINOR for a in assets if 'package' in a]  # E23c: 2.8 only for an asset with a package
                     + [PROVENANCE_MINOR for a in assets if 'read_by' in a]  # E107a: 2.9 only for an asset with a kept original
-                    + [SOURCE_RECORD_MINOR for a in assets if 'source_record' in a])  # E122 s5b: 1.10/2.10 only when a record travels
+                    + [SOURCE_RECORD_MINOR for a in assets if 'source_record' in a]  # E122 s5b: 1.10/2.10 only when a record travels
+                    + [SENDER_MINOR for a in assets if 'sender' in a])  # E182 s2b: 1.18/2.18 only when a sender travels
         if citation is not None: minor = max(minor, _descriptors_contract().MINOR)  # E147 s2: 2.15, or the content's own minor above it
         if citation is not None and _descriptors_contract().bundle_tables(assets):  # E147 s2b: 2.16 when a typed table gets a record set
             minor = max(minor, _descriptors_contract().TABLES_MINOR)

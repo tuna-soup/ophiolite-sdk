@@ -10,6 +10,13 @@ export function object(value: unknown): ObjectValue {
   requireValue(value !== null && typeof value === "object" && !Array.isArray(value));
   return value as ObjectValue;
 }
+/** E187 s0: a string of a closed vocabulary (an enum, a const, a state) this release does not know names the upgrade;
+ * ignoring it would change what the answer means, so it stays a refusal. Any other mismatch keeps the generic sentence. */
+export const NEWER_WORD = "This answer uses a word this release of @ophiolite/client does not know; upgrade @ophiolite/client to read it.";
+export function requireWord(condition: unknown, value: unknown): asserts condition {
+  if (!condition) throw new VerificationFailed(typeof value === "string" ? NEWER_WORD : undefined);
+}
+function isWord(error: unknown): boolean { return error instanceof VerificationFailed && error.message.startsWith(NEWER_WORD); }
 function equal(a: unknown, b: unknown): boolean { return JSON.stringify(a) === JSON.stringify(b); }
 function selected(a: object, b: object, keys: readonly string[]): boolean {
   const x = a as ObjectValue, y = b as ObjectValue;
@@ -27,15 +34,16 @@ export function validateSchema(value: unknown, schema: unknown, document: unknow
     const key = s.$ref.slice(8).replaceAll("~1", "/").replaceAll("~0", "~");
     validateSchema(value, object(object(document).$defs)[key], document); return;
   }
-  if ("const" in s) requireValue(equal(value, s.const));
-  if (Array.isArray(s.enum)) requireValue(s.enum.some(x => equal(x, value)));
+  if ("const" in s) requireWord(equal(value, s.const), typeof s.const === "string" ? value : null);
+  if (Array.isArray(s.enum)) requireWord(s.enum.some(x => equal(x, value)), s.enum.some(x => typeof x === "string") ? value : null);
   for (const union of ["anyOf", "oneOf"]) {
     if (Array.isArray(s[union])) {
-      let successes = 0;
+      let successes = 0, words = 0;
       for (const branch of s[union]) {
         try { validateSchema(value, branch, document); successes++; }
-        catch (error) { if (!(error instanceof VerificationFailed)) throw error; }
+        catch (error) { if (!(error instanceof VerificationFailed)) throw error; if (isWord(error)) words++; }
       }
+      if (successes === 0 && words === s[union].length && words > 0) throw new VerificationFailed(NEWER_WORD);  // F5: every branch failed on a word
       requireValue(union === "oneOf" ? successes === 1 : successes > 0); return;
     }
   }

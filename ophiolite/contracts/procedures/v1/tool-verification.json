@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/procedures/v1/tool-verification.json",
   "x-ophiolite": {
     "id": "ophiolite.tool-verification/1",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "lifecycle": "preview"
   },
   "title": "ToolVerification",
@@ -232,6 +232,123 @@
         "reference"
       ],
       "title": "PublicationVerification",
+      "type": "object"
+    },
+    "ReferenceCasesReference": {
+      "additionalProperties": false,
+      "description": "E180 s0: the reference run, and its set version and counts as the server read them at verification.",
+      "properties": {
+        "run_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "cases_version": {
+          "minimum": 1,
+          "title": "Cases Version",
+          "type": "integer"
+        },
+        "counted": {
+          "description": "The cases the run counted (not those no longer accepted)",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Counted",
+          "type": "integer"
+        },
+        "passed": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Passed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "run_id",
+        "cases_version",
+        "counted",
+        "passed"
+      ],
+      "title": "ReferenceCasesReference",
+      "type": "object"
+    },
+    "ReferenceCasesVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "ophiolite.tool-verification/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "project": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "pattern": "^[^\\x00]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Statement"
+        },
+        "command_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "request_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "const": "reference-cases",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/ReferenceCasesReference"
+        }
+      },
+      "required": [
+        "schema",
+        "id",
+        "project",
+        "digest",
+        "by",
+        "at",
+        "statement",
+        "command_id",
+        "request_sha256",
+        "kind",
+        "reference"
+      ],
+      "title": "ReferenceCasesVerification",
       "type": "object"
     },
     "VerifiedCheckReference": {
@@ -498,6 +615,7 @@
     "mapping": {
       "check": "#/$defs/CheckVerification",
       "publication": "#/$defs/PublicationVerification",
+      "reference-cases": "#/$defs/ReferenceCasesVerification",
       "withdrawn": "#/$defs/Withdrawal",
       "witnessed": "#/$defs/WitnessedVerification"
     },
@@ -515,6 +633,9 @@
     },
     {
       "$ref": "#/$defs/Withdrawal"
+    },
+    {
+      "$ref": "#/$defs/ReferenceCasesVerification"
     }
   ]
 }

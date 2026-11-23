@@ -75,7 +75,7 @@ def three(two_keys):
 def test_t1_an_export_carries_exactly_the_records_the_route_serves(two_keys, tmp_path):
     web, ka, alice, qgis, las, plain = three(two_keys)
     opened = alice.export([(*qgis, None), (*las, ['GRS']), (*plain, None)], tmp_path / 'exported')
-    assert opened.manifest['bundle_version'] == '2.10.0'
+    assert opened.manifest['bundle_version'] == '2.18.0'  # E182 s2b: each version's sender travels too (2.18)
     entries = opened.manifest['assets']
     expected = [qgis_record(web, qgis[0], points(7).bytes), path_record(web, las[0], FOLDER[1][0], RUN04)]
     assert [e['source_record'] for e in entries[:2]] == [{'schema': 'ophiolite.source-provenance/1', 'asset_id': k[0], 'revision': k[1], 'record': r}
@@ -144,7 +144,8 @@ def test_t8_a_readable_version_without_a_record_carries_none(two_keys, tmp_path)
     assert route_of(web, ka['key'])(item, sha(v1.bytes))['record'] is None
     opened = alice.export([(item, sha(v1.bytes), None)], tmp_path / 'exported')
     assert opened.assets[0].source_record is None and 'source_record' not in opened.manifest['assets'][0]
-    assert opened.manifest['bundle_version'] == '2.2.0'  # a point set, nothing more: the version it had before records
+    # a point set and its sender (E182 s2b), nothing more: no record, so not the minor records gave
+    assert opened.manifest['bundle_version'] == '2.18.0' and opened.manifest['assets'][0]['sender']['schema'] == 'ophiolite.sender/1'
 
 
 def test_t12_only_the_record_travels_never_the_observation_gone_or_words(web, tmp_path):
@@ -175,12 +176,12 @@ def test_t9_slice_exports_carry_the_volume_versions_record_sync_and_async(web, t
     served = route_of(web, 'oph_api_alice:read')(made.asset_id, made.revision)['record']
     assert served is not None and served['content']['content_sha256'] == made.revision
     sync = alice.export_slices(made.asset_id, made.revision, [('inline', 1)], tmp_path / 'sync')
-    assert sync.assets[0].source_record == served and sync.manifest['bundle_version'] == '2.10.0'
+    assert sync.assets[0].source_record == served and sync.manifest['bundle_version'] == '2.18.0'  # E182 s2b: with its sender
     async def main():
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=web.app), base_url='https://workspace.example') as http:
             async with AsyncClient('https://workspace.example', 'p', Credential.bearer('oph_api_alice:read,write'), http) as client:
                 return await client.export_slices(made.asset_id, made.revision, [('crossline', 5)], tmp_path / 'async')
     opened = anyio.run(main)
-    assert opened.assets[0].source_record == served and opened.manifest['bundle_version'] == '2.10.0'
+    assert opened.assets[0].source_record == served and opened.manifest['bundle_version'] == '2.18.0'
     route = route_of(web, 'oph_api_alice:read')
     assert check(sync.path, [(made.asset_id, made.revision)], route, SCHEMA) == check(opened.path, [(made.asset_id, made.revision)], route, SCHEMA) == []

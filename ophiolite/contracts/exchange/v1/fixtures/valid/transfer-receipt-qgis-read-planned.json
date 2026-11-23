@@ -1,0 +1,38 @@
+{
+  "schema": "ophiolite.transfer-receipt/1",
+  "direction": "get",
+  "capability": "qgis",
+  "route": {
+    "profile": "points-csv/1",
+    "data": "Point set",
+    "direction": "read"
+  },
+  "contract": "points-csv/1",
+  "state": "planned",
+  "base": {
+    "item": "horizon-top",
+    "revision": "r1",
+    "number": 1
+  },
+  "made": null,
+  "fingerprints": {
+    "source": "version r1 of horizon-top and its manifest file digests",
+    "target": "a new layer; nothing held yet",
+    "converter": "qgis-plugin 0.12.0"
+  },
+  "codes": {
+    "id": "ophiolite.transfer-codes/1",
+    "version": "1.0.0"
+  },
+  "kept": [
+    {"code": "points", "sentence": "Points at their positions, with their values: 16", "count": 16},
+    {"code": "crs", "sentence": "The coordinate system, EPSG:32631", "value": "EPSG:32631"}
+  ],
+  "changed": [
+    {"code": "no-height-flat", "sentence": "Points without a height, drawn flat: 1", "count": 1},
+    {"code": "local-copy", "sentence": "Opened as a GeoPackage copy on this computer"}
+  ],
+  "not_carried": [
+    {"code": "display-settings", "sentence": "Display styling stays in QGIS and is not returned"}
+  ]
+}

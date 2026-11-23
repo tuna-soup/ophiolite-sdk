@@ -19,8 +19,9 @@ from .models.api import OrganizationsPage, ProjectsPage
 def checked(model, page, message):
     """E31: a discovery answer as documented (Unavailable otherwise, as before), handed on unchanged."""
     from pydantic import ValidationError
+    from .models.answers import refusal  # E187 s0: a word this release does not know names the upgrade
     try: model.model_validate(page)
-    except (ValidationError, ValueError, TypeError): raise Unavailable(message) from None
+    except (ValidationError, ValueError, TypeError) as error: raise refusal(error, Unavailable(message)) from None
     return page
 
 

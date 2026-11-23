@@ -1,0 +1,101 @@
+{
+  "note": "E180 s0 C1: the answers of the seven rows (strategy §3.6), one or more per answer model, read by the route models C4 binds; the stubs answer none of them (D10). dave cannot open W-3, so c3 reaches him restricted: the case as its id only, the run result without its output and comparison (Q3).",
+  "answers": [
+    {"name": "cases-alice", "model": "ReferenceCasesView", "answer": {
+      "tool": "residual-fit", "version": 1, "state": "active", "kind": "well-residual/1", "least": null,
+      "by": {"kind": "person", "id": "alice", "name_at_time": "Alice"}, "at": 1795000000.0, "versions": [1],
+      "cases": [
+        {"case": "c1", "label": "W-1 Brent", "settings": {},
+         "inputs": {"trajectory": [{"asset_id": "trajectory-w1", "revision": "r1"}], "top": [{"asset_id": "top-brent-w1", "revision": "r1"}]},
+         "accepted": {"asset_id": "residual-w1", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c001",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "curve": null, "interpretation": null},
+         "still_accepted": true, "rejections": 0, "versions_run": 2},
+        {"case": "c2", "label": "W-2 Brent", "settings": {},
+         "inputs": {"trajectory": [{"asset_id": "trajectory-w2", "revision": "r1"}], "top": [{"asset_id": "top-brent-w2", "revision": "r1"}]},
+         "accepted": {"asset_id": "residual-w2", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c002",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "curve": null, "interpretation": null},
+         "still_accepted": true, "rejections": 1, "versions_run": 2},
+        {"case": "c3", "label": "W-3 Brent", "settings": {},
+         "inputs": {"trajectory": [{"asset_id": "trajectory-w3", "revision": "r1"}], "top": [{"asset_id": "top-brent-w3", "revision": "r1"}]},
+         "accepted": {"asset_id": "residual-w3", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c003",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "curve": null, "interpretation": null},
+         "still_accepted": false, "rejections": 0, "versions_run": 2}
+      ]}},
+    {"name": "cases-dave", "model": "ReferenceCasesView", "answer": {
+      "tool": "residual-fit", "version": 1, "state": "active", "kind": "well-residual/1", "least": null,
+      "by": {"kind": "person", "id": "alice", "name_at_time": "Alice"}, "at": 1795000000.0, "versions": [1],
+      "cases": [
+        {"case": "c1", "label": "W-1 Brent", "settings": {},
+         "inputs": {"trajectory": [{"asset_id": "trajectory-w1", "revision": "r1"}], "top": [{"asset_id": "top-brent-w1", "revision": "r1"}]},
+         "accepted": {"asset_id": "residual-w1", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c001",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "curve": null, "interpretation": null},
+         "still_accepted": true, "rejections": 0, "versions_run": 2},
+        {"case": "c2", "label": "W-2 Brent", "settings": {},
+         "inputs": {"trajectory": [{"asset_id": "trajectory-w2", "revision": "r1"}], "top": [{"asset_id": "top-brent-w2", "revision": "r1"}]},
+         "accepted": {"asset_id": "residual-w2", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c002",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "curve": null, "interpretation": null},
+         "still_accepted": true, "rejections": 1, "versions_run": 2},
+        {"case": "c3", "restricted": true}
+      ]}},
+    {"name": "cases-withdrawn", "model": "ReferenceCasesView", "answer": {
+      "tool": "residual-fit", "version": 2, "state": "withdrawn", "kind": "well-residual/1", "least": null,
+      "by": {"kind": "person", "id": "alice", "name_at_time": "Alice"}, "at": 1795090000.0, "versions": [1, 2], "cases": []}},
+    {"name": "accepted-residuals", "model": "ReferenceAcceptedResults", "answer": {
+      "kind": "well-residual/1",
+      "entries": [
+        {"asset_id": "residual-w1", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c001",
+         "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}, "at": 1794990000.0, "made_by": null},
+        {"asset_id": "residual-w9", "revision": "r2", "verdict_id": "verdict-0000000000000000000000000000c009",
+         "author": {"kind": "person", "id": "bob", "name_at_time": null}, "at": 1794990100.0,
+         "made_by": {"name": "residual-fit", "digest": "1111111111111111111111111111111111111111111111111111111111111111"}}
+      ],
+      "next": "after-residual-w9-r2"}},
+    {"name": "run-v2-dave", "model": "ReferenceRunEntry", "answer": {
+      "run_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "cases_version": 1, "state": "finished",
+      "record": {
+        "schema": "ophiolite.reference-run/1", "run_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "project": "p-ref",
+        "tool": {"name": "residual-fit", "digest": "2222222222222222222222222222222222222222222222222222222222222222", "version_number": 2, "label": "Residual fit"},
+        "cases": {"version": 1, "least": null},
+        "started_by": {"kind": "person", "id": "carol", "name_at_time": "Carol"}, "started_at": 1795002000.0, "finished_at": 1795002095.0,
+        "box": {"image": "ophiolite-sandbox:2026.11.20", "runtime": "runsc", "limits": {"memory_mb": 256, "seconds": 60, "cpus": 1.0}, "network": "none"},
+        "results": [
+          {"case": "c1", "outcome": "passed", "reason": null, "job": "job-v2-c1", "restricted": false,
+           "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000c12", "bytes": 412},
+           "comparison": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "outcome": "passed", "reason": null,
+                          "differences": {"count": 0, "total": 2, "largest": null, "missing": 0, "extra": 0, "reasons_differ": 0, "formation": "Brent", "first": []}}},
+          {"case": "c2", "outcome": "failed", "reason": "differed", "job": "job-v2-c2", "restricted": false,
+           "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000c22", "bytes": 410},
+           "comparison": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "outcome": "differed", "reason": null,
+                          "differences": {"count": 1, "total": 2, "largest": 0.75, "missing": 0, "extra": 0, "reasons_differ": 0, "formation": "Brent",
+                                          "first": [{"wellbore": "wellbore-00000000000000000000000000000002", "occurrence": 1, "md": 1500.0,
+                                                     "result_residual": 2.25, "reference_residual": 1.5, "result_reason": null, "reference_reason": null}]}}},
+          {"case": "c3", "outcome": "passed", "reason": null, "job": "job-v2-c3", "restricted": true, "output": null, "comparison": null}
+        ],
+        "counts": {"cases": 3, "passed": 2, "failed": 1, "not_counted": 0}}}},
+    {"name": "run-queued", "model": "ReferenceRunEntry", "answer": {
+      "run_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "cases_version": 1, "state": "queued", "record": null}},
+    {"name": "run-failed", "model": "ReferenceRunEntry", "answer": {
+      "run_id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+      "cases_version": 1, "state": "failed", "record": null}},
+    {"name": "runs-of-residual-fit", "model": "ReferenceRunList", "answer": {
+      "entries": [
+        {"run_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+         "version_number": 2, "cases_version": 1, "state": "queued", "counts": null,
+         "started_by": {"kind": "person", "id": "carol", "name_at_time": "Carol"}, "started_at": 1795004000.0},
+        {"run_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+         "version_number": 2, "cases_version": 1, "state": "finished", "counts": {"cases": 3, "passed": 2, "failed": 1, "not_counted": 0},
+         "started_by": {"kind": "person", "id": "carol", "name_at_time": "Carol"}, "started_at": 1795002000.0},
+        {"run_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "digest": "1111111111111111111111111111111111111111111111111111111111111111",
+         "version_number": 1, "cases_version": 1, "state": "finished", "counts": {"cases": 3, "passed": 3, "failed": 0, "not_counted": 0},
+         "started_by": {"kind": "person", "id": "carol", "name_at_time": "Carol"}, "started_at": 1795001000.0}
+      ],
+      "next": null}}
+  ]
+}

@@ -62,6 +62,44 @@ def verify_pair(descriptor, normalized, artifact, requested_curve, *, strict_int
         warnings.warn('The saved and current reader interpretations differ; both records are available in the descriptor.',InterpretationDiffers,stacklevel=2)
     return asset, view
 
+
+def well_log_row(rep, requested_curve):
+    """E183 s2c: the descriptor's normalized row is the stored well log form of the requested curve."""
+    rules.require(rep['profile']==rules.WELL_LOG and rep['id']=='well-log-curve:'+requested_curve, 'The descriptor does not name the well log form of this curve')
+
+
+def verify_well_log(descriptor, normalized, artifact, requested_curve, *, strict_interpretation=False):
+    """E183 s2c (strategy E183-s2 §3.3, D4): a descriptor asked for with form `ophiolite.well-log-curve/1` and its served
+    well log agree. (a) the descriptor as `verify_descriptor` checks it, and the normalized row's form, bytes and digest;
+    (b) the gateway's validators (`rules.well_log`); (c) the source and the original's digest; (d) the facts the
+    descriptor states; (e) the curve asked for; (f) the reader, and the recorded interpretation as `verify_pair`."""
+    import json
+    from .models.generated import WellLogCurve
+    asset=validate.model(ScientificAsset,descriptor); data=asset.model_dump(by_alias=True)
+    rules.asset(data)
+    rep=next(r for r in data['representations'] if r['kind']=='normalized')
+    well_log_row(rep,requested_curve)
+    rules.require(rep['available'] and len(normalized)==rep['bytes'] and hashlib.sha256(normalized).hexdigest()==rep['sha256'], 'Normalized representation unavailable or integrity mismatch')
+    try: value=json.loads(normalized)
+    except (ValueError,UnicodeError): raise VerificationFailed('Normalized data is not valid JSON.') from None
+    rules.require(isinstance(value,dict) and value.get('schema')==rules.WELL_LOG, 'The normalized data is not the profile the descriptor names')
+    view=validate.model(WellLogCurve,value); value=view.model_dump(by_alias=True)
+    rules.well_log(value)
+    strict,received=value['strict'],value['as_received']
+    expected=data['source_reference'] or dict(authority=data['authority'],key=data['asset_id'],revision=data['revision'],profile=data['profile'])
+    raw=rules.artifact(data)
+    rules.require(rules.known(received['source'],rules.REFERENCE)==rules.known(expected,rules.REFERENCE), 'Well log and artifact sources disagree')
+    rules.require(received['source_sha256']==raw['sha256'], 'Well log and artifact digests disagree')
+    rules.require(all(data['scientific'].get(k)==v for k,v in rules.well_log_facts(strict).items()), 'Descriptor scientific context disagrees with the well log')
+    rules.require(strict['mnemonic']==requested_curve, 'The well log names another curve than the one asked for')
+    rules.require(rules.known(strict['reading'],rules.INTERPRETATION)==rules.known(data['interpretation'],rules.INTERPRETATION), 'Descriptor interpretation disagrees with the well log reader')
+    verify_bytes(raw,artifact)
+    evidence=rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True))
+    if evidence=='recorded-differs':
+        if strict_interpretation: raise InterpretationChanged('The saved and current reader interpretations differ.', 'Read the exact artifact or explicitly accept this difference.', details={'recorded':data['recorded_interpretation'],'live':data['interpretation']})
+        warnings.warn('The saved and current reader interpretations differ; both records are available in the descriptor.',InterpretationDiffers,stacklevel=2)
+    return asset, view
+
 def origin(value):
     if not isinstance(value,str): raise Refused('Use a service origin.')
     parsed=urlsplit(value)

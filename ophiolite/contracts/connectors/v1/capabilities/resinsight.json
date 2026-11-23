@@ -6,7 +6,9 @@
   "summary": "Read ResInsight property maps through its Python API (rips) into Ophiolite for QGIS and Excel.",
   "host": {
     "name": "ResInsight",
-    "versions": [],
+    "versions": [
+      "2026.9.0"
+    ],
     "os": [
       "linux"
     ]
@@ -30,8 +32,8 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-09-20",
-        "evidence": "integration:docs/resinsight-qgis-demo.md"
+        "date": "2026-11-21",
+        "evidence": "integration:ophiolite-connectors/src/asset_connectors/data/resinsight-qualification.json (property map read, ResInsight 2026.9.0)"
       }
     }
   ],

@@ -1,0 +1,10 @@
+{
+  "id": "ophiolite.scientific-asset/1",
+  "version": "1.37.0",
+  "path": "assets/v1/schema.json",
+  "canonical": "the released document as JSON with keys sorted, separators ',' and ':', UTF-8, no trailing newline",
+  "canonical_sha256": "46ff5e839e3b2f1b1b29ecd71ca34ddd1491cfa9ed205d89a4492de9df42389b",
+  "file_sha256": "c746067eb5b7abea58a8de01d012ea6106a5b4fcbf8f131a6d49a5bca750f293",
+  "file": "the released file bytes: the document with indent 2 and one trailing newline",
+  "frozen_by": "E182 s2a: 1.38.0 minus its sender and the three copied sender definitions, version set back, is these bytes"
+}

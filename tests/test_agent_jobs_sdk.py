@@ -227,10 +227,11 @@ def test_a_completed_step_whose_answer_was_never_stored_is_command_owned():
 
 
 @pytest.mark.parametrize('change', [lambda s: s.pop('review_url'), lambda s: s.update(state='finished'), lambda s: s.update(step=9),
-                                    lambda s: s['steps'][0].update(state='done'), lambda s: s.update(extra=1), lambda s: s.update(plan=OTHER)],
-                         ids=['no-review-url', 'state', 'step', 'step-state', 'extra-field', 'other-plan'])
+                                    lambda s: s['steps'][0].update(state='done'), lambda s: s.update(plan=OTHER)],
+                         ids=['no-review-url', 'state', 'step', 'step-state', 'other-plan'])
 def test_a_malformed_status_is_verification_failed(change):
-    """Mutation: the status validation removed → the malformed answer passes."""
+    """Mutation: the status validation removed → the malformed answer passes. (E187 s0: an added field is no longer
+    malformed; tests/test_answer_models.py reads it.)"""
     gateway = Gateway()
     def handler(request):
         if request.url.path.endswith('jobs/status'):
@@ -277,4 +278,4 @@ def test_the_runner_reader_and_changes_are_unchanged():
     assert client(handler).job('j') == {'id': 'j', 'state': 'queued'}
     assert seen == [('/api/v1/projects/p/runners/job', {'project_id': 'p', 'id': 'j'})]
     assert list(inspect.signature(AgentClient.job).parameters) == ['self', 'job_id']
-    assert len(agents.CHANGES) == 27 and not any(c.startswith('jobs/') for c in agents.CHANGES)
+    assert len(agents.CHANGES) == 31 and not any(c.startswith('jobs/') for c in agents.CHANGES)

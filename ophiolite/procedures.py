@@ -173,6 +173,49 @@ def compared(outcome, compared=None, differed=None):
     return Compared(outcome, compared, differed)
 
 
+CHECK_ANSWER = 'ophiolite.check-answer/1'
+ANSWER_ROWS = 1000  # the platform's outcome_tools.ROWS
+_READABLE = re.compile(r'^[^\x00-\x1f\x7f]+$')
+
+
+def _short(value, longest):
+    return isinstance(value, str) and 0 < len(value) <= longest and _READABLE.match(value) is not None
+
+
+def _number(value):
+    return value is None or (isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value))
+
+
+class Answered:
+    """E179 s1: what the entry of a check that answers an outcome returns (made by `answered`); Ophiolite's box writes
+    it as `ophiolite.check-answer/1` to `/output/answer.json`, and nothing the code printed."""
+    def __init__(self, document):
+        self.document = document
+
+
+def answered(state, rows=(), reason=None):
+    """`return answered('failed', [{'key': 'W-2 Top Brent', 'measure': 'residual', 'value': 6.1, 'unit': 'm', 'limit': 5,
+    'pass': False}])` from the entry of a check whose input is a `result`. `state` is passed, failed or not_compared;
+    `reason`, in words, exactly when not_compared; a passed answer has a row and no failing row, a failed one a failing
+    row. Anything else raises ValueError here, so the box stops before it writes an answer."""
+    rows = [dict(row) for row in rows]
+    if state not in ('passed', 'failed', 'not_compared'): raise ValueError('state is passed, failed or not_compared')
+    if (reason is not None) != (state == 'not_compared') or (reason is not None and not _short(reason, 200)):
+        raise ValueError('reason is a sentence of 1 to 200 characters exactly when state is not_compared')
+    if len(rows) > ANSWER_ROWS: raise ValueError('an answer has at most 1000 rows')
+    for row in rows:
+        if (set(row) != {'key', 'measure', 'value', 'unit', 'limit', 'pass'} or not _short(row['key'], 80) or not _short(row['measure'], 80)
+                or not _number(row['value']) or not _number(row['limit']) or not (row['unit'] is None or _short(row['unit'], 16))
+                or not isinstance(row['pass'], bool)):
+            raise ValueError('a row is {key, measure, value, unit, limit, pass}: words, finite numbers or null, a unit or null, true or false')
+    failing = sum(not row['pass'] for row in rows)
+    if state == 'passed' and (not rows or failing): raise ValueError('a passed answer has a row and no failing row')
+    if state == 'failed' and not failing: raise ValueError('a failed answer has a failing row')
+    document = {'schema': CHECK_ANSWER, 'state': state, 'rows': rows}
+    if reason is not None: document['reason'] = reason
+    return Answered(document)
+
+
 def procedure(function):
     """Mark the function a procedure's entry names; `run` refuses an entry that is not marked."""
     function.__ophiolite_procedure__ = True
@@ -275,6 +318,8 @@ SENTENCES = {  # E131 s2: person-read sentences say tool; `withdrawn` is kept (t
     'check-reference': 'Not run: give the reference as --reference FILE or --reference ITEM@N, as {label} reads.',
     'check-returned': 'Not run: the check returned {reason}',
     'check-wrong': 'Not run: a check tool must return ophiolite.compared(outcome, compared, differed).',
+    # E179: the outcome form of a check runs only in the project's sandbox, when its outcome is evaluated
+    'check-outcome': 'Not run: this check answers an outcome; Ophiolite runs it when the outcome is evaluated.',
 }
 WHAT = {'number': 'a finite number', 'integer': 'a whole number', 'boolean': 'true or false', 'choice': 'one of its choices', 'string': 'a short text'}
 INTEGER = re.compile(r'^[-+]?[0-9]+$')
@@ -430,6 +475,26 @@ def parent_slots(manifest):
     return contract().parent_slots(manifest)
 
 
+def local_run(folder):
+    """A run folder's record and its outputs as a report names them, each output's SHA-256 checked (`NotRun` words):
+    what `procedure_publish` reports and `try_result` tries (E176 s1)."""
+    try: record = json.loads((folder / 'run.json').read_text(encoding='utf-8'))
+    except (OSError, ValueError): raise NotRun('not-a-run') from None
+    if record.get('schema') != LOCAL_RUN: raise NotRun('not-a-run')
+    if record.get('systems') or any('asset_id' not in v for versions in record['inputs'].values() for v in versions): raise NotRun('local-inputs')
+    outputs = []
+    for role, output in record['outputs'].items():
+        path = folder / output['file']
+        if not path.is_file() or _sha256(path) != output['sha256']: raise NotRun('output-changed', f'/outputs/{role}', file=output['file'])
+        outputs.append({'role': role, 'sha256': output['sha256'], 'bytes': path.stat().st_size, 'declared': output['declared']})
+    return record, outputs
+
+
+def report_inputs(record):
+    """The report's inputs: each slot's versions as the run used them."""
+    return {slot: [{'asset_id': v['asset_id'], 'revision': v['revision']} for v in versions] for slot, versions in record['inputs'].items()}
+
+
 def run_parents(manifest, record):
     """A local run's parents in the order the Gateway checks them (`procedure_runs.parents`): the registered manifest's
     slot order, then the run's order within a slot, one per version. Never run.json's own order: its keys are sorted."""
@@ -543,6 +608,7 @@ def _child(request_path):
     inputs = {slot: _decode(value) for slot, value in request['inputs'].items()}
     if 'delivery' in request: return _child_send(function, inputs, request, exchange)
     if 'check' in request: return _child_check(function, inputs, request, exchange)
+    if 'answer' in request: return _child_answer(function, inputs, request, exchange)
     try:
         returned = function(inputs, request['settings'])
     except Stopped as stopped:  # E123 SZ: a stop on purpose, with the procedure's own sentence
@@ -576,6 +642,21 @@ def _child_check(function, inputs, request, exchange):
     try: text = json.dumps(said)
     except (TypeError, ValueError): text = json.dumps({'outcome': None, 'compared': None, 'differed': None})
     (exchange / 'comparison.json').write_text(text)
+    return 0
+
+
+def _child_answer(function, inputs, request, exchange):
+    """E179 s1: the entry of a check that answers an outcome is called as `entry(inputs, settings)`, its `result` slot
+    among the inputs; only what `answered(...)` holds is written, as `answer.json`, the one file of the exchange. Any
+    other return or an exception writes nothing there (the reason goes to stderr) and exits 3."""
+    try: returned = function(inputs, request['settings'])
+    except Exception as error:
+        print('The check stopped: %s: %s' % (type(error).__name__, str(error)[:2000]), file=sys.stderr)
+        return 3
+    if not isinstance(returned, Answered):
+        print('The check did not return answered(...): it returned %s' % type(returned).__name__, file=sys.stderr)
+        return 3
+    (exchange / 'answer.json').write_text(json.dumps(returned.document, sort_keys=True, separators=(',', ':'), allow_nan=False), encoding='utf-8')
     return 0
 
 
@@ -659,6 +740,7 @@ def run(folder, destination, inputs=None, *, kinds=None, declared=None, systems=
     manifest = verdict['manifest']
     _requirements(manifest)  # E112 s4: before the send refusal, a destination or a child process
     if manifest['step'] == 'send': raise NotRun('later-release', '/step', step=manifest['step'])
+    if contract().outcome_form(manifest): raise NotRun('check-outcome', '/step')  # E179: before a destination or a child process
     if destination.exists() or destination.is_symlink(): raise NotRun('destination-exists', '', {'destination': str(destination)})
     target = destination.parent.resolve() / destination.name
     given = [Path(p.path if isinstance(p, ProjectInput) else p).resolve() for paths in (inputs or {}).values() for p in paths] + [Path(p).resolve() for p in (systems or {}).values()]
@@ -782,7 +864,8 @@ def _process_start(folder, label):
 
 PROJECT_INPUT = re.compile(r'^@([^:@\s]+):([^:@\s]+)$')
 SANDBOX_FINAL = ('published', 'failed', 'killed', 'cancelled')  # E113 s1: a sandbox job's last states (runners.FINAL)
-EXTENSIONS = {'las2/1': '.las', 'esri-ascii-grid/1': '.asc', 'well-location/1': '.json', 'wavelet-text/1': '.txt'}
+EXTENSIONS = {'las2/1': '.las', 'esri-ascii-grid/1': '.asc', 'well-location/1': '.json', 'wavelet-text/1': '.txt',
+              'sql-wells/1': '.json'}  # E181 s1: a kept copy of a wells table (the gateway's runners.EXTENSIONS)
 OUTCOME_WORDS = {'same': 'Same result', 'same-newer': 'Same result, newer procedure version', 'same-earlier': 'Same result, earlier procedure version',
                  'different': 'Different result', 'not-compared': 'Not compared', 'no-earlier': 'No earlier result you can read to compare with'}
 
@@ -810,6 +893,15 @@ def manifest_of(folder):
 
 def contract_readers():
     return json.loads((CONTRACT.parents[2] / 'connectors' / 'v1' / 'readers.json').read_text(encoding='utf-8'))['readers']
+
+
+def original_only(profile):
+    """E181 s1b (D-4): the profile's contract serves its exact original alone (ophiolite.original/1) and no reader
+    declares anything for it."""
+    try: found = json.loads((CONTRACT.parents[2] / 'profiles' / 'v1' / (profile.split('/')[0] + '.json')).read_text(encoding='utf-8'))
+    except (OSError, ValueError): return False
+    return (found.get('id') == profile and found.get('serves') == ['ophiolite.original/1']
+            and not any(r['declared'] for r in contract_readers() if r['profile'] == profile))
 
 
 def _extension(profile):
@@ -1133,19 +1225,21 @@ class ProcedureClient:
     def procedure_trust(self, digest, *, command_id=None):
         return self._procedure_change('trust', digest, command_id)
 
-    def procedure_verify(self, digest, *, check=None, publication=None, withdraw=None, witnessed=None, statement=None, command_id=None):
+    def procedure_verify(self, digest, *, check=None, publication=None, withdraw=None, witnessed=None, reference_run=None, statement=None,
+                         command_id=None):
         """E165 s1: verify a version against a passed check of a result it produced (`check`, the check record's id), or
         a published method (`publication`: title, authors, year, link {kind: doi or url, value}), or a run Ophiolite
-        made of it in the project's sandbox (`witnessed`, the run's id; E113 s1), or withdraw a verification
+        made of it in the project's sandbox (`witnessed`, the run's id; E113 s1), or a finished reference run of it
+        that passed what its case set asks for (`reference_run`, the run's id; E180 s2), or withdraw a verification
         (`withdraw`, its id); exactly one. Each call is a new command id, resent only by this call's own
         retry; give `command_id` to resend a call whose answer was lost. The answer is `{record, verification}`, with the
         server's line in `verification['line']`."""
-        given = [(kind, value) for kind, value in (('check', check), ('publication', publication), ('withdrawn', withdraw), ('witnessed', witnessed))
-                 if value is not None]
-        if len(given) != 1: raise ValueError('Give exactly one of check, publication, witnessed or withdraw.')
+        given = [(kind, value) for kind, value in (('check', check), ('publication', publication), ('withdrawn', withdraw), ('witnessed', witnessed),
+                                                   ('reference-cases', reference_run)) if value is not None]
+        if len(given) != 1: raise ValueError('Give exactly one of check, publication, witnessed, reference_run or withdraw.')
         kind, value = given[0]
-        reference = ({'check_id': value} if kind == 'check' else {'withdraws': value} if kind == 'withdrawn' else {'run_id': value} if kind == 'witnessed'
-                     else value)
+        reference = ({'check_id': value} if kind == 'check' else {'withdraws': value} if kind == 'withdrawn'
+                     else {'run_id': value} if kind in ('witnessed', 'reference-cases') else value)
         body = {'command_id': command_id or 'verify-' + uuid.uuid4().hex, 'digest': digest, 'kind': kind, 'reference': reference}
         if statement is not None: body['statement'] = statement
         return self._post('procedures', 'verify', body, retry=True)
@@ -1153,6 +1247,47 @@ class ProcedureClient:
     def procedure_verifications(self, digest):
         """E165 s1: every verification and withdrawal of a version, oldest first, each with its line, and its state."""
         return self._post('procedures', 'verifications', {'digest': digest}, retry=True)
+
+    # --- E180 s2: reference cases and reference runs ------------------------------------------------------------------
+
+    def reference_cases_declare(self, tool, kind, cases, *, supersedes=None, least=None, command_id=None):
+        """Declare the next version of a tool's reference case set (a person's act): `cases` as declared (each names its
+        inputs, settings, comparison and accepted result `{asset_id, revision, verdict_id}`; the server reads the
+        verdict's author), `supersedes` the current version you read (None for the first), `least` how many cases must
+        pass (None: all). The answer is the stored set version."""
+        body = {'command_id': command_id or 'reference-declare-' + uuid.uuid4().hex, 'tool': tool, 'supersedes': supersedes, 'kind': kind,
+                'least': least, 'cases': cases}
+        return self._post('reference-cases', 'declare', body, retry=True)
+
+    def reference_cases_withdraw(self, tool, supersedes, *, command_id=None):
+        """Withdraw a tool's case set: a withdrawn version after `supersedes`, the current version you read."""
+        body = {'command_id': command_id or 'reference-withdraw-' + uuid.uuid4().hex, 'tool': tool, 'supersedes': supersedes}
+        return self._post('reference-cases', 'withdraw', body, retry=True)
+
+    def reference_cases_get(self, tool, version=None):
+        """One version of a tool's case set (the newest when `version` is None), with its versions and each case's
+        runs as the server answers them."""
+        return self._post('reference-cases', 'get', {'tool': tool, **({'version': version} if version is not None else {})}, retry=True)
+
+    def accepted_results(self, kind, *, limit=50, cursor=None):
+        """One page of the results of `kind` accepted by their author's current verdict (`verdicts/accepted`)."""
+        return self._post('verdicts', 'accepted', {'kind': kind, 'limit': limit, **({'cursor': cursor} if cursor else {})}, retry=True)
+
+    def reference_run_start(self, digest, *, command_id=None):
+        """Run one tool version on every case of its tool's newest case set (a person's act; never an assistant's).
+        Each call is a new command id; give `command_id` to resend a call whose answer was lost. The answer is the run:
+        `run_id`, `state` (queued, running, finished or failed) and, when finished, its `record`."""
+        body = {'command_id': command_id or 'reference-start-' + uuid.uuid4().hex, 'digest': digest}
+        return self._post('reference-runs', 'start', body, retry=True)
+
+    def reference_run_get(self, run_id):
+        """One reference run of the project, as the caller may read it."""
+        return self._post('reference-runs', 'get', {'run_id': run_id}, retry=True)
+
+    def reference_run_list(self, *, tool=None, digest=None, limit=50, cursor=None):
+        """One page of the project's reference runs, newest first; of one tool or one tool version when given."""
+        body = {'limit': limit, **({'tool': tool} if tool else {}), **({'digest': digest} if digest else {}), **({'cursor': cursor} if cursor else {})}
+        return self._post('reference-runs', 'list', body, retry=True)
 
     def procedure_sandbox_enable(self, digest, enabled=True, *, command_id=None):
         """E113 s1: turn sandbox runs of an enabled version on (or, with `enabled=False`, off) in this project; project
@@ -1237,7 +1372,7 @@ class ProcedureClient:
                 if not prompt(question(found)): raise NotRun('declined', '', {'digest': digest})
             self.procedure_trust(digest)
         _before_run(folder)
-        inputs = self._project_inputs(inputs or {})
+        inputs = self._project_inputs(inputs or {}, manifest_of(folder))
         scratch = Path(tempfile.mkdtemp(prefix='ophiolite-items-')) if items or reference is not None else None
         try:
             if scratch is not None: self._check_inputs(manifest_of(folder), inputs, items, reference, scratch)
@@ -1675,9 +1810,12 @@ class ProcedureClient:
 
     # ------------------------------------------------------------ E106: project versions, reported runs, again
 
-    def _project_inputs(self, inputs):
+    def _project_inputs(self, inputs, manifest=None):
         """Each `@RESULT:REVISION` input downloaded as exactly that version, with its stored type and declarations
-        (the typed descriptor's profile, and its context for the declarations the reader takes); other inputs as given."""
+        (the typed descriptor's profile, and its context for the declarations the reader takes); other inputs as given.
+        E181 s1b (D-4): a slot that accepts exactly one kind, served as its original alone and declaring nothing, takes
+        that kind without asking for a description (the deployment gives none; the reported run checks the stored kind)."""
+        kinds = {i['slot']: i['kinds'] for i in (manifest or {}).get('inputs', []) if i.get('class') == 'version'}
         out, work = {}, None
         try:
             for slot, given in inputs.items():
@@ -1688,7 +1826,9 @@ class ProcedureClient:
                     if found is None:
                         out[slot].append(text); continue
                     work = work or Path(tempfile.mkdtemp(prefix='ophiolite-inputs-'))
-                    out[slot].append(self._download_version(found.group(1), found.group(2), work / f'{slot}-{n}'))
+                    only = kinds.get(slot, [])
+                    profile = only[0] if len(only) == 1 and original_only(only[0]) else None
+                    out[slot].append(self._download_version(found.group(1), found.group(2), work / f'{slot}-{n}', profile, {} if profile else None))
         except BaseException:
             _discard(out); shutil.rmtree(work, ignore_errors=True) if work else None
             raise
@@ -1725,15 +1865,7 @@ class ProcedureClient:
         result of a run made again for that outcome; it is saved with the command id, so a resume still sends it.
         Returns {sentence, run, outputs: [{role, outcome, sentence, receipt}]}."""
         folder = Path(folder)
-        try: record = json.loads((folder / 'run.json').read_text(encoding='utf-8'))
-        except (OSError, ValueError): raise NotRun('not-a-run') from None
-        if record.get('schema') != LOCAL_RUN: raise NotRun('not-a-run')
-        if record.get('systems') or any('asset_id' not in v for versions in record['inputs'].values() for v in versions): raise NotRun('local-inputs')
-        outputs = []
-        for role, output in record['outputs'].items():
-            path = folder / output['file']
-            if not path.is_file() or _sha256(path) != output['sha256']: raise NotRun('output-changed', f'/outputs/{role}', file=output['file'])
-            outputs.append({'role': role, 'sha256': output['sha256'], 'bytes': path.stat().st_size, 'declared': output['declared']})
+        record, outputs = local_run(folder)
         state_path = folder / 'publish.json'
         try: state = json.loads(state_path.read_text(encoding='utf-8'))
         except (OSError, ValueError): state = None
@@ -1747,8 +1879,7 @@ class ProcedureClient:
         chosen = state.get('for_outcome')
         before_report(state)
         body = {'command_id': state['command_id'], 'procedure': {'digest': record['procedure']['digest']}, 'settings': record['settings'],
-                'inputs': {slot: [{'asset_id': v['asset_id'], 'revision': v['revision']} for v in versions] for slot, versions in record['inputs'].items()},
-                'outputs': outputs, 'again_of': state.get('again_of')}
+                'inputs': report_inputs(record), 'outputs': outputs, 'again_of': state.get('again_of')}
         reported = self._reported(lambda: self._post('procedure-runs', 'report', body, retry=True))
         for slot, versions in record['inputs'].items():
             for i, (used, stored) in enumerate(zip(versions, reported['inputs'].get(slot, []))):
@@ -1785,9 +1916,11 @@ class ProcedureClient:
         """A well-log version: its original, then the verified description of its first value curve, which must say
         las2/1 (the reader declares nothing for a log)."""
         from . import las_header
+        from .errors import Refused
         target = stem.with_suffix(_extension('las2/1'))
         self.download_original(asset, revision, target)
-        first = next((c.mnemonic for c in las_header.curves(target.read_bytes())[1:]), None)
+        try: first = next((c.mnemonic for c in las_header.curves(target.read_bytes())[1:]), None)
+        except Refused: first = None  # E181 s1b: not a log (an original served without a description); nothing kept
         described = self.describe(asset, revision, first) if first else None
         if getattr(described, 'profile', None) != 'las2/1':
             target.unlink(missing_ok=True)
@@ -1963,9 +2096,39 @@ class AgentRun:
             steps[role] = (header, raw)
         return steps
 
-    def report(self, summary='', *, evidence=None, **wait):
+    def try_outcomes(self, *, role=None, outcome_ids=None):
+        """E176 s2a: what each enabled outcome would say about this run's outputs were they published, tried in the
+        report form before anything is proposed: {role: the sealed outcome-trial answer}, for each output whose kind
+        outcomes are declared over (or the one `role` names). The report tried is exactly `request()` without `publish`,
+        so the answer can go with the proposal: `report(..., trial=answer)`. Nothing is reported, published or kept."""
+        import base64
+        from .outcomes import KIND
+        from .publish import derive_request, json_bytes
+        from .writers import WrittenOriginal
+        request, record = self.request(), self._record()
+        report = {k: v for k, v in request.items() if k != 'publish'}
+        version = self.agent.read('procedures/get', {'digest': record['procedure']['digest']})
+        method, parents = method_of(version, record['settings']), run_parents(version['manifest'], record)
+        answers = {}
+        for output in request['outputs']:
+            name, local = output['role'], record['outputs'][output['role']]
+            if (name != role) if role is not None else local['profile'] != KIND: continue
+            raw = self._raw(record, name, output['sha256'])
+            header, _ = derive_request(self.agent.project, WrittenOriginal(raw, local['profile'], dict(local['declared'] or {})),
+                                       name=request['publish'][name]['name'], from_=parents, method=method, command_id='try-' + uuid.uuid4().hex)
+            body = {'header': base64.b64encode(json_bytes(header)).decode(), 'content_base64': base64.b64encode(raw).decode(),
+                    'run': {'report': report, 'role': name}, **({'outcome_ids': list(outcome_ids)} if outcome_ids is not None else {})}
+            answers[name] = self.agent._post('outcomes', 'try', body)
+        return answers
+
+    def report(self, summary='', *, evidence=None, trial=None, **wait):
         """Propose the report, wait for the person's approval, report the run, then publish each output under that
-        approval. Safe to repeat. Returns {plan, run_id, outputs: [{role, receipt}]}."""
+        approval. Safe to repeat. Returns {plan, run_id, outputs: [{role, receipt}]}. E176 s2a: `trial`, one answer of
+        `try_outcomes`, goes in the evidence so the person sees it beside the proposal; the gateway confirms its seal and
+        shows "not tried" otherwise. It grants nothing: publication checks the outcomes again. It needs `evidence`."""
+        if trial is not None:
+            if evidence is None: raise ValueError('A trial goes in the evidence: pass evidence with trial.')
+            evidence = {**evidence, 'trial': trial}
         request = self.request()
         proposed = self.agent.propose('procedure-runs/report', request, summary, evidence=evidence)
         plan, record = proposed['hash'], (proposed.get('evidence') if evidence is not None else None)

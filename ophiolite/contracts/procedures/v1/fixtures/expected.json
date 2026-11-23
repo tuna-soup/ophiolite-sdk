@@ -32,6 +32,10 @@
     "send-residual": [
       "procedure.json",
       "procedure.py"
+    ],
+    "check-outcome": [
+      "procedure.json",
+      "procedure.py"
     ]
   },
   "cases": {
@@ -210,6 +214,15 @@
       "structural": false,
       "sentence": "Not valid: this step reads a different number of inputs."
     },
+    "check-outcome-with-reference": {"base": "check", "code": "wrong-input-count", "field": "/inputs", "structural": false, "sentence": "Not valid: this step reads a different number of inputs."},
+    "check-outcome-two-results": {"base": "check", "code": "wrong-input-count", "field": "/inputs", "structural": false, "sentence": "Not valid: this step reads a different number of inputs."},
+    "check-outcome-result-many": {"base": "check", "code": "bad-cardinality", "field": "/inputs/0/cardinality", "structural": false, "sentence": "Not valid: input 1 must say whether it takes one item or many."},
+    "check-outcome-result-kind": {"base": "check", "code": "kind-not-allowed", "field": "/inputs/0/kinds", "structural": false, "sentence": "Not valid: input 1 names a type of data this step cannot use."},
+    "check-outcome-comparison-output": {"base": "check", "code": "wrong-output-class", "field": "/outputs/0/class", "structural": false, "sentence": "Not valid: output 1 is not something this step can make."},
+    "check-outcome-answer-kind": {"base": "check", "code": "unknown-field", "field": "/outputs/0/kind", "structural": false, "sentence": "Not valid: output 1 has a field Ophiolite does not know; check its spelling."},
+    "check-outcome-two-answers": {"base": "check", "code": "wrong-output-count", "field": "/outputs", "structural": false, "sentence": "Not valid: this step makes a different number of outputs."},
+    "check-answer-in-comparison": {"base": "check", "code": "wrong-output-class", "field": "/outputs/0/class", "structural": false, "sentence": "Not valid: output 1 is not something this step can make."},
+    "process-result-input": {"base": "process", "code": "wrong-input-class", "field": "/inputs/0/class", "structural": false, "sentence": "Not valid: input 1 is not an input this step can read."},
     "check-reference-url": {
       "base": "check",
       "code": "wrong-input-class",

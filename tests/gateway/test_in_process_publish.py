@@ -240,7 +240,7 @@ def test_sdk_reads_and_exports_typed_data(web,kind,tmp_path):
     from ophiolite.errors import Incompatible
     with pytest.raises(Incompatible):alice.read(tops['asset_id'],tops['revision'],['md'])  # the server refuses curves on typed data
     opened=alice.export([(log['asset_id'],log['revision'],['GR']),(tops['asset_id'],tops['revision'],None),(survey['asset_id'],survey['revision'],None),(grid['asset_id'],grid['revision'],None)],tmp_path/'four')
-    assert opened.manifest['bundle_version']=='2.10.0' and [a.type for a in opened.assets]==['well-log','well-tops','trajectory','regular-grid-surface']  # E122 s5b: uploads carry their source records
+    assert opened.manifest['bundle_version']=='2.18.0' and [a.type for a in opened.assets]==['well-log','well-tops','trajectory','regular-grid-surface']  # E122 s5b: uploads carry their source records; E182 s2b: and senders
     # Bob: refused until shared; then the tops show a restricted log (not shared) and export succeeds without its id.
     with pytest.raises((PermissionRefused,Unavailable)):bob.read_data(tops['asset_id'],tops['revision'])
     uploads.call('share',{'project_id':'p','asset_id':tops['asset_id'],'audience':['bob'],'expected_generation':1},'alice')
@@ -284,9 +284,9 @@ def test_sdk_export_carries_visible_groups_only(web,kind,tmp_path):
     groups.call('recommend',{'project_id':'p','id':g['id'],'expected_generation':g['generation'],'recommended':{'asset_id':one.output_reference.key,'revision':one.output_reference.revision},'reason':'Closer'},'alice')
     ref=lambda r:(r.output_reference.key,r.output_reference.revision,['GR'])
     mine=alice.export([ref(one_v2),ref(one),ref(two)],tmp_path/'alice')
-    assert mine.manifest['bundle_version']=='1.1.0' and mine.groups[0]['members']==[0,1,2]
+    assert mine.manifest['bundle_version']=='1.18.0' and mine.groups[0]['members']==[0,1,2]  # E182 s2b: each version's sender travels (1.18)
     assert mine.groups[0]['recommended']['asset_position']==1 and mine.groups[0]['recommended']['revision']==one.output_reference.revision
-    assert alice.export([ref(one)],tmp_path/'plain',groups=False).manifest['bundle_version']=='1.0.0'
+    assert alice.export([ref(one)],tmp_path/'plain',groups=False).manifest['bundle_version']=='1.18.0'
     # Bob: the server itself hides Alice-only members, then the bundle carries only what he can see.
     alice.share(two,read=['bob'],expected_generation=alice.grants(two).generation)
     [raw]=bob.result_groups()
@@ -311,7 +311,7 @@ def test_sdk_reads_and_exports_meshes_and_points(web,kind,tmp_path):
     assert isinstance(m,TriangulatedSurface) and m.vertices[1]==[10.0,0.0,None] and m.data['attributes'][0]['values']==[1.0,0.0,None]
     assert isinstance(p,PointSet) and p.points[1]==[4.0,5.0,None] and list(p.to_frame()['phi'])==[0.0,0.2]
     opened=alice.export([(mesh['asset_id'],mesh['revision'],None),(points['asset_id'],points['revision'],None)],tmp_path/'b')
-    assert opened.manifest['bundle_version']=='2.10.0' and opened.assets[0].data.triangles==[[0,1,2]]  # E122 s5b: uploads carry their source records
+    assert opened.manifest['bundle_version']=='2.18.0' and opened.assets[0].data.triangles==[[0,1,2]]  # E122 s5b: uploads carry their source records; E182 s2b: and senders
 
 
 # --- E30b: publish a derived file -------------------------------------------------------------------------------

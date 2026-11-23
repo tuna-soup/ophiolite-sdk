@@ -1,0 +1,70 @@
+{
+  "description": "E176 s2a (R4): a trial in words, one line per outcome, counted by hand. `base` names a valid fixture in trial/valid; `rows`, when present, replaces the first outcome's rows (W-n wellbores are invented). Both the SDK's trial_lines and the gateway's outcome_trials.lines read these cases and must give exactly `lines`.",
+  "cases": [
+    {"name": "accepted", "base": "accepted", "lines": ["Tops within 5 m: would be accepted"]},
+    {"name": "two-outcomes", "base": "rejected-one", "lines": ["Tops within 1 m: would be rejected: 1 row over 1 m", "Tops within 5 m: would be accepted"]},
+    {"name": "twenty-five-over", "base": "rejected-25", "lines": ["Tops within 1 m: would be rejected: 25 rows over 1 m"]},
+    {"name": "not-compared", "base": "not-compared-unit", "lines": ["Tops within 10 ft: would not be compared: units disagree"]},
+    {"name": "data-rule", "base": "rejected-data-rule", "lines": ["Unique tops within 5 m: would be rejected: an input failed a data rule the outcome names"]},
+    {"name": "not-evaluated", "base": "not-evaluated", "lines": ["Tops within 5 m: would not be evaluated: the person who declared this outcome cannot read Tops A."]},
+    {"name": "not-tried", "base": "not-tried", "lines": ["Checked by the review tool: not tried: this outcome's rule is a tool, which runs only after publication."]},
+    {"name": "none-declared", "base": "none-declared", "lines": ["No outcome is declared for this kind."]},
+    {"name": "feet", "base": "feet-negative", "lines": ["Tops within 10 ft: would be rejected: 1 row over 10 ft"]},
+    {"name": "not-computed-allowed", "base": "not-computed-allowed", "lines": ["Tops within 5 m: would be accepted"]},
+    {"name": "one-required-not-computed", "base": "not-computed-required", "lines": ["Every top within 5 m: would be rejected: 1 required row not computed"]},
+    {
+      "name": "twenty-five-required-not-computed",
+      "base": "not-computed-required",
+      "rows": {
+        "computed": 10,
+        "passing": 7,
+        "failing_count": 28,
+        "failing": [
+          {"key": {"wellbore": "W-1", "occurrence": 0}, "measure": "residual", "value": 6.5, "unit": "m", "limit": 5.0, "pass": false, "reason": null},
+          {"key": {"wellbore": "W-2", "occurrence": 0}, "measure": "residual", "value": -7.25, "unit": "m", "limit": 5.0, "pass": false, "reason": null},
+          {"key": {"wellbore": "W-3", "occurrence": 0}, "measure": "residual", "value": 5.5, "unit": "m", "limit": 5.0, "pass": false, "reason": null},
+          {"key": {"wellbore": "W-10", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-11", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-12", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-13", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-14", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-15", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-16", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-17", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-18", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-19", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-20", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-21", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-22", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-23", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-24", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-25", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-26", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"}
+        ],
+        "not_computed": [
+          {"key": {"wellbore": "W-10", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-11", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-12", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-13", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-14", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-15", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-16", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-17", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-18", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-19", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-20", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-21", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-22", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-23", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-24", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-25", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-26", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-27", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-28", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"},
+          {"key": {"wellbore": "W-29", "occurrence": 0}, "measure": "residual", "value": null, "unit": "m", "limit": 5.0, "pass": false, "reason": "no-trajectory"}
+        ]
+      },
+      "lines": ["Every top within 5 m: would be rejected: 3 rows over 5 m, 25 required rows not computed"]
+    }
+  ]
+}

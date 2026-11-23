@@ -99,8 +99,8 @@ def _url(context, asset, revision):
 
 class PresentedOutcome(Outcome):
     """An Exchange outcome that can show itself in a notebook."""
-    def __init__(self, outcome, sentence, facts=None, technical=None, context=None):
-        Outcome.__init__(self, outcome, sentence, facts, technical)
+    def __init__(self, outcome, sentence, facts=None, technical=None, context=None, receipt=None):
+        Outcome.__init__(self, outcome, sentence, facts, technical, receipt)
         self._context = context
 
     def _repr_html_(self):
@@ -124,7 +124,7 @@ class PresentedExchange(Exchange):
         outcome = Exchange.send(self, data, **arguments)
         recipe = {'call': 'send', 'arguments': snapshot} if snapshot is not None else None
         context = {'origin': self.origin, 'project': self.transport.project, 'family': FAMILY_OF_KIND['derived'], 'recipe': recipe} if self.origin else None
-        return PresentedOutcome(outcome.outcome, outcome.sentence, outcome.facts, outcome.technical, context)
+        return PresentedOutcome(outcome.outcome, outcome.sentence, outcome.facts, outcome.technical, context, outcome.receipt)  # E184 s0
 
 
 class PresentedReceipt(PublicationReceipt):

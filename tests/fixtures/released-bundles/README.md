@@ -30,6 +30,11 @@ Written once on 2 November 2026 (lane e148s2, base `edf29d0aecd5`; the SDK code 
 | 2.11 | `ophiolite/bundle.py` (no frozen 2.11 module) | a packaged polyline set: the faults fixture reprofiled to `petrel-faultsticks/1`, read by `asset_connectors.petrel_faults/1`, members `faults.txt` (primary) and `faults.crs` (crs-metadata, one synthetic line) | built as `test_bundle_package.shapefile_read` builds its package (`stored_rows`, `rehash`) |
 
 | 2.17 | `ophiolite/bundle.py` (no frozen 2.17 module) | one wells table (`well-table`, `sql-wells/1`): two synthetic rows `S-1`, `S-2` beside a synthetic source manifest; written on 9 November 2026 (lane e162s2a) | `test_bundle_well_table.table()` |
+| 1.18 | `ophiolite/bundle.py` (no frozen 1.18 module) | the LAS curve with a sender in its entry (`reported`: client `qgis-plugin` 1.4.0, host `qgis` 3.34.2, transport `http`, accepted as `las2/1`), the same view also served on its descriptor and left out of the descriptor file; written on 22 November 2026 (lane e182s2b, commit E182 s2b C2) | `test_bundle.Read` with `.sender` set |
+| 2.18 | `ophiolite/bundle.py` (no frozen 2.18 module) | the tops with a sender in their entry (`not reported`, transport `mcp`, accepted as `well-tops-csv/1`), served on the descriptor too and left out of its file; written as 1.18 | `typed_read('tops')` with `.sender` set |
+
+The 1.18 and 2.18 descriptor and manifest digests are pinned in `sender-digests.json` beside these directories (their
+other files are the 1.10 / 2.10 LAS and tops files, byte for byte).
 
 No frozen writer fell back to a later one: each wrote its version offline.
 

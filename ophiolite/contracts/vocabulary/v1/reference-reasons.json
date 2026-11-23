@@ -1,0 +1,25 @@
+{
+ "schema": "ophiolite.reference-reasons/1",
+ "id": "ophiolite.reference-reasons/1",
+ "description": "E180. `reasons`: why a reference-case declaration, a run start or a read was refused, one closed key each, one sentence each; nothing was stored (the HTTP status of each is the service's `reference_cases.STATUS`). `lines`: the words a person reads beside a tool version's reference cases and runs. Placeholders are in braces; no sentence carries a code. Frozen in slice 0; slices 1 and 2 raise them.",
+ "reasons": {
+  "no-verdict": "No one has accepted this version; only accepted work can be a reference case.",
+  "rejected": "The verdict named rejects this version; only accepted work can be a reference case.",
+  "verdict-not-current": "The verdict named is not its author's current verdict on this version.",
+  "verdict-other-version": "The verdict named is on another version.",
+  "verdict-by-agent": "A reference case rests on a person's acceptance, not an assistant's.",
+  "no-comparison": "No comparison for this kind.",
+  "made-by-tool": "Made by this tool: a result the tool under test produced cannot be its reference.",
+  "accepted-as-input": "A case cannot give the tool the accepted result, or another version of it, as an input.",
+  "unreadable": "You cannot open every version this case names.",
+  "set-unknown": "No reference cases for this tool in this project.",
+  "run-unknown": "No reference run Ophiolite made in this project has this id.",
+  "set-moved": "The reference cases changed since you read them; read them again."
+ },
+ "lines": {
+  "not-run": "Reference cases not run for this version",
+  "no-longer-accepted": "No longer accepted",
+  "versions-run": "Run on {count} versions of this tool",
+  "rejections": "Rejected by {count} other people"
+ }
+}

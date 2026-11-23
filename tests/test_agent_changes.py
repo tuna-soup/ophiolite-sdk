@@ -23,7 +23,7 @@ NOT_STANDALONE = {'table-imports/read'}  # E153 s1: a file step, sent with a job
 def test_the_changes_are_the_declared_proposable_operations():
     """Mutations: publications/derive back in CHANGES, or publications/share dropped → red."""
     assert set(agents.CHANGES) == declared_proposable() - NOT_STANDALONE
-    assert len(agents.CHANGES) == len(set(agents.CHANGES)) == 27  # E153 s1: the four JSON steps of a table import; s1b: six more; E154 s0: request and withdraw; s1: bind
+    assert len(agents.CHANGES) == len(set(agents.CHANGES)) == 31  # E153 s1: the four JSON steps of a table import; s1b: six more; E154 s0: request and withdraw; s1: bind; E178 s0: four chain writes
     assert 'publications/derive' not in agents.CHANGES
 
 

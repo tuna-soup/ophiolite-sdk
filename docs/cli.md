@@ -49,6 +49,7 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `teams` | `{"teams": [team]}`; with `--team`: `{"team": team}` |
 | `list` | `{"assets": [asset]}` |
 | `kinds` | `{"kinds": [row]}`: every row of the export matrix this release carries (`profile`, `kind` or `none`, and the rest), in its order |
+| `results chains`, `results chain-runs` | the served answer as it is: a chain entry, `ChainList`, `ChainDetail`, `ophiolite.chain-due/1`, `ophiolite.chain-run/1` or `ChainRunList` |
 | `doctor` | `{"configuration", "python", "local_contracts", "server_contracts"?}` |
 | `check`, `get`, `send` | `{"outcome", "sentence", "facts", "technical"}` (see below) |
 | `checks publish` | `{"published": [stored check]}` (each an `ophiolite.check/1` record with its `id`, `witness`, `recorded_by`, `command_id`, `at`) |
@@ -258,6 +259,20 @@ kind, or `none:` and the matrix's reason. It reads no configuration or credentia
 `ophiolite.kinds()` returns the same rows and `ophiolite.profiles_for(kind)` every profile of one kind (an empty list
 for a kind no row names); a read says what the server served, as `osdu_kind` and `osdu_kind_reason` on the curve
 frame's descriptor and on a typed read, and both are `None` from a server that does not send them yet.
+
+## `results chains` and `results chain-runs`
+
+A chain is the project's declared order of steps after a new version of an item (`ophiolite.chain/1`); a run is one
+pass of one chain version over the version that started it. `ophiolite results chains declare FILE` and `revise NAME
+FILE` read the declaration from a JSON file; `enable`, `disable`, `withdraw` and `get` take the chain's name; `list`
+and `due [NAME]` read one page (`--cursor` the next, as `--json` gives it); `dismiss NAME ITEM[@N] --reason TEXT` sets
+one due version aside. `ophiolite results chain-runs start NAME ITEM[@N] ...` starts a run of the chain's current
+version (`--chain-version N` another); `get`, `attach RUN STEP ITEM[@N]`, `choose RUN STEP ANSWER`, `acknowledge RUN
+STEP --label TEXT [--reference TEXT]`, `decide RUN STEP --applies|--does-not-apply --reason TEXT` and `continue RUN STEP
+--reason TEXT` name the run by its chain's name (its newest run you can read) or by its id, and a step and an answer by
+their names. The default lines are labels and state words ("Design review: Said to be done outside"); no step key,
+code, digest or id is printed. `--json` prints the served answer. The server decides who may act; its refusal is
+printed with its sentence and the exit code of its kind.
 
 ## `recipes`
 

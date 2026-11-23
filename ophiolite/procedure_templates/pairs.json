@@ -1,6 +1,6 @@
 {
  "schema": "ophiolite.procedure-template-pairs/1",
- "rules_version": "1.4.0",
+ "rules_version": "1.6.0",
  "kinds": {
   "points-csv/1": {
    "word": "points"
@@ -46,6 +46,9 @@
   },
   "segy/1": {
    "word": "seismic-volume"
+  },
+  "sql-wells/1": {
+   "word": "wells-table"
   }
  },
  "listed": [
@@ -376,6 +379,31 @@
    "step": "check",
    "kind": "segy/1",
    "sentence": "There is no check template for seismic-volume yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "read",
+   "kind": "sql-wells/1",
+   "sentence": "A kept copy of a wells table is made in Ophiolite when a table is imported; it cannot be read from a file."
+  },
+  {
+   "step": "source",
+   "kind": "sql-wells/1",
+   "sentence": "A kept copy of a wells table is made in Ophiolite when a table is imported; it cannot be read from a file."
+  },
+  {
+   "step": "process",
+   "kind": "sql-wells/1",
+   "sentence": "There is no process template for wells-table yet; a procedure can use a kept copy of a wells table as an input but cannot make one."
+  },
+  {
+   "step": "send",
+   "kind": "sql-wells/1",
+   "sentence": "A kept copy of a wells table cannot be sent by a procedure."
+  },
+  {
+   "step": "check",
+   "kind": "sql-wells/1",
+   "sentence": "There is no check template for wells-table yet; check templates compare well tops and deviation surveys."
   }
  ]
 }

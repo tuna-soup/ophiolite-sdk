@@ -153,9 +153,11 @@ def _input(item, i, step, slots):
     _identifier(item['slot'], field + '/slot', where, slots)
     _label(item['label'], field + '/label', where)
     cls = item['class']
-    allowed = {'read': ('file',), 'source': ('system',), 'process': ('version',), 'send': ('version', 'system'), 'check': ('version', 'reference')}[step]  # E109 D1: a send may name its destination system
+    allowed = {'read': ('file',), 'source': ('system',), 'process': ('version',), 'send': ('version', 'system'), 'check': ('version', 'reference'),
+               'check-outcome': ('result', 'version', 'reference')}[step]  # E109 D1: a send may name its destination system; E179: a reference beside a result is a count defect
     if cls not in allowed: raise Invalid('wrong-input-class', field + '/class', where=where)
-    extra = {'file': {'signature'}, 'system': {'config_keys'}, 'version': {'kinds', 'cardinality'}, 'reference': {'from', 'kinds', 'cardinality'}}[cls]
+    extra = {'file': {'signature'}, 'system': {'config_keys'}, 'version': {'kinds', 'cardinality'}, 'reference': {'from', 'kinds', 'cardinality'},
+             'result': {'kinds', 'cardinality'}}[cls]
     stray = sorted(set(item) - {'slot', 'label', 'class'} - extra)
     if stray: raise Invalid('unknown-field', field + '/' + stray[0], where=where)
     if cls == 'file':
@@ -177,10 +179,10 @@ def _input(item, i, step, slots):
                 if stray: raise Invalid('unknown-field', field + '/' + stray[0], where=where)
                 return
         if 'kinds' not in item: raise Invalid('missing-field', field + '/kinds', where=where)
-        allowed_kinds = RULES['send_kinds'] if step == 'send' else RULES['process_input_kinds']
+        allowed_kinds = RULES['send_kinds'] if step == 'send' else RULES['process_kinds'] if cls == 'result' else RULES['process_input_kinds']
         _kinds(item['kinds'], field + '/kinds', where, allowed_kinds)
         if item.get('cardinality') not in ('one', 'many'): raise Invalid('bad-cardinality', field + '/cardinality', where=where)
-        if step == 'check' and item['cardinality'] != 'one': raise Invalid('bad-cardinality', field + '/cardinality', where=where)
+        if (step == 'check' or cls == 'result') and item['cardinality'] != 'one': raise Invalid('bad-cardinality', field + '/cardinality', where=where)
 
 
 def _output(item, i, step, roles):
@@ -188,14 +190,14 @@ def _output(item, i, step, roles):
     _object(item, 'output', field, where)
     _identifier(item['role'], field + '/role', where, roles)
     _label(item['label'], field + '/label', where)
-    cls = {'read': 'version', 'source': 'version', 'process': 'version', 'send': 'delivery', 'check': 'comparison'}[step]
+    cls = {'read': 'version', 'source': 'version', 'process': 'version', 'send': 'delivery', 'check': 'comparison', 'check-outcome': 'answer'}[step]
     if item['class'] != cls: raise Invalid('wrong-output-class', field + '/class', where=where)
     if cls == 'version':
         kinds = RULES['process_kinds'] if step == 'process' else RULES['read_source_kinds']
         if 'kind' not in item: raise Invalid('missing-field', field + '/kind', where=where)
         if item['kind'] not in kinds: raise Invalid('kind-not-allowed', field + '/kind', where=where)
     elif 'kind' in item:
-        raise Invalid('unknown-field', field + '/kind', where=where)  # a delivery's payload is fixed (delivery.py, E109); comparison payloads come with E110
+        raise Invalid('unknown-field', field + '/kind', where=where)  # a delivery's payload is fixed (delivery.py, E109); comparison payloads come with E110; an answer is ophiolite.check-answer/1 (E179)
 
 
 def _setting(item, i, keys):
@@ -249,6 +251,18 @@ def is_residual(manifest):
     return manifest.get('step') == 'process' and any(o.get('kind') == RESIDUAL['output'] for o in manifest.get('outputs', []))
 
 
+def outcome_form(manifest):
+    """E179 (rules 1.5.0): a `check` manifest with a `result` input is the outcome form (a result and the versions it was
+    made from, one answer, run only by Ophiolite when an outcome is evaluated); any other `check` is E110's comparison."""
+    inputs = manifest.get('inputs')
+    return manifest.get('step') == 'check' and isinstance(inputs, list) and any(isinstance(i, dict) and i.get('class') == 'result' for i in inputs)
+
+
+def step_words(manifest):
+    """What a tool of this manifest does, in words: `answer_words` for the outcome form, else its step's `step_words`."""
+    return RULES['answer_words'] if outcome_form(manifest) else RULES['step_words'][manifest['step']]
+
+
 def parent_slots(manifest):
     """E119b D2: the slots whose versions are parents of a result: every slot, except a residual procedure's pinned
     ones (`residual_procedure.pinned`, empty in this version). The SDK applies the same rule (`procedures.parent_slots`)."""
@@ -284,15 +298,17 @@ def check_manifest(manifest, members):
     step = manifest['step']
     if step not in RULES['steps']: raise Invalid('bad-step', '/step')
     inputs = _list(manifest['inputs'], '/inputs', _where('procedure'), LIMITS['inputs'], 1)
+    form = outcome_form(manifest) and 'check-outcome' or step
     slots = set()
-    for i, item in enumerate(inputs): _input(item, i, step, slots)
+    for i, item in enumerate(inputs): _input(item, i, form, slots)
     classes = [item['class'] for item in inputs]
     if step in ('read', 'source') and len(inputs) != 1: raise Invalid('wrong-input-count', '/inputs')
-    if step == 'check' and sorted(classes) != ['reference', 'version']: raise Invalid('wrong-input-count', '/inputs')
+    if form == 'check' and sorted(classes) != ['reference', 'version']: raise Invalid('wrong-input-count', '/inputs')
+    if form == 'check-outcome' and (classes.count('result') != 1 or 'reference' in classes): raise Invalid('wrong-input-count', '/inputs')
     if step == 'send' and (classes.count('system') > RULES['send_systems'] or 'version' not in classes): raise Invalid('wrong-input-count', '/inputs')  # E109 D1
     outputs = _list(manifest['outputs'], '/outputs', _where('procedure'), LIMITS['outputs'], 1)
     roles = set()
-    for i, item in enumerate(outputs): _output(item, i, step, roles)
+    for i, item in enumerate(outputs): _output(item, i, form, roles)
     if step in ('send', 'check') and len(outputs) != 1: raise Invalid('wrong-output-count', '/outputs')
     keys = set()
     for i, item in enumerate(_list(manifest.get('settings', []), '/settings', _where('procedure'), LIMITS['settings'])): _setting(item, i, keys)
@@ -388,7 +404,7 @@ def _words(manifest):
         if item['class'] == 'reference' and item['from'] == 'file': return 'a reference file'
         return ' or '.join(kinds[k] for k in item['kinds'])
     def made(item):
-        return {'delivery': 'a delivery', 'comparison': 'a comparison'}.get(item['class']) or kinds[item['kind']]
+        return {'delivery': 'a delivery', 'comparison': 'a comparison', 'answer': 'an answer'}.get(item['class']) or kinds[item['kind']]
     return ' and '.join(one(i) for i in manifest['inputs']), ' and '.join(made(o) for o in manifest['outputs'])
 
 

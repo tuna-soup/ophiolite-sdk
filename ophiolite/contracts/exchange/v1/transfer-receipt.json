@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/exchange/v1/transfer-receipt.json",
+  "x-ophiolite": {
+    "id": "ophiolite.transfer-receipt/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Base": {
+      "additionalProperties": false,
+      "description": "The version the transfer started from.",
+      "properties": {
+        "item": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Item",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item",
+        "revision",
+        "number"
+      ],
+      "title": "Base",
+      "type": "object"
+    },
+    "CodesRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": "ophiolite.transfer-codes/1",
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "title": "CodesRef",
+      "type": "object"
+    },
+    "Fingerprints": {
+      "additionalProperties": false,
+      "description": "The exact source, the exact target and the converter the lists were computed for (design 3).",
+      "properties": {
+        "source": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        },
+        "converter": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Converter",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "converter"
+      ],
+      "title": "Fingerprints",
+      "type": "object"
+    },
+    "MadeCopy": {
+      "additionalProperties": false,
+      "description": "A get's held copy, by its opaque copy id (held_copies.copy_id), never the holder id.",
+      "properties": {
+        "copy": {
+          "pattern": "^[0-9a-f]{16}$",
+          "title": "Copy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "copy"
+      ],
+      "title": "MadeCopy",
+      "type": "object"
+    },
+    "MadeVersion": {
+      "additionalProperties": false,
+      "description": "A send's new version.",
+      "properties": {
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "revision",
+        "number"
+      ],
+      "title": "MadeVersion",
+      "type": "object"
+    },
+    "Route": {
+      "additionalProperties": false,
+      "description": "A capability route as its file names it (`routes[].profile`, `data`, `direction`).",
+      "properties": {
+        "profile": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Profile",
+          "type": "string"
+        },
+        "data": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Data",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "read",
+            "write",
+            "publish",
+            "export"
+          ],
+          "title": "Direction",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile",
+        "data",
+        "direction"
+      ],
+      "title": "Route",
+      "type": "object"
+    },
+    "Row": {
+      "additionalProperties": false,
+      "description": "One line of a list: its code, its sentence, and the count or value measured on this transfer when one was.",
+      "properties": {
+        "code": {
+          "pattern": "^[a-z][a-z0-9-]{1,47}$",
+          "title": "Code",
+          "type": "string"
+        },
+        "sentence": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Sentence",
+          "type": "string"
+        },
+        "count": {
+          "default": null,
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "value": {
+          "default": null,
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "sentence"
+      ],
+      "title": "Row",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "ophiolite.transfer-receipt/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "direction": {
+      "enum": [
+        "get",
+        "send"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "capability": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+      "title": "Capability",
+      "type": "string"
+    },
+    "route": {
+      "$ref": "#/$defs/Route"
+    },
+    "contract": {
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+      "title": "Contract",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "planned",
+        "committed"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "base": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Base"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "made": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MadeVersion"
+        },
+        {
+          "$ref": "#/$defs/MadeCopy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Made"
+    },
+    "fingerprints": {
+      "$ref": "#/$defs/Fingerprints"
+    },
+    "codes": {
+      "$ref": "#/$defs/CodesRef"
+    },
+    "kept": {
+      "items": {
+        "$ref": "#/$defs/Row"
+      },
+      "maxItems": 8,
+      "title": "Kept",
+      "type": "array"
+    },
+    "changed": {
+      "items": {
+        "$ref": "#/$defs/Row"
+      },
+      "maxItems": 8,
+      "title": "Changed",
+      "type": "array"
+    },
+    "not_carried": {
+      "items": {
+        "$ref": "#/$defs/Row"
+      },
+      "maxItems": 8,
+      "title": "Not Carried",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "direction",
+    "capability",
+    "route",
+    "contract",
+    "state",
+    "base",
+    "made",
+    "fingerprints",
+    "codes",
+    "kept",
+    "changed",
+    "not_carried"
+  ],
+  "title": "TransferReceipt",
+  "type": "object"
+}

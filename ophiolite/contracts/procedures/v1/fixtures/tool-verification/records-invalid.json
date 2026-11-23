@@ -22,5 +22,14 @@
      "reference": {"title": "A method note", "authors": ["C. Example"], "year": 2024, "link": {"kind": "isbn", "value": "0000000000"}}},
     {"name": "a statement over 2000 characters", "set": {"statement": "REPEAT:2001"}},
     {"name": "a digest that is not 64 hex", "set": {"digest": "edf86682"}}
+  ],
+  "reference_cases_note": "E180 s0: reference-cases records the contract refuses, one defect each on the reference_cases record of records.json; `reference` replaces fields of its reference. A shape case is refused by the published JSON Schema and by the model; a semantic case passes the JSON Schema and is refused by the model with `error` in its message.",
+  "reference_cases": [
+    {"name": "no case counted", "layer": "shape", "reference": {"counted": 0, "passed": 0}},
+    {"name": "a run id that is not 64 hex", "layer": "shape", "reference": {"run_id": "aaaa"}},
+    {"name": "set version 0", "layer": "shape", "reference": {"cases_version": 0}},
+    {"name": "an unknown reference field", "layer": "shape", "reference": {"least": 3}},
+    {"name": "a check reference", "layer": "shape", "reference": {"check_id": "check-0001"}},
+    {"name": "more passed than counted", "layer": "semantic", "reference": {"passed": 4}, "error": "A run passes at most the cases it counted"}
   ]
 }

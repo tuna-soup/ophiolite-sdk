@@ -21,7 +21,8 @@
   "normalized_profile": "ophiolite.application-curve/1",
   "normalized_profiles": [
     "ophiolite.application-curve/1",
-    "ophiolite.curve-columns/1"
+    "ophiolite.curve-columns/1",
+    "ophiolite.well-log-curve/1"
   ],
   "context_schema": "ophiolite.curve-context/1",
   "representation_rules": {

@@ -147,6 +147,18 @@
               "maxLength": 512
             },
             "description": "The revision manifest profiles this reader verifies, comma separated (for example /1,/2,/3,/4). Absent means /1,/2: a /3 or /4 revision is then served as its /2 view, with digest_v2 as its digest and no derivation_record. A /4 revision is served as /4 only to a reader that lists /4; a /3 reader gets its /2 view."
+          },
+          {
+            "name": "form",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ophiolite.well-log-curve/1"
+              ]
+            },
+            "description": "E183 s1a: the normalized form to describe. Absent: the curve's default form. ophiolite.well-log-curve/1: the curve's stored well log form (read it as representation well-log-curve:<mnemonic>), or 422 incompatible-context naming every reason the version holds none. Any other value: 400."
           }
         ],
         "security": [

@@ -1,5 +1,5 @@
 import type { Reference, ApplicationCurve } from "./generated/contracts.js";
-import { object, requireValue, validateCurve } from "./verify.js";
+import { object, requireValue, requireWord, validateCurve } from "./verify.js";
 
 export type Binding = { id: string; owner: string; project_id: string; kind: "binding"; name: string; generation: number; curve: string; publication_profile: "curve-edits/1" | "las-derived-curves/1" };
 export type ResultManifest = { schema: string; media_type: string; bytes: number; sha256: string };
@@ -27,7 +27,8 @@ function reference(value: unknown): Reference {
 export function binding(value: unknown): Binding {
   const v = object(value); requireValue(v.kind === "binding");
   const generation = number(v.generation); requireValue(Number.isInteger(generation) && generation >= 1);
-  const profile = v.publication_profile ?? "curve-edits/1"; requireValue(profile === "curve-edits/1" || profile === "las-derived-curves/1");
+  // E187 s0: a profile this release does not know names the upgrade; a `kind` other than "binding" is another record, not a newer word.
+  const profile = v.publication_profile ?? "curve-edits/1"; requireWord(profile === "curve-edits/1" || profile === "las-derived-curves/1", profile);
   return { id: text(v.id), owner: text(v.owner), project_id: text(v.project_id), kind: "binding", name: text(v.name), generation, curve: text(v.curve), publication_profile: profile };
 }
 function manifest(value: unknown, restricted: boolean): ResultManifest | OwnerManifest {

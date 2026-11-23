@@ -145,7 +145,7 @@ def test_only_the_comment_changed(tmp_path):
             assert sha((folder / member).read_bytes()) == expected, (pair, member)
         template = json.loads((folder / 'template.json').read_text())
         assert template.pop('sdk_version') == _version.__version__
-        assert template == {'step': pair[0], 'kind': pair[1], 'pairs_rules_version': '1.4.0'}, pair
+        assert template == {'step': pair[0], 'kind': pair[1], 'pairs_rules_version': '1.6.0'}, pair  # E181 s1: rules 1.6.0
     no_kind = made['no-kind']
     assert sorted(path.name for path in no_kind.iterdir()) == ['procedure.json', 'procedure.py']
     assert sha((no_kind / 'procedure.json').read_bytes()) == NO_KIND_BEFORE['procedure.json']

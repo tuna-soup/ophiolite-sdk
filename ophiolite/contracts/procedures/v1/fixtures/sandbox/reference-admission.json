@@ -1,0 +1,25 @@
+{
+  "note": "E180 s0 C3: admit_reference(manifest, packages, kind), written by hand (strategy §3.4). `admit` as it is, then exactly one output of `kind`. `manifest` names a fixture under fixtures/; `set` replaces top-level fields of it; `expect` is {\"role\": ...} (admitted, the role of the one output compared) or the closed code with its complete sentence. admission.json and its consumer test_sandbox_admission.py are unchanged (F7).",
+  "cases": [
+    {"name": "the depth-shift bundle makes one Well tops output", "manifest": "bundles/depth-shift/procedure.json", "kind": "well-tops-csv/1", "packages": {},
+     "expect": {"role": "shifted"}},
+    {"name": "the one output of the kind among others", "manifest": "valid/process.json", "kind": "well-residual/1", "packages": {"numpy": "1.26.4"},
+     "set": {"outputs": [{"role": "shifted", "label": "Shifted tops", "class": "version", "kind": "well-tops-csv/1"},
+                         {"role": "residuals", "label": "Residuals", "class": "version", "kind": "well-residual/1"}]},
+     "expect": {"role": "residuals"}},
+    {"name": "no output of the kind", "manifest": "bundles/depth-shift/procedure.json", "kind": "well-residual/1", "packages": {},
+     "expect": {"code": "reference-output", "sentence": "Not run: Shift tops by a fixed depth must make exactly one Residual result (JSON) to be compared with the reference cases."}},
+    {"name": "two outputs of the kind", "manifest": "valid/process.json", "kind": "well-tops-csv/1", "packages": {"numpy": "1.26.4"},
+     "set": {"outputs": [{"role": "a", "label": "A", "class": "version", "kind": "well-tops-csv/1"},
+                         {"role": "b", "label": "B", "class": "version", "kind": "well-tops-csv/1"}]},
+     "expect": {"code": "reference-output", "sentence": "Not run: Shift tops by a fixed depth must make exactly one Well tops (CSV) to be compared with the reference cases."}},
+    {"name": "an outcome's check keeps sandbox-check", "manifest": "valid/check-outcome.json", "kind": "well-residual/1", "packages": {"numpy": "1.26.4"},
+     "expect": {"code": "sandbox-check", "sentence": "A tool that answers whether a result meets an outcome runs only when Ophiolite evaluates that outcome."}},
+    {"name": "a comparison check keeps sandbox-step", "manifest": "valid/check.json", "kind": "well-tops-csv/1", "packages": {"numpy": "1.26.4"},
+     "expect": {"code": "sandbox-step", "sentence": "A tool that compares data with a reference does not run in the sandbox yet."}},
+    {"name": "a read tool keeps sandbox-step", "manifest": "bundles/team-las/procedure.json", "kind": "las2/1", "packages": {},
+     "expect": {"code": "sandbox-step", "sentence": "A tool that reads a file does not run in the sandbox yet."}},
+    {"name": "an unmet requires is judged before the output count", "manifest": "valid/process.json", "kind": "well-residual/1", "packages": {"numpy": "1.23.5"},
+     "expect": {"code": "sandbox-requires", "sentence": "Not run: Shift tops by a fixed depth needs numpy>=1.24, which the sandbox does not have."}}
+  ]
+}

@@ -182,6 +182,34 @@ separate from application-grant consent; use an explicitly authorised delegate
 client/folder when required. The SDK never falls back to a different credential.
 Attribution and rights confirmation are user declarations, not verified licences.
 
+A LAS upload (`client.upload_las` or `work.upload_las`) may add
+`curve_declaration={'well': 'W-1', 'depth_kind': 'MD', 'depth_datum': 'unknown'}`:
+the well, the depth kind (`MD`, `TVD` or `TVDSS`) and the depth datum of its curves,
+all three or none. The version then also holds each curve's well log form. The SDK
+sends only what you declare; it never reads these values from the file's header.
+
+`client.read(asset, revision, ['GR'], form='ophiolite.well-log-curve/1')` reads such
+a curve in its well log form: each of `.curves` is a `WellLog` with the declared
+`.well`, `.depth_kind`, `.depth_unit` and `.depth_datum`, `.depth`, `.values` (a
+missing sample is `None`), `.unit`, `.missing_value_marker` and `.header` (the
+file's header entries as received, with `entries_total` and `entries_withheld`).
+`to_frame()` names the depth index by the declared kind and puts the unit, datum and
+well in `frame.attrs['ophiolite']`; curves combine only when depth, depth unit, kind,
+datum, well and source agree. A curve without that form is refused with the
+deployment's reasons; nothing falls back to the other form, and nothing is converted
+or resampled. Without `form`, `read` is unchanged. `AsyncClient.read` does not take
+`form` yet.
+
+`ophiolite.lasio.to_lasio` on such a read writes LAS from the declaration and the
+data: `WELL` is the declared well, `STRT` and `STOP` the first and last depth, `STEP`
+the spacing when it is the same throughout (else 0), `NULL` -999.25, `~Curve` the
+selected curves in your order with their units, and the declared datum a line of
+`~Other`. The file's other header entries follow as received, in file order with
+repeats kept; its own `VERS`, `WRAP`, `DLM`, `WELL`, `STRT`, `STOP`, `STEP`, `NULL`
+and `~Curve` lines are not written. `lasio_bytes` re-reads those entries and returns
+nothing if lasio wrote one otherwise (lasio writes an empty value that has a unit
+as 0).
+
 `AsyncClient` exposes the same methods with `await`; its work-folder methods are
 also awaited. Credential and folder transactions run off the event loop. Cancellation
 drains the active transaction before releasing its lock; it does not undo a server

@@ -1,0 +1,13 @@
+{
+  "project": "p-affected",
+  "asked": "residual-top",
+  "item": null,
+  "against": "head",
+  "as_of": "2026-11-19T09:30:00Z",
+  "counts": {"results": 0, "acceptances": 0, "held": 0},
+  "without_inputs": 2,
+  "restricted": false,
+  "complete": true,
+  "rows": [],
+  "next": null
+}

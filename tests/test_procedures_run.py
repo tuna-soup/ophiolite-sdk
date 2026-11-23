@@ -60,7 +60,7 @@ def test_a_process_run_writes_the_outputs_their_declarations_and_run_json(tmp_pa
     record = json.loads((out / 'run.json').read_text())
     assert record == {
         'schema': 'ophiolite.local-run/0', 'runner': 'this computer', 'systems': {},
-        'procedure': {'name': 'depth-shift', 'version': 1, 'digest': 'edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7', 'rules_version': '1.4.0'},  # E123 SZ: rules 1.4.0
+        'procedure': {'name': 'depth-shift', 'version': 1, 'digest': 'edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7', 'rules_version': '1.6.0'},  # E179 s0: rules 1.5.0; E181 s1: 1.6.0
         'settings': {'shift': 2.5, 'mode': 'add', 'count': 1, 'note': '', 'keep': False},
         'inputs': {'tops': [{'file': str((tmp_path / 'in/tops.csv').resolve()), 'sha256': 'bccf61bf244a0fc06d3a489d23f581fef9e51eaa3bdd97830e36dd175f285a9f',
                              'kind': 'well-tops-csv/1', 'declared': DECLARED}]},
@@ -352,7 +352,7 @@ def test_validate_says_words_and_puts_identifiers_under_json(tmp_path, capsys):
     code, out, err = cli_run(capsys, ['procedures', 'validate', str(folder)])
     assert (code, out) == (1, 'Not valid: setting 1 needs a readable label, for example "Depth shift".\n')
     code, out, err = cli_run(capsys, ['procedures', 'validate', str(folder), '--json'])
-    assert json.loads(out) == {'valid': False, 'rules_version': '1.4.0','sentence': 'Not valid: setting 1 needs a readable label, for example "Depth shift".',
+    assert json.loads(out) == {'valid': False, 'rules_version': '1.6.0','sentence': 'Not valid: setting 1 needs a readable label, for example "Depth shift".',
                                'code': 'unreadable-label', 'field': '/settings/0/label'}
     assert cli.main(['procedures', 'validate', str(FIXTURES / 'bundles/depth-shift'), '--json'])['digest'] == 'edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7'
 
@@ -374,4 +374,4 @@ def test_every_earlier_subcommand_keeps_its_name_and_help():
     now = old_lines(cli.parser())  # E163 s1: each one line is its verb line in its group; two lose their epic id
     reworded = {name: frozen[name].replace(' (E88)', '').replace(' (E89)', '') for name in ('wells', 'layouts')}
     assert {name: now.get(name) for name in frozen} == {**frozen, **reworded} and reworded != {n: frozen[n] for n in reworded}
-    assert set(now) - set(frozen) == {'new-data', 'audience', 'templates', 'template', 'sample', 'repositories', 'intake', 'source', 'access-history', 'teams', 'rights', 'deliver', 'outcomes', 'residuals', 'recipes', 'verdicts', 'withdraw', 'trajectories', 'ai-use', 'rules', 'find', 'kinds', 'surveys', 'survey', 'try', 'holders'}  # E171 s1 holders; E150 s1b try; E142 s1 surveys and survey; E168 s1 kinds; E145 s3 find (data group); E163 s1: tools and starter are groups; E144 s3 rules; E134 s2 ai-use; E134 s1 trajectories; E132 s2 withdraw; E132 s0 verdicts; E129 Sa starter; E112 s2 recipes; E119b residuals; E120 s0 outcomes; E109 deliver; E35a rights; E67b: access-history and teams (read verbs); E108 source; E107a intake; E60 C6: repositories; E90 adds new-data and audience; E91 templates, template and sample
+    assert set(now) - set(frozen) == {'new-data', 'audience', 'templates', 'template', 'sample', 'repositories', 'intake', 'source', 'access-history', 'teams', 'rights', 'deliver', 'outcomes', 'residuals', 'recipes', 'verdicts', 'withdraw', 'trajectories', 'ai-use', 'rules', 'find', 'kinds', 'surveys', 'survey', 'try', 'holders', 'affected', 'chains', 'chain-runs'}  # E178 s2c chains and chain-runs; E171 s1 holders; E150 s1b try; E142 s1 surveys and survey; E168 s1 kinds; E145 s3 find (data group); E163 s1: tools and starter are groups; E144 s3 rules; E134 s2 ai-use; E134 s1 trajectories; E132 s2 withdraw; E132 s0 verdicts; E129 Sa starter; E112 s2 recipes; E119b residuals; E120 s0 outcomes; E109 deliver; E35a rights; E67b: access-history and teams (read verbs); E108 source; E107a intake; E60 C6: repositories; E90 adds new-data and audience; E91 templates, template and sample

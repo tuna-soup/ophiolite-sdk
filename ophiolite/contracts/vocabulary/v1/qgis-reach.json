@@ -34,7 +34,7 @@
               ],
               "layer": "Wells",
               "slice": "E29",
-              "evidence": "integration:docs/verification/E172-s4-whole-journey-2026-11-13.json (J-mvp step (k), QGIS 4.2.2)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (well-location/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -67,7 +67,7 @@
               ],
               "layer": "Well sets",
               "slice": null,
-              "evidence": "integration:docs/verification/E123-s7-qgis-well-set-2026-11-02.md (QGIS 4.2.2 headless on Linux: the s3 well set's 7 wellbores as the layer Well sets, 6 placed)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (well-set/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -137,7 +137,7 @@
               ],
               "layer": "Tops",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (well-tops-csv/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -186,7 +186,7 @@
               ],
               "layer": "Wellbore paths",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (deviation-csv/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -240,7 +240,7 @@
               ],
               "layer": "Point sets",
               "slice": "E65",
-              "evidence": "integration:docs/verification/E172-s4-whole-journey-2026-11-13.json (J-mvp steps (e) and (h), QGIS 4.2.2)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (points-csv/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -273,7 +273,7 @@
               ],
               "layer": "Lines",
               "slice": "E65",
-              "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (opendtect-faultsticks/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -306,7 +306,7 @@
               ],
               "layer": "Lines",
               "slice": null,
-              "evidence": "integration:docs/verification/E123-s1fb-qgis-petrel-sticks.json (QGIS 4.2.2 on Linux adds the sticks by the plug-in and by OGC API - Features)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (petrel-faultsticks/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -341,7 +341,7 @@
               ],
               "layer": "Feature points, Feature lines or Feature polygons",
               "slice": "E65",
-              "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (esri-shapefile/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -376,7 +376,7 @@
               ],
               "layer": "Feature points, Feature lines or Feature polygons",
               "slice": "E65",
-              "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (ogc-geopackage/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -411,7 +411,7 @@
               ],
               "layer": "Feature points, Feature lines or Feature polygons",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (geojson/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -445,17 +445,17 @@
                 "scalar-map"
               ],
               "slice": null,
-              "evidence": "integration:web/docs/src/content/docs/availability.md (Mac QGIS 4.2.2 follow/pin)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (geotiff/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
                   "4.2.2"
                 ],
                 "platforms": [
-                  "macos"
+                  "linux"
                 ],
                 "limits": [
-                  "The QGIS plug-in is qualified on macOS only"
+                  "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
                 ]
               }
             }
@@ -468,12 +468,25 @@
           "routes": [
             {
               "route": "raster",
-              "state": "not-yet",
+              "state": "open",
               "transport": "map-connection",
               "asset_kinds": [
                 "regular-grid-surface"
               ],
-              "slice": null
+              "slice": null,
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (esri-ascii-grid/1 read, QGIS 4.2.2)",
+              "client": {
+                "name": "QGIS",
+                "versions": [
+                  "4.2.2"
+                ],
+                "platforms": [
+                  "linux"
+                ],
+                "limits": [
+                  "Through the QGIS plug-in"
+                ]
+              }
             }
           ]
         },
@@ -532,12 +545,25 @@
           "routes": [
             {
               "route": "raster",
-              "state": "not-yet",
+              "state": "open",
               "transport": "map-connection",
               "asset_kinds": [
                 "triangulated-surface"
               ],
-              "slice": null
+              "slice": null,
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (mesh-text/1 read, QGIS 4.2.2)",
+              "client": {
+                "name": "QGIS",
+                "versions": [
+                  "4.2.2"
+                ],
+                "platforms": [
+                  "linux"
+                ],
+                "limits": [
+                  "Through the QGIS plug-in, as a mesh"
+                ]
+              }
             }
           ]
         },
@@ -558,7 +584,7 @@
               ],
               "layer": "Point sets",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (petrel-points-attributes/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -591,7 +617,7 @@
               ],
               "layer": "Point sets",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (petrel-horizon-ilxl/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -640,7 +666,7 @@
               ],
               "layer": "Point sets",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (opendtect-horizon-ascii/1 read, QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [

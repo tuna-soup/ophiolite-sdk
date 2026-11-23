@@ -140,7 +140,7 @@ def test_a_source_made_version_exported_verified_offline_and_imported_keeps_its_
     first = clients['bob'].export([(item['asset_id'], item['revision'], None)], tmp_path / 'first', groups=False, entities=False)
     opened = bundle.open_bundle(tmp_path / 'first')  # offline
     recorded = bundle.recorded_source(opened.assets[0].data._wire_descriptor)
-    assert recorded == {'digest': digest, 'label': 'Survey share', 'version_label': 'Release 2', 'version': 2, 'rules_version': '1.4.0',  # E123 SZ: rules 1.4.0
+    assert recorded == {'digest': digest, 'label': 'Survey share', 'version_label': 'Release 2', 'version': 2, 'rules_version': '1.6.0',  # E179 s0: rules 1.5.0; E181 s1: 1.6.0
                         'runner': 'bob', 'system': 'Team survey share', 'role': 'tops'}
     assert first.manifest['bundle_version'] == opened.manifest['bundle_version'] and 'read_by' not in opened.manifest['assets'][0]
     [step] = clients['alice'].import_bundle(opened, audience=[], attribution='Synthetic test', rights_confirmed=True)

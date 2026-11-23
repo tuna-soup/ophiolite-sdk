@@ -1,0 +1,8 @@
+{
+ "schema": "ophiolite.outcome/1",
+ "label": "Gamma ray checked by our tool",
+ "kind": "well-residual/1",
+ "rule": {"name": "tool-check/1", "tool": {"digest": "7777777777777777777777777777777777777777777777777777777777777777"}, "settings": {"limit_m": 5}},
+ "inputs": ["well-set/1", "well-tops-csv/1"],
+ "destination": {"procedure": "tops-to-team-database", "label": "Team database"}
+}

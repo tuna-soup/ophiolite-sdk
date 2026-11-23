@@ -23,6 +23,8 @@ PROFILES='&profiles=%2F1%2C%2F2%2C%2F3%2C%2F4'
 FILE_BYTES=128*1024*1024  # E58b: a downloaded table file (a connected table is read up to 64 MiB; CSV is longer than Parquet)
 FILE_FORMATS=('parquet','geoparquet','csv')
 DOWNLOAD_MISMATCH='The download did not match the file the server holds; nothing was saved.'
+WELL_LOG_FORM='ophiolite.well-log-curve/1'  # E183 s2c: the one form `read` may ask for (the gateway's)
+FORM_CHOICE='Ask for the well log form (ophiolite.well-log-curve/1) or for no form.'  # the gateway's sentence (curve_mapping.FORM_CHOICE)
 
 
 from ._core import origin
@@ -78,9 +80,30 @@ class CurveSet:
             write('descriptor'+suffix+'.json',encode(self._wire_descriptors[index] if legacy_order and self._wire_descriptors is not None else descriptor.model_dump(by_alias=True,exclude_unset=True)))
 
 
+class WellLogSet(CurveSet):
+    """E183 s2c: curves read with form `ophiolite.well-log-curve/1`; each of `curves` is a verified
+    `ophiolite.scientific.WellLog`. `to_numpy` and `to_frame` combine them only when depth, depth unit, depth kind,
+    datum, well and source agree (else AxisMismatch); the frame's index is named by the declared depth kind."""
+    form=WELL_LOG_FORM
+
+    def to_numpy(self):
+        from .scientific import well_logs_numpy
+        return well_logs_numpy(self)
+
+    def to_frame(self):
+        from .scientific import well_logs_frame
+        return well_logs_frame(self)
+
+    def _repr_html_(self):
+        import html
+        return '<section aria-label="Well logs"><p>'+html.escape(', '.join(repr(v) for v in self.curves),quote=True)+'</p></section>'
+
+
 class Provenance:
     """E122 s0: one version's source record as served: `words` (the gateway's sentence), `record` (or None),
-    `observation` (the run, reader and time that read it), `gone` (E122 s2, or None) and `json` (the served document)."""
+    `observation` (the run, reader and time that read it), `gone` (E122 s2, or None) and `json` (the served document).
+    E182 s2b: `sender` (what the request that made the version said sent it, `ophiolite.sender/1` as served) and
+    `sender_words` (the gateway's sentence for it, passed through unchanged); both None from a gateway that serves neither."""
     __slots__=('json',)
 
     def __init__(self,data):self.json=data
@@ -88,6 +111,8 @@ class Provenance:
     record=property(lambda self:self.json.get('record'))
     observation=property(lambda self:self.json.get('observation'))
     gone=property(lambda self:self.json.get('gone'))  # E122 s2: the item marked gone from its source (source, path, run_id, marked_at, sentence), or None
+    sender=property(lambda self:self.json.get('sender'))  # E182 s2b: as served, never composed or checked here
+    sender_words=property(lambda self:self.json.get('sender_words'))  # E182 s2b: the gateway's own sentence
 
     def __repr__(self):return 'Provenance(%r)'%self.json['words']
 
@@ -120,6 +145,12 @@ def _source_record_of(found):
     return {'schema':'ophiolite.source-provenance/1','asset_id':found.json['asset_id'],'revision':found.json['revision'],'record':found.record}
 
 
+def _parts_of(found):
+    """E182 s2b (D-5): (source record or None, sender or None) of one provenance answer, each its own bundle entry field:
+    a sender travels without a record, a record without a sender is as before."""
+    return _source_record_of(found),found.sender
+
+
 def _warn_source_records_omitted(omitted):
     if omitted:
         import warnings
@@ -143,23 +174,39 @@ from .procedures import ProcedureClient  # noqa: E402
 from .tools import ToolClient  # noqa: E402  (E131 s1: the tool_* twins)
 from .access_history import AccessHistoryClient  # noqa: E402  (E67b)
 from .outcomes import OutcomeClient  # noqa: E402  (E120)
+from .chains import ChainClient  # noqa: E402  (E178 s2c)
 from .verdicts import VerdictClient  # noqa: E402  (E132)
 from .trajectories import TrajectoryClient  # noqa: E402  (E134)
 from .rule_results import RuleResultsClient  # noqa: E402  (E144 s3)
 
 
+def affected_whole(pages):
+    """E177 s1 (D-8): served changes/affected pages gathered into the whole answer Client.affected() returns."""
+    whole={'rows':[],'restricted':False,'complete':True,'pages':0}
+    for page in pages:
+        whole['rows']+=page['rows']
+        whole.update({key:page[key] for key in ('item','as_of','counts','without_inputs')})
+        whole['restricted']=whole['restricted'] or page['restricted']
+        whole['complete']=whole['complete'] and page['complete']
+        whole['pages']+=1
+    return whole
+
+
 class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient, ProcedureClient, ToolClient, AccessHistoryClient, OutcomeClient, VerdictClient, TrajectoryClient, RuleResultsClient):  # E29: wells() and extent(); E50a: sources(); E96: checks; E105b: procedures; E131 s1: tools; E67b: access history and teams; E120: outcomes; E132: verdicts; E134: export_trajectories; E144 s3: rule_results
-    def __init__(self,url,project,credential=None,http=None):
+    _sender=None  # E182 s1: what this client says sent its requests; None is this library's own report
+
+    def __init__(self,url,project,credential=None,http=None,*,application=None,host=None):
+        sender=_client_header.sender(application,host)  # refused before a transport exists
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
-        self.project,self.credential=project,credential
+        self.project,self.credential,self._sender=project,credential,sender
         self.prefix='/api/v1/projects/'+quote(project,safe='')+'/scientific-assets'
         self._owns_http=http is None
         self.http=http or httpx.Client(timeout=60,follow_redirects=False,trust_env=False)
         self._notifier=_deprecation.Notifier()  # E148: this client's once-set; nothing is installed on http
 
     @classmethod
-    def from_configuration(cls,path='configuration.json',*,credential=None,http=None):
+    def from_configuration(cls,path='configuration.json',*,credential=None,http=None,application=None,host=None):
         try:value=json.loads(Path(path).read_text())
         except (OSError,ValueError):raise Refused('Cannot read configuration. Download it again from Connect.') from None
         if not isinstance(value,dict) or value.get('schema') not in ('ophiolite.read-configuration/1','ophiolite.local-configuration/1'):
@@ -167,7 +214,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if ('asset' in value)!=('revision' in value):raise Refused('An exact selection needs both asset and revision.')
         for key in ('asset','revision','curve'):
             if key in value and (not isinstance(value[key],str) or not value[key]):raise Refused('Invalid exact-read selection.')
-        client=cls(value.get('url'),value.get('project'),credential,http)
+        client=cls(value.get('url'),value.get('project'),credential,http,application=application,host=host)
         if credential is None:client.credential=_environment_credential(client.url,client.project)  # first-run defect 9
         return client
 
@@ -273,6 +320,13 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         named by its label (ophiolite.well_sets.WellSets)."""
         from .well_sets import WellSets
         return WellSets(self)
+
+    @property
+    def chains(self):
+        """E178 s2c: the project's chains and their runs: declare, revise, enable, disable, withdraw, list, get, due,
+        dismiss and run_start, run_attach, run_choose, run_acknowledge, run_decide, run_continue, run_get, run_list
+        (ophiolite.chains.ChainClient)."""
+        return ChainClient(self)
 
     def import_storage(self,connection,prefix=None,*,keep_copy=False,attribution,rights_confirmed,audience=(),well_notes='',declare=None,skip_decisions=False,
                        link_wellbore=False,new=False,progress=None):
@@ -395,19 +449,25 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             raise Refused('Choose an asset and its exact revision.')
         return _provenance_of(self._json(_provenance_path(self.prefix,asset,revision),PROVENANCE_BYTES),asset,revision)
 
-    def _source_record(self,asset,revision,state):
-        """E122 s5b: the bundle's `source_record` for one exact version, or None. `state` is one export's own: after an
-        older gateway's router 404 (`NOT_FOUND`, no provenance route) no further version is asked."""
-        if state.get('omitted'):return None
+    def _provenance_parts(self,asset,revision,state):
+        """E122 s5b: the bundle's `source_record` for one exact version, or None; E182 s2b: with its `sender`, or None,
+        from the same one request. `state` is one export's own: after an older gateway's router 404 (`NOT_FOUND`, no
+        provenance route) no further version is asked."""
+        if state.get('omitted'):return None,None
         try:found=self.provenance(asset,revision)
         except Unavailable as error:
             if not _no_provenance_route(error):raise
-            state['omitted']=NO_SOURCE_RECORDS;return None
-        return _source_record_of(found)
+            state['omitted']=NO_SOURCE_RECORDS;return None,None
+        return _parts_of(found)
 
-    def read(self,asset,revision,curves,*,strict_interpretation=False):
+    def read(self,asset,revision,curves,*,strict_interpretation=False,form=None):
+        """Read exact curves of one revision, verified. E183 s2c: with `form='ophiolite.well-log-curve/1'` each curve is
+        read in the well log form the gateway stored (a WellLogSet of WellLog views: the declared well, depth kind, unit
+        and datum, and the header as received); a curve that has no such form is Refused with the gateway's reasons, and
+        nothing falls back to the application curve. Without `form` the read is unchanged."""
         if not isinstance(curves,(list,tuple)) or not curves or len(set(curves))!=len(curves):
             raise Refused('Choose distinct value curves explicitly.')
+        if form is not None:return self._read_well_logs(asset,revision,curves,form,strict_interpretation)
         descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[];wire_curve_bytes=[]
         for curve in curves:
             path,query=self._path(asset,revision,curve)
@@ -423,6 +483,33 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             wire_descriptors.append(data);wire_curves.append(json.loads(body));wire_curve_bytes.append(body)
         result=CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves,wire_curve_bytes=wire_curve_bytes)
         result._client=self  # E126a: ophiolite.lasio.to_lasio names the well linked to this revision
+        return result
+
+    def _read_well_logs(self,asset,revision,curves,form,strict_interpretation):
+        """E183 s2c: `read(..., form=)`. The descriptor is asked with the gateway's `form`; its one normalized row is the
+        stored `well-log-curve:<key>`, read and verified (`_core.verify_well_log`). A 422 is Refused with the gateway's
+        sentence verbatim (`server_message` too); the application curve is never requested."""
+        from .scientific import WellLog
+        if form!=WELL_LOG_FORM:raise Refused(FORM_CHOICE)
+        descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[];wire_curve_bytes=[]
+        for curve in curves:
+            path,query=self._path(asset,revision,curve)
+            try:data=self._json(path+query+'&form='+quote(form,safe='')+PROFILES,256*1024)
+            except Incompatible as error:
+                raise Refused(error.message,error.recovery,status=error.status,code=error.code,remedy=error.remedy,docs=error.docs,
+                              request_id=error.request_id,server_message=error.message) from None
+            _core.refuse_windows_only(_core.verify_descriptor(data,self.project,asset,revision,curve))
+            raw=_core.rules.artifact(data)
+            normalized=next(r for r in data['representations'] if r['kind']=='normalized')
+            _core.well_log_row(normalized,curve)  # before any representation is asked for: never the application curve
+            if artifact is None:artifact=self._artifact(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])
+            _core.verify_bytes(raw,artifact)
+            body=self._get(path+'/representations/'+quote(normalized['id'],safe='')+query,normalized['bytes'])
+            model,view=_core.verify_well_log(data,body,artifact,curve,strict_interpretation=strict_interpretation)
+            descriptors.append(model);views.append(WellLog(view))
+            wire_descriptors.append(data);wire_curves.append(json.loads(body));wire_curve_bytes.append(body)
+        result=WellLogSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves,wire_curve_bytes=wire_curve_bytes)
+        result._client=self
         return result
 
     def _artifact(self,path,size):
@@ -585,7 +672,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         volume=self.read_data(asset,revision)
         read=[self.read_slice(asset,revision,axis,label,volume=volume) for axis,label in chosen]
         state={}
-        volume.source_record=self._source_record(asset,revision,state)  # E122 s5b
+        volume.source_record,volume.sender=self._provenance_parts(asset,revision,state)  # E122 s5b; E182 s2b
         _warn_source_records_omitted(state.get('omitted'))
         return write_bundle(destination,[({'asset_id':asset,'revision':revision,'curves':[],'slices':[{'axis':a,'label':l} for a,l in chosen]},(volume,read))],
                             source_records_omitted=state.get('omitted'))
@@ -630,11 +717,11 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                 if read.type=='seismic-volume':raise Refused('A seismic volume is exported as chosen slices (export_slices); the complete volume is not exported.')
                 if read._wire_descriptor.get('package') is not None:read.package_rows=self._package_rows(asset,revision,read._wire_descriptor)  # E23c (C4)
                 read.provenance=self._kept_original(asset,revision,read._wire_descriptor)  # E107a C6b
-                read.source_record=self._source_record(asset,revision,state)  # E122 s5b
+                read.source_record,read.sender=self._provenance_parts(asset,revision,state)  # E122 s5b; E182 s2b
                 items.append(({'asset_id':asset,'revision':revision,'curves':[]},read));continue
             read=self.read(asset,revision,list(curves))
             read.provenance=self._kept_original(asset,revision,read._wire_descriptors[0])  # E107a C6b
-            read.source_record=self._source_record(asset,revision,state)  # E122 s5b
+            read.source_record,read.sender=self._provenance_parts(asset,revision,state)  # E122 s5b; E182 s2b
             items.append(({'asset_id':asset,'revision':revision,'curves':list(curves)},read))
         _warn_source_records_omitted(state.get('omitted'))
         found,omitted=self._bundle_groups(items) if groups else (None,None)
@@ -747,7 +834,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         return out or None,None
 
     def _headers(self):
-        return _client_header.stamp(self.credential.headers(self.url,self.project) if self.credential else {})  # E93
+        return _client_header.stamp(self.credential.headers(self.url,self.project) if self.credential else {},self._sender)  # E93, E182 s1
 
     def _post_bytes(self,area,operation,raw,*,extra_headers=None,headers=None,retry=False,expected_context=None,timeout=None,answer_bytes=False):
         from . import publish as planning,application_transport as policy
@@ -756,7 +843,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if expected_context is not None and (url,project)!=expected_context:raise RecoveryUnavailable('The gateway or project changed during this operation.')
         path=planning.operation_path(project,area,operation)
         if extra_headers and any(key.lower() not in ('content-type','x-ophiolite-upload') for key in extra_headers):raise Refused('Saved request headers cannot replace authorization.')
-        captured=_client_header.stamp(self._headers() if headers is None else headers)
+        captured=_client_header.stamp(self._headers() if headers is None else headers,self._sender)
         captured.update(extra_headers or {'Content-Type':'application/json'})
         attempts=3 if operation!='share' and (retry or operation in planning.READ_OPERATIONS) else 1
         for attempt in range(attempts):
@@ -783,7 +870,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from .publish import json_bytes,operation_path
         from . import application_transport as policy
         raw=json_bytes({'project_id':self.project,**body});path=self.url+operation_path(self.project,area,operation)
-        headers={**_client_header.stamp(self._headers()),'Content-Type':'application/json'}
+        headers={**_client_header.stamp(self._headers(),self._sender),'Content-Type':'application/json'}
         for attempt in range(3):
             try:
                 with self.http.stream('POST',path,content=raw,headers=headers,follow_redirects=False) as response:
@@ -891,7 +978,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         body={'organization_id':organization,**{k:v for k,v in given.items() if v is not None},**({'include_archived':True} if include_archived else {}),'limit':limit}
         from .errors import OphioliteError
         from .access_history import _headers,_post  # the organisation-level read of person_history (no project in the body or headers)
-        try:answer=_post(self.http,self.url,'/api/v1/organizations/search',body,_headers(self.credential,self.url,None),notifier=getattr(self,'_notifier',None))
+        try:answer=_post(self.http,self.url,'/api/v1/organizations/search',body,_headers(self.credential,self.url,None,self._sender),notifier=getattr(self,'_notifier',None))
         except OphioliteError as refused:  # the server's sentence (the filter it names; E14's without a model), not the transport's generic one
             if not refused.server_message or refused.server_message==refused.message:raise
             raise type(refused)(refused.server_message,refused.recovery,status=refused.status,code=refused.code,remedy=refused.remedy,
@@ -971,6 +1058,57 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             else:whole['rows']+=page['rows']
         whole['next']=None
         return whole
+
+    def receipt_pages(self,item,revision,*,limit=None):
+        """E184 s0a: the pages of exchange/receipts (ophiolite.transfer-receipts/1), first page first, each validated:
+        what the send that made this version of `item` and each get of it kept, changed and did not carry. Read by the
+        item's audience; an unknown and an unreadable version answer alike."""
+        from . import publish as planning
+        from .models.generated import TransferReceipts
+        body={'item':item,'revision':revision,**({'limit':limit} if limit else {})}
+        cursor,seen=None,set()
+        for _ in range(_surveys.MAX_PAGES):
+            raw=self._post('exchange','receipts',{**body,**({'cursor':cursor} if cursor else {})},retry=True)
+            page=planning.parse(TransferReceipts,raw)
+            if page.item!=item or page.revision!=revision:raise VerificationFailed('The receipts page names another item or version.')
+            yield raw;cursor=page.next
+            if cursor is None:return
+            if cursor in seen:raise VerificationFailed('Invalid or repeated receipts cursor.')
+            seen.add(cursor)
+        raise VerificationFailed('The receipts read did not end.')
+
+    def receipts(self,item,revision):
+        """E184 s0a: one version's receipts read whole: the first page's document with every page's gets and no `next`."""
+        whole=None
+        for page in self.receipt_pages(item,revision):
+            if whole is None:whole=dict(page,got=list(page['got']))
+            else:whole['got']+=page['got']
+        whole['next']=None
+        return whole
+
+    def affected_pages(self,item,*,against='head',limit=None):
+        """E177 s1: the pages of changes/affected (ophiolite.affected/1), first page first, each validated: what rests on
+        the versions of `item` other than its head (against='next': its head too, before a new version is published)."""
+        from . import publish as planning
+        from .models.generated import Affected
+        body={'asset_id':item,'against':against,**({'limit':limit} if limit else {})}
+        cursor,seen=None,set()
+        for _ in range(_surveys.MAX_PAGES):
+            raw=self._post('changes','affected',{**body,**({'cursor':cursor} if cursor else {})},retry=True)
+            page=planning.parse(Affected,raw)
+            if page.project!=self.project or page.asked!=item or page.against!=against:raise VerificationFailed('The affected page names another project, item or question.')
+            yield raw;cursor=page.next
+            if cursor is None:return
+            if cursor in seen:raise VerificationFailed('Invalid or repeated affected cursor.')
+            seen.add(cursor)
+        raise VerificationFailed('The affected read did not end.')
+
+    def affected(self,item,*,against='head'):
+        """E177 s1: the whole answer, read page by page. A plain dict, not an ophiolite.affected/1 document: `rows` from
+        every page; `item`, `as_of`, `counts` and `without_inputs` from the last page read; `restricted` when any page
+        said so; `complete` only when every page did; `pages` the number of pages. Plain words are the CLI's
+        `ophiolite results affected`."""
+        return affected_whole(self.affected_pages(item,against=against))
 
     def survey_pages(self,survey_id,revision=None,*,view='revision',limit=None):
         """The pages of one survey revision (ophiolite.survey/1), first page first; see survey()."""
@@ -1137,7 +1275,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
 
     def _grant_status(self,headers):
         from .auth import request
-        return request(self.url+'/api/v1/application-access/status',{'id':headers['X-Ophiolite-Application-Grant']},_client_header.stamp(headers),http=self.http,notifier=_deprecation.of(self))
+        return request(self.url+'/api/v1/application-access/status',{'id':headers['X-Ophiolite-Application-Grant']},_client_header.stamp(headers,self._sender),http=self.http,notifier=_deprecation.of(self))
 
     def work_folder(self,path,**options):
         from .publish import WorkFolder
@@ -1149,17 +1287,23 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if not path.is_dir() or not (path/'owner.json').is_file():raise RecoveryUnavailable('Recovery requires the original private SDK work folder.')
         return self.work_folder(path).recover(through)
 
-    def upload_las(self,source,*,name,attribution,audience,rights_confirmed,filename=None,well_notes='',command_id=None):
+    def upload_las(self,source,*,name,attribution,audience,rights_confirmed,filename=None,well_notes='',command_id=None,curve_declaration=None):
         """Upload original bytes. Without a WorkFolder this is not recoverable after restart; with the same
-        `command_id`, a file sent in parts continues where it stopped (E54)."""
+        `command_id`, a file sent in parts continues where it stopped (E54).
+        E183 s2b: `curve_declaration` ({'well', 'depth_kind': 'MD'|'TVD'|'TVDSS', 'depth_datum'}, all three; the
+        datum may be 'unknown') declares the curves' well, depth kind and datum, so the version also holds their well
+        log form. Only what you give is sent: nothing is read from the file's header. Without it the request is as
+        before."""
         import uuid
         from . import publish as planning
         filename=filename or (Path(source).name if not isinstance(source,bytes) else 'input.las')
-        body,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,rights_confirmed=rights_confirmed,well_notes=well_notes)
+        declared=dict(curve_declaration=curve_declaration) if curve_declaration is not None else {}
+        body,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,rights_confirmed=rights_confirmed,well_notes=well_notes,**declared)
         return self._send(source,body,extra)
 
     def upload_data(self,source,*,profile,name,attribution,audience,rights_confirmed,declared=None,filename=None,well_log=None,well_notes='',command_id=None,origin=None,
-                    append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None):
+                    append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None,receipt=None,
+                    curve_declaration=None):
         """E11/E18: upload an original of any supported type with the context you declare (units, CRS,
         meanings; nothing is inferred). Starts private. A repeated command id returns the same asset.
         E53: `append_to` (your uploaded wavelet, model or section) with `expected_parent` (its current revision)
@@ -1169,20 +1313,29 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         E173 s0b: `represents='horizon'` marks a point set (points-csv/1, petrel-points-attributes/1) as a horizon, in one
         request or in parts; a later version keeps the mark without naming it.
         E171 s1: `holder` (a work folder's holder id) and `application` ('application:<word>' or 'script') record that
-        the folder holds the version this upload adds; neither changes what a retry with the same command id matches."""
+        the folder holds the version this upload adds; neither changes what a retry with the same command id matches.
+        E184 s0: `receipt` (an `ophiolite.transfer-receipt/1`) is kept with the version by a project whose capabilities
+        list its codes version (`transfer_codes_kept`); send it only to such a project.
+        E183 s2b: `curve_declaration`, as `upload_las` takes it, with profile 'las2/1' only."""
         import uuid
         from . import publish as planning
         filename=filename or (Path(source).name if not isinstance(source,bytes) else 'upload')
         body,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,
                                             rights_confirmed=rights_confirmed,well_notes=well_notes,profile=profile,declared=declared,well_log=well_log,origin=origin,
                                             append_to=append_to,expected_parent=expected_parent,provenance=provenance,application_source=application_source,
-                                            represents=represents,holder=holder,application=application)
+                                            represents=represents,holder=holder,application=application,receipt=receipt,curve_declaration=curve_declaration)
         return self._send(source,body,extra)
 
     def _described(self):
         """The deployment's capabilities answer, read once (its limits and what a folder upload may declare)."""
         if getattr(self,'_capabilities_answer',None) is None:self._capabilities_answer=self._post('capabilities','describe',{},retry=True)
         return self._capabilities_answer
+
+    def transfer_codes_kept(self,version):
+        """E184 s0 (D-6): whether this deployment keeps transfer receipts of that code document version (its capabilities'
+        `transfer_receipts.codes`); an older deployment states none, and this SDK then sends no receipt."""
+        member=self._described().get('transfer_receipts')
+        return isinstance(member,dict) and isinstance(member.get('codes'),list) and version in member['codes']
 
     def upload_reads(self):
         """E107a (R5-8): the deployment lets a folder upload say it reads read procedures (`upload_runs.reads`); without
@@ -1220,7 +1373,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
     def _upload_parts(self,file,digest,body):
         """begin (the same command continues), the parts not yet received, finish, the check (polled), publish."""
         begin={'command_id':body['command_id'],'filename':body['filename'],'profile':body.get('profile','las2/1'),'declared':body.get('declared',{}),
-               'bytes':file.size,'sha256':digest,**{k:body[k] for k in ('append_to','expected_parent','represents') if k in body}}  # E173 s0b: the mark goes with begin
+               'bytes':file.size,'sha256':digest,**{k:body[k] for k in ('append_to','expected_parent','represents','curve_declaration') if k in body}}  # E173 s0b: the mark goes with begin; E183 s2b: the declaration too, never with publish
         view=self._transfer_parts(file,self._post('las-uploads','begin',begin,retry=True))
         if view['state'] not in ('checked','published'):raise session_refusal(view)
         fields={k:body[k] for k in ('name','attribution','audience','rights_confirmed','well_notes','well_log','source') if k in body}  # E122 s6: the item's source
@@ -1261,7 +1414,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         return save_verified(destination,fill,mismatch='The downloaded original does not match the file the deployment holds; nothing was saved.')
 
     def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None,
-                        holder=None,application=None):
+                        holder=None,application=None,receipt=None):
         """E30b: publish a file you derived (a `WrittenOriginal` from ophiolite.writers) from exact revisions you
         may reuse, with the method you declare. `command_id` is required: a network retry with the same id is
         safe (the same receipt comes back); a fresh id on retry can create a second asset. Use
@@ -1276,12 +1429,12 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from; the version keeps it, and without `new_version_of` or `as_new` the server compares the send with what that
         object sent before (receipt `source_change`: new, changed, or unchanged with nothing published). E171 s1: `holder`
         and `application` record that a work folder holds the version published (a person's send only: an assistant
-        naming a holder is refused)."""
+        naming a holder is refused). E184 s0: `receipt` as `upload_data` takes it."""
         from . import publish as planning
         from .models.api import PublicationReceipt
         body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,
                                            new_version_of=new_version_of,expected_parent=expected_parent,procedure=procedure,source=source,
-                                           holder=holder,application=application)
+                                           holder=holder,application=application,receipt=receipt)
         from .presentation import PresentedReceipt,publication_recipe
         recipe=publication_recipe(name=name,from_=from_,method=method,of_entity=of_entity)  # E104: "Send again", at call time
         verify=planning.verify_derived if procedure is None else planning.verify_run_output

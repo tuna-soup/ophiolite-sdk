@@ -33,12 +33,27 @@
                          "would": {"type": "object", "required": ["outcome", "effects"],
                                    "properties": {"outcome": {"enum": ["proceeds", "refused"]}, "effects": {"type": "array", "maxItems": 64}}}}
         },
+        "trial": {"$ref": "#/$defs/trial"},
         "budget": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
         "expires_at": {"type": "number"},
         "review_url": {"type": "string", "minLength": 1, "maxLength": 2048},
         "question": {"type": "string", "minLength": 1, "maxLength": 300},
         "choices": {"type": "array", "minItems": 2, "maxItems": 8, "items": {"$ref": "#/$defs/choice"}},
         "choice_token": {"type": "string", "pattern": "^ct1\\.[A-Za-z0-9_-]{43}$"}
+      }
+    },
+    "trial": {
+      "description": "E176 s2a: the outcomes trial the newest evidence record came with, as the gateway confirmed it from its seal; it grants nothing and publication checks again. `not_tried`: the attached trial could not be confirmed. `current`: every input is still at the version tried, read now. Absent when that record came with none.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "as_of", "current", "inputs", "lines"],
+      "properties": {
+        "state": {"enum": ["tried", "not_tried"]},
+        "as_of": {"type": ["number", "null"]},
+        "current": {"type": "boolean"},
+        "inputs": {"type": "array", "maxItems": 4096, "items": {"type": "object", "additionalProperties": false, "required": ["slot", "name", "version"],
+                   "properties": {"slot": {"type": "string"}, "name": {"type": ["string", "null"]}, "version": {"type": ["integer", "null"]}}}},
+        "lines": {"type": "array", "minItems": 1, "items": {"type": "string"}}
       }
     },
     "choice": {

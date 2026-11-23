@@ -1,0 +1,53 @@
+{
+  "note": "E180 s0 C1: ophiolite.reference-cases/1 records counted by hand (strategy §6). Synthetic values only; a well or formation name here is a label, not data. Project p-ref; alice accepted the three residual results; tool residual-fit; kind well-residual/1 compared by residual-compare/1 within 0.5 m. residual-v2-withdrawn withdraws version 1; tops-v1 and las-v1 show the interpretation and the curve their kinds need.",
+  "sets": [
+    {"name": "residual-v1", "record": {
+      "schema": "ophiolite.reference-cases/1", "project": "p-ref", "tool": "residual-fit", "version": 1, "supersedes": null,
+      "state": "active", "kind": "well-residual/1", "least": null,
+      "cases": [
+        {"case": "c1", "label": "W-1 Brent", "settings": {},
+         "inputs": {"trajectory": [{"asset_id": "trajectory-w1", "revision": "r1"}], "top": [{"asset_id": "top-brent-w1", "revision": "r1"}]},
+         "accepted": {"asset_id": "residual-w1", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c001",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "curve": null, "interpretation": null}},
+        {"case": "c2", "label": "W-2 Brent", "settings": {},
+         "inputs": {"trajectory": [{"asset_id": "trajectory-w2", "revision": "r1"}], "top": [{"asset_id": "top-brent-w2", "revision": "r1"}]},
+         "accepted": {"asset_id": "residual-w2", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c002",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "curve": null, "interpretation": null}},
+        {"case": "c3", "label": "W-3 Brent", "settings": {},
+         "inputs": {"trajectory": [{"asset_id": "trajectory-w3", "revision": "r1"}], "top": [{"asset_id": "top-brent-w3", "revision": "r1"}]},
+         "accepted": {"asset_id": "residual-w3", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000c003",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "curve": null, "interpretation": null}}
+      ],
+      "by": {"kind": "person", "id": "alice", "name_at_time": "Alice"}, "at": 1795000000.0, "command_id": "declare-1"}},
+    {"name": "residual-v2-withdrawn", "record": {
+      "schema": "ophiolite.reference-cases/1", "project": "p-ref", "tool": "residual-fit", "version": 2, "supersedes": 1,
+      "state": "withdrawn", "kind": "well-residual/1", "least": null, "cases": [],
+      "by": {"kind": "person", "id": "alice", "name_at_time": "Alice"}, "at": 1795090000.0, "command_id": "withdraw-1"}},
+    {"name": "tops-v1", "record": {
+      "schema": "ophiolite.reference-cases/1", "project": "p-ref", "tool": "tops-pick", "version": 1, "supersedes": null,
+      "state": "active", "kind": "well-tops-csv/1", "least": 1,
+      "cases": [
+        {"case": "w1-tops", "label": "W-1 tops", "settings": {"smoothing": 3},
+         "inputs": {"log": [{"asset_id": "gr-w1", "revision": "r2"}, {"asset_id": "dt-w1", "revision": "r1"}]},
+         "accepted": {"asset_id": "tops-w1", "revision": "r4", "verdict_id": "verdict-0000000000000000000000000000d001",
+                      "author": {"kind": "person", "id": "bob", "name_at_time": null}},
+         "compare": {"rules_id": "tops-compare/1", "tolerance": {"kind": "absolute", "value": 1.0, "unit": "m"}, "curve": null,
+                     "interpretation": {"depth_unit": "m", "depth_basis": "md", "depth_datum": "kb", "wellbore_confirmed": true}}}
+      ],
+      "by": {"kind": "person", "id": "alice", "name_at_time": "Alice"}, "at": 1795000500.0, "command_id": "declare-2"}},
+    {"name": "las-v1", "record": {
+      "schema": "ophiolite.reference-cases/1", "project": "p-ref", "tool": "gr-normalise", "version": 1, "supersedes": null,
+      "state": "active", "kind": "las2/1", "least": null,
+      "cases": [
+        {"case": "w1-gr", "label": "W-1 gamma ray", "settings": {"low": 10, "high": 150},
+         "inputs": {"log": [{"asset_id": "las-w1", "revision": "r1"}]},
+         "accepted": {"asset_id": "las-w1-normalised", "revision": "r1", "verdict_id": "verdict-0000000000000000000000000000e001",
+                      "author": {"kind": "person", "id": "alice", "name_at_time": "Alice"}},
+         "compare": {"rules_id": "series-compare/1", "tolerance": {"kind": "relative", "value": 0.001}, "curve": "GR_NORM", "interpretation": null}}
+      ],
+      "by": {"kind": "person", "id": "alice", "name_at_time": "Alice"}, "at": 1795000600.0, "command_id": "declare-3"}}
+  ]
+}

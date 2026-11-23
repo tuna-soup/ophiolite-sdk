@@ -22,6 +22,10 @@
     {"name": "a package-profile output", "manifest": "valid/process.json", "set": {"outputs": [{"role": "map", "kind": "esri-shapefile/1", "label": "Map"}]}, "packages": {"numpy": "1.26.4"},
      "expect": {"code": "sandbox-output", "sentence": "A tool that makes esri-shapefile/1 does not run in the sandbox yet."}},
     {"name": "outputs are judged before requires", "manifest": "valid/process.json", "set": {"outputs": [{"role": "a", "kind": "well-tops-csv/1", "label": "A"}, {"role": "b", "kind": "resqml-epc/1", "label": "B"}]}, "packages": {},
-     "expect": {"code": "sandbox-output", "sentence": "A tool that makes resqml-epc/1 does not run in the sandbox yet."}}
+     "expect": {"code": "sandbox-output", "sentence": "A tool that makes resqml-epc/1 does not run in the sandbox yet."}},
+    {"name": "a comparison check keeps its step words (E179 s0)", "manifest": "valid/check.json", "packages": {"numpy": "1.26.4"},
+     "expect": {"code": "sandbox-step", "sentence": "A tool that compares data with a reference does not run in the sandbox yet."}},
+    {"name": "an outcome's check runs only when the outcome is evaluated (E179 s0)", "manifest": "valid/check-outcome.json", "packages": {"numpy": "1.26.4"},
+     "expect": {"code": "sandbox-check", "sentence": "A tool that answers whether a result meets an outcome runs only when Ophiolite evaluates that outcome."}}
   ]
 }

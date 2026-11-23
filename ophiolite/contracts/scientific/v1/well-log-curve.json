@@ -1,0 +1,325 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/well-log-curve.json",
+  "x-ophiolite": {
+    "id": "ophiolite.well-log-curve/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "AsReceived": {
+      "additionalProperties": false,
+      "description": "Never read to decide anything (R-K1).",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/Reference"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/Entry"
+          },
+          "maxItems": 512,
+          "title": "Entries",
+          "type": "array"
+        },
+        "entries_total": {
+          "minimum": 0,
+          "title": "Entries Total",
+          "type": "integer"
+        },
+        "entries_withheld": {
+          "minimum": 0,
+          "title": "Entries Withheld",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source",
+        "source_sha256",
+        "entries",
+        "entries_total",
+        "entries_withheld"
+      ],
+      "title": "AsReceived",
+      "type": "object"
+    },
+    "Entry": {
+      "additionalProperties": false,
+      "description": "One header entry as text, in file order.",
+      "properties": {
+        "section": {
+          "enum": [
+            "V",
+            "W",
+            "C",
+            "P",
+            "O"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "mnemonic": {
+          "maxLength": 65536,
+          "title": "Mnemonic",
+          "type": "string"
+        },
+        "unit": {
+          "maxLength": 65536,
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 65536,
+          "title": "Value",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 65536,
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section",
+        "mnemonic",
+        "unit",
+        "value",
+        "description"
+      ],
+      "title": "Entry",
+      "type": "object"
+    },
+    "Reading": {
+      "additionalProperties": false,
+      "description": "The reader's identity and sentences, carried from the application curve as text (former losses 3 and 5).",
+      "properties": {
+        "reader": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reader",
+          "type": "string"
+        },
+        "lasio_version": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Lasio Version",
+          "type": "string"
+        },
+        "mapping": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Mapping",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "depth_index": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Depth Index",
+          "type": "string"
+        },
+        "missing_value_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Missing Value Policy",
+          "type": "string"
+        },
+        "depth_reference": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Depth Reference",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "lasio_version",
+        "mapping",
+        "null_policy",
+        "parsing_policy",
+        "depth_index",
+        "missing_value_policy",
+        "depth_reference"
+      ],
+      "title": "Reading",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "Strict": {
+      "additionalProperties": false,
+      "description": "Read to decide; every field declared.",
+      "properties": {
+        "well": {
+          "maxLength": 512,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Well",
+          "type": "string"
+        },
+        "mnemonic": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Mnemonic",
+          "type": "string"
+        },
+        "unit": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Unit",
+          "type": "string"
+        },
+        "unit_status": {
+          "const": "declared",
+          "title": "Unit Status",
+          "type": "string"
+        },
+        "depth_kind": {
+          "enum": [
+            "MD",
+            "TVD",
+            "TVDSS"
+          ],
+          "title": "Depth Kind",
+          "type": "string"
+        },
+        "depth_unit": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Depth Unit",
+          "type": "string"
+        },
+        "depth_datum": {
+          "maxLength": 512,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Depth Datum",
+          "type": "string"
+        },
+        "depth": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 100000,
+          "minItems": 1,
+          "title": "Depth",
+          "type": "array"
+        },
+        "values": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maxItems": 100000,
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        },
+        "missing_value_marker": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Missing Value Marker",
+          "type": "string"
+        },
+        "reading": {
+          "$ref": "#/$defs/Reading"
+        }
+      },
+      "required": [
+        "well",
+        "mnemonic",
+        "unit",
+        "unit_status",
+        "depth_kind",
+        "depth_unit",
+        "depth_datum",
+        "depth",
+        "values",
+        "missing_value_marker",
+        "reading"
+      ],
+      "title": "Strict",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "ophiolite.well-log-curve/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "strict": {
+      "$ref": "#/$defs/Strict"
+    },
+    "as_received": {
+      "$ref": "#/$defs/AsReceived"
+    }
+  },
+  "required": [
+    "schema",
+    "strict",
+    "as_received"
+  ],
+  "title": "WellLogCurve",
+  "type": "object"
+}

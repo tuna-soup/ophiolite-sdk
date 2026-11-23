@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/procedures/v1/reference-cases.json",
+  "x-ophiolite": {
+    "id": "ophiolite.reference-cases/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "AbsoluteTolerance": {
+      "additionalProperties": false,
+      "description": "In the compared quantity's unit.",
+      "properties": {
+        "kind": {
+          "const": "absolute",
+          "title": "Kind",
+          "type": "string"
+        },
+        "value": {
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        },
+        "unit": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "unit"
+      ],
+      "title": "AbsoluteTolerance",
+      "type": "object"
+    },
+    "ReferenceAccepted": {
+      "additionalProperties": false,
+      "description": "The result a person accepted: the version, the verdict that accepted it and that verdict's author.",
+      "properties": {
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "verdict_id": {
+          "pattern": "^verdict-[0-9a-f]{32}$",
+          "title": "Verdict Id",
+          "type": "string"
+        },
+        "author": {
+          "$ref": "#/$defs/ReferencePerson"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "verdict_id",
+        "author"
+      ],
+      "title": "ReferenceAccepted",
+      "type": "object"
+    },
+    "ReferenceCase": {
+      "additionalProperties": false,
+      "properties": {
+        "case": {
+          "description": "Stable across set versions: runs of different versions count against the same case",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,31}$",
+          "title": "Case",
+          "type": "string"
+        },
+        "label": {
+          "description": "As people name it; it must read as words (the server's check, display.readable_label)",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "inputs": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/ReferenceVersion"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array"
+          },
+          "description": "Per input slot (1 to 16), the exact versions the tool reads",
+          "maxProperties": 16,
+          "title": "Inputs",
+          "type": "object"
+        },
+        "settings": {
+          "additionalProperties": true,
+          "description": "The tool's settings for this case, checked against the manifest when declared (slice 1)",
+          "title": "Settings",
+          "type": "object"
+        },
+        "accepted": {
+          "$ref": "#/$defs/ReferenceAccepted"
+        },
+        "compare": {
+          "$ref": "#/$defs/ReferenceCompare"
+        }
+      },
+      "required": [
+        "case",
+        "label",
+        "inputs",
+        "settings",
+        "accepted",
+        "compare"
+      ],
+      "title": "ReferenceCase",
+      "type": "object"
+    },
+    "ReferenceCompare": {
+      "additionalProperties": false,
+      "description": "What checks/compare takes besides the file (D9): the rule, the allowed difference, the curve and the interpretation.",
+      "properties": {
+        "rules_id": {
+          "description": "The rule of the set's kind (COMPARABLE)",
+          "enum": [
+            "series-compare/1",
+            "grid-compare/1",
+            "tops-compare/1",
+            "trajectory-compare/1",
+            "residual-compare/1"
+          ],
+          "title": "Rules Id",
+          "type": "string"
+        },
+        "tolerance": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "absolute": "#/$defs/AbsoluteTolerance",
+                  "relative": "#/$defs/RelativeTolerance"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/AbsoluteTolerance"
+                },
+                {
+                  "$ref": "#/$defs/RelativeTolerance"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Null for exact equality; absolute for tops, trajectories and residuals (residuals in m)",
+          "title": "Tolerance"
+        },
+        "curve": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The curve compared on both sides; given exactly for las2/1",
+          "title": "Curve"
+        },
+        "interpretation": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The declarations checks/compare takes for the kind; given exactly for grids, tops and trajectories",
+          "title": "Interpretation"
+        }
+      },
+      "required": [
+        "rules_id",
+        "tolerance",
+        "curve",
+        "interpretation"
+      ],
+      "title": "ReferenceCompare",
+      "type": "object"
+    },
+    "ReferencePerson": {
+      "additionalProperties": false,
+      "description": "A person, never an agent (R-A2): a case set is chosen and a run started by a person; a case rests on a person's acceptance.",
+      "properties": {
+        "kind": {
+          "const": "person",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name_at_time": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name At Time"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "name_at_time"
+      ],
+      "title": "ReferencePerson",
+      "type": "object"
+    },
+    "ReferenceVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision"
+      ],
+      "title": "ReferenceVersion",
+      "type": "object"
+    },
+    "RelativeTolerance": {
+      "additionalProperties": false,
+      "description": "A dimensionless fraction of |reference|; a zero reference allows no difference.",
+      "properties": {
+        "kind": {
+          "const": "relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "value": {
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ],
+      "title": "RelativeTolerance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One version of a project's reference cases for one tool; never changed. A withdrawn version has no cases.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.reference-cases/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "project": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Project",
+      "type": "string"
+    },
+    "tool": {
+      "description": "The tool's catalogue name (its manifest `name`)",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,62}(/[a-z0-9][a-z0-9-]{0,62})?$",
+      "title": "Tool",
+      "type": "string"
+    },
+    "version": {
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "supersedes": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The version this one follows; null exactly for version 1",
+      "title": "Supersedes"
+    },
+    "state": {
+      "enum": [
+        "active",
+        "withdrawn"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "kind": {
+      "description": "The kind of every case's accepted result and of the output compared with it",
+      "enum": [
+        "las2/1",
+        "esri-ascii-grid/1",
+        "well-tops-csv/1",
+        "deviation-csv/1",
+        "well-residual/1"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "least": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How many cases must pass; null for all of them",
+      "title": "Least"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/ReferenceCase"
+      },
+      "maxItems": 100,
+      "title": "Cases",
+      "type": "array"
+    },
+    "by": {
+      "$ref": "#/$defs/ReferencePerson"
+    },
+    "at": {
+      "description": "Epoch seconds",
+      "minimum": 0,
+      "title": "At",
+      "type": "number"
+    },
+    "command_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Command Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "project",
+    "tool",
+    "version",
+    "supersedes",
+    "state",
+    "kind",
+    "least",
+    "cases",
+    "by",
+    "at",
+    "command_id"
+  ],
+  "title": "ReferenceCases",
+  "type": "object"
+}

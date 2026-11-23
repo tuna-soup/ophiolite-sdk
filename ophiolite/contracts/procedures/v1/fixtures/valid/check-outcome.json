@@ -1,0 +1,54 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "residual-limit",
+  "label": "Residuals within the team's limit",
+  "version": 1,
+  "step": "check",
+  "inputs": [
+    {
+      "slot": "residuals",
+      "label": "Residual result",
+      "class": "result",
+      "kinds": [
+        "well-residual/1"
+      ],
+      "cardinality": "one"
+    },
+    {
+      "slot": "tops",
+      "label": "Tops of the wells",
+      "class": "version",
+      "kinds": [
+        "well-tops-csv/1"
+      ],
+      "cardinality": "many"
+    },
+    {
+      "slot": "surface",
+      "label": "Surface compared with",
+      "class": "version",
+      "kinds": [
+        "esri-ascii-grid/1"
+      ],
+      "cardinality": "one"
+    }
+  ],
+  "outputs": [
+    {
+      "role": "answer",
+      "label": "Answer",
+      "class": "answer"
+    }
+  ],
+  "settings": [
+    {
+      "key": "limit",
+      "label": "Largest residual allowed",
+      "type": "number",
+      "unit": "m",
+      "default": 5,
+      "minimum": 0
+    }
+  ],
+  "entry": "procedure:check"
+}

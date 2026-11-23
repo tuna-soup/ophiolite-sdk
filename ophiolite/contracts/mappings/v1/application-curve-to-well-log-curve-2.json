@@ -1,0 +1,53 @@
+{
+  "schema": "ophiolite.contract-mapping/1",
+  "id": "ophiolite.mapping/application-curve-to-well-log-curve/2",
+  "from": "ophiolite.application-curve/1",
+  "to": "ophiolite.well-log-curve/1",
+  "direction": "one-way",
+  "invertible": false,
+  "executable": "project_gateway.curve_mapping.to_well_log_curve",
+  "vocabulary": "ophiolite.vocabulary/1",
+  "caller_supplied": ["well", "depth_kind", "depth_datum", "header"],
+  "pairs": [
+    {"from": "axis", "to": "strict.depth", "rule": "copied unchanged; the axis must already be strictly increasing"},
+    {"from": "values", "to": "strict.values", "rule": "copied unchanged; a null sample stays null"},
+    {"from": "curve", "to": "strict.mnemonic", "rule": "copied unchanged"},
+    {"from": "unit", "to": "strict.unit", "rule": "copied as declared; must be non-blank"},
+    {"from": "context.depth_index", "to": "strict.reading.depth_index", "rule": "copied unchanged"},
+    {"from": "context.depth_unit", "to": "strict.depth_unit", "rule": "copied as declared; must be non-blank; never converted"},
+    {"from": "context.depth_reference", "to": "strict.reading.depth_reference", "rule": "copied as the reader's sentence; never used as the depth datum"},
+    {"from": "context.missing_value_marker", "to": "strict.missing_value_marker", "rule": "copied unchanged; samples keep null as the one missing form"},
+    {"from": "context.missing_value_policy", "to": "strict.reading.missing_value_policy", "rule": "copied unchanged"},
+    {"from": "source", "to": "as_received.source", "rule": "copied unchanged"},
+    {"from": "source_sha256", "to": "as_received.source_sha256", "rule": "copied unchanged"},
+    {"from": "interpretation.reader", "to": "strict.reading.reader", "rule": "copied unchanged"},
+    {"from": "interpretation.lasio_version", "to": "strict.reading.lasio_version", "rule": "copied unchanged"},
+    {"from": "interpretation.mapping", "to": "strict.reading.mapping", "rule": "copied unchanged"},
+    {"from": "interpretation.null_policy", "to": "strict.reading.null_policy", "rule": "copied unchanged"},
+    {"from": "interpretation.parsing_policy", "to": "strict.reading.parsing_policy", "rule": "copied unchanged"}
+  ],
+  "constants": [
+    {"from": "schema", "value": "ophiolite.application-curve/1", "rule": "rebuilt: this document's 'from'"},
+    {"from": "representation", "value": "normalized", "rule": "rebuilt: the one representation of the source schema"}
+  ],
+  "additions": [
+    {"to": "strict.well", "from": "caller: well"},
+    {"to": "strict.depth_kind", "from": "caller: depth_kind"},
+    {"to": "strict.depth_datum", "from": "caller: depth_datum"},
+    {"to": "strict.unit_status", "from": "constant: declared"},
+    {"to": "as_received.entries", "from": "caller: header, the first entries in file order up to 512 entries and 65,536 bytes"},
+    {"to": "as_received.entries_total", "from": "caller: header, its length"},
+    {"to": "as_received.entries_withheld", "from": "caller: header, its length less the entries kept"}
+  ],
+  "eligibility": [
+    {"id": "well", "check": "well is non-empty trimmed text", "sentence": "The well is not declared; it is not read from the file's header."},
+    {"id": "depth-kind", "check": "depth_kind in ('MD', 'TVD', 'TVDSS')", "sentence": "The depth kind is not declared."},
+    {"id": "depth-unit", "check": "context.depth_unit.strip() != ''", "sentence": "The depth unit is not declared; it is not read from the file's header."},
+    {"id": "datum", "check": "depth_datum is non-empty trimmed text; 'unknown' is a declaration", "sentence": "The depth datum is not declared; 'unknown' may be declared, a header value is not used."},
+    {"id": "unit", "check": "unit.strip() != ''", "sentence": "The value unit is not declared."},
+    {"id": "axis", "check": "len(axis) >= 1 and axis[i] < axis[i+1] for every i", "sentence": "The depth axis is not strictly increasing; nothing is reordered or removed."},
+    {"id": "registered", "check": "decided by the caller from the stored kind: the curve's stored row is a registration or a snapshot (ophiolite/well-curve/1, no file header); never from a name or a header", "sentence": "This curve was registered without a file header, so it has no well log form; it is read as it was registered."},
+    {"id": "samples", "check": "decided by the caller from the stored representation: the curve is stored as columns (more than 100,000 samples)", "sentence": "This curve has more than 100,000 samples and is read in sections; the well log form holds a curve of up to 100,000 samples."}
+  ],
+  "losses": []
+}

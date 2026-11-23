@@ -141,7 +141,10 @@ MUTATIONS = {
     'x missing': (lambda h, b: joined(h, put(b, at(0, 7), NAN)), DAMAGED),
     'x extent': (header_with(lambda h: h['context'].update(x_range=[500000.0, 509950.0])), 'Coordinates and their context disagree'),
     'missing z count': (header_with(lambda h: h['context'].update(missing_z_count=99)), 'Points and their context disagree'),
-    'header contract': (header_with(lambda h: h['context'].update(z_meaning='sideways')), 'Scientific data does not satisfy the declared contract.'),
+    'header contract': (header_with(lambda h: h['context'].update(z_meaning=7)), 'Scientific data does not satisfy the declared contract.'),
+    # E187 s0: a word of the closed vocabulary this release does not know names the upgrade
+    'header word': (header_with(lambda h: h['context'].update(z_meaning='sideways')),
+                    'This answer uses a word this release of ophiolite does not know; upgrade ophiolite to read it.'),
     'source digest': (header_with(lambda h: h.update(source_sha256='0' * 64)), 'Typed data and artifact source identities disagree'),
     'interpretation': (header_with(lambda h: h['interpretation'].update(null_policy='empty cells and NaN')),
                        'Descriptor scientific context or interpretation disagrees with the data'),

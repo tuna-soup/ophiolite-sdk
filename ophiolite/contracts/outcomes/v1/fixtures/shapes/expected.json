@@ -1,0 +1,16 @@
+{
+ "schema": "ophiolite.outcome-fixtures/1",
+ "note": "E179 s0: schema-valid shapes of an outcome judged by a tool. Each declaration is refused through outcomes/declare for the reason given (E179 s1: tool-rule's digest names no tool version of the project); each record validates as it stands. Synthetic values.",
+ "declarations": {
+  "tool-rule": "tool-unknown",
+  "tool-rule-data-rules": "data_rules"
+ },
+ "records": {
+  "tool-check-admission": "admission",
+  "tool-check-crashed": "run",
+  "tool-check-malformed": "run",
+  "tool-check-not-compared": "answer",
+  "tool-check-accepted": "answer",
+  "tool-check-rejected": "answer"
+ }
+}

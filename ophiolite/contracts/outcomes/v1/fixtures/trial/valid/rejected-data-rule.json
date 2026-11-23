@@ -1,0 +1,31 @@
+{
+  "schema": "ophiolite.outcome-trial/1",
+  "trial": true,
+  "kind": "well-residual/1",
+  "candidate": {"output_sha256": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210", "output_bytes": 2048},
+  "inputs": [
+    {"slot": "selection", "asset_id": "well-set-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "surface", "asset_id": "surface-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "tops", "asset_id": "tops-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "trajectories", "asset_id": "trajectories-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+  ],
+  "at": 1795000000.0,
+  "sentence": null,
+  "outcomes": [
+    {
+      "outcome": {"id": "tops-within-5m-unique", "version": 1, "rule": "well-residual-within/1", "settings_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+      "label": "Unique tops within 5 m",
+      "would": "rejected",
+      "reason": "data_rule",
+      "sentence": null,
+      "rows": {"computed": 0, "passing": 0, "failing_count": 0, "failing": [], "not_computed": []},
+      "data_rules": {
+        "registry_version": "1.4.0",
+        "results": [
+          {"rule": "tops-unique-name/1", "state": "failed", "count": 2, "examples": [{"row": 4, "depth": null, "value": "Top A"}], "parameters": {},
+           "reason": null, "context": null, "slot": "tops", "asset_id": "tops-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "severity": "error"}
+        ]
+      }
+    }
+  ]
+}

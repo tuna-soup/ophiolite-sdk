@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/chains/v1/chain-due-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.chain-due/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ChainDueLine": {
+      "additionalProperties": false,
+      "properties": {
+        "chain": {
+          "$ref": "#/$defs/ChainName"
+        },
+        "trigger": {
+          "$ref": "#/$defs/ChainDueTrigger"
+        }
+      },
+      "required": [
+        "chain",
+        "trigger"
+      ],
+      "title": "ChainDueLine",
+      "type": "object"
+    },
+    "ChainDueTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "published_at": {
+          "description": "Epoch seconds",
+          "minimum": 0,
+          "title": "Published At",
+          "type": "number"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "kind",
+        "published_at"
+      ],
+      "title": "ChainDueTrigger",
+      "type": "object"
+    },
+    "ChainName": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "label": {
+          "description": "As people name it; it must read as words (the server's check)",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "label"
+      ],
+      "title": "ChainName",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The item versions a chain should start for: published after the chain version was enabled, with no run and no\ndismissal for (chain, item, version); in (published_at, chain id, asset_id) order.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.chain-due/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "project": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Project",
+      "type": "string"
+    },
+    "as_of": {
+      "description": "Epoch seconds",
+      "minimum": 0,
+      "title": "As Of",
+      "type": "number"
+    },
+    "lines": {
+      "items": {
+        "$ref": "#/$defs/ChainDueLine"
+      },
+      "maxItems": 500,
+      "title": "Lines",
+      "type": "array"
+    },
+    "next": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Next"
+    }
+  },
+  "required": [
+    "schema",
+    "project",
+    "as_of",
+    "lines",
+    "next"
+  ],
+  "title": "ChainDue",
+  "type": "object"
+}

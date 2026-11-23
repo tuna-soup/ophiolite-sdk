@@ -1,0 +1,47 @@
+{
+  "project": "p-affected",
+  "asked": "tops-north",
+  "item": {"asset_id": "tops-north", "name": "Tops North", "kind": "tops", "head": {"revision": "rev-tops-2", "version": 2}},
+  "against": "head",
+  "as_of": "2026-11-19T09:30:00Z",
+  "counts": {"results": 1, "acceptances": 0, "held": 2},
+  "without_inputs": 1,
+  "restricted": true,
+  "complete": true,
+  "rows": [
+    {
+      "kind": "result",
+      "item": {"asset_id": "horizon-top", "name": "Horizon Top", "kind": "horizons"},
+      "head": {"revision": "rev-horizon-1", "version": 1},
+      "distance": 1,
+      "rests_on": {"revision": "rev-tops-1", "version": 1}
+    },
+    {
+      "kind": "held",
+      "held": {
+        "copy": "1b1551c5c1086015",
+        "item": {"asset_id": "tops-north", "name": "Tops North", "kind": "tops"},
+        "application": "application:qgis",
+        "person": {"shown": "a-member"},
+        "version": {"revision": "rev-tops-1", "how": "got", "confirmed_at": "2026-11-19T09:05:00Z", "since": "2026-11-19T09:05:00Z"},
+        "mode": "stays",
+        "state": "behind",
+        "behind": {"count": 1, "newest": {"revision": "rev-tops-2", "author": "Ana", "at": "2026-11-19T09:20:00Z"}}
+      }
+    },
+    {
+      "kind": "held",
+      "held": {
+        "copy": "dba7321c051bd4ab",
+        "item": {"asset_id": "tops-north", "name": "Tops North", "kind": "tops"},
+        "application": "script",
+        "person": {"shown": "you", "name": "Ben"},
+        "version": {"revision": "rev-tops-1", "how": "got", "confirmed_at": "2026-11-19T09:10:00Z", "since": "2026-11-19T09:10:00Z"},
+        "mode": null,
+        "state": "behind",
+        "behind": {"count": 1, "newest": {"revision": "rev-tops-2", "author": "Ana", "at": "2026-11-19T09:20:00Z"}}
+      }
+    }
+  ],
+  "next": null
+}

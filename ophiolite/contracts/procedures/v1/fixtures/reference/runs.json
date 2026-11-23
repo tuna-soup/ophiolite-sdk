@@ -1,0 +1,68 @@
+{
+  "note": "E180 s0 C1: ophiolite.reference-run/1 records counted by hand (strategy §6). v1 is residual-fit version 1 (digest 64 x 1) on residual-v1: three passed. v2 is version 2 (digest 64 x 2): c2's output 2.25 m against the accepted 1.5 m differs by 0.75 m > 0.5 m, so c2 failed and c1, c3 passed. endings covers every other row of the §3.2 table, one case each. Every value is exact in binary floating point.",
+  "runs": [
+    {"name": "v1", "record": {
+      "schema": "ophiolite.reference-run/1", "run_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "project": "p-ref",
+      "tool": {"name": "residual-fit", "digest": "1111111111111111111111111111111111111111111111111111111111111111", "version_number": 1, "label": "Residual fit"},
+      "cases": {"version": 1, "least": null},
+      "started_by": {"kind": "person", "id": "carol", "name_at_time": "Carol"}, "started_at": 1795001000.0, "finished_at": 1795001090.0,
+      "box": {"image": "ophiolite-sandbox:2026.11.20", "runtime": "runsc", "limits": {"memory_mb": 256, "seconds": 60, "cpus": 1.0}, "network": "none"},
+      "results": [
+        {"case": "c1", "outcome": "passed", "reason": null, "job": "job-v1-c1",
+         "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000c11", "bytes": 412},
+         "comparison": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "outcome": "passed", "reason": null,
+                        "differences": {"count": 0, "total": 2, "largest": null, "missing": 0, "extra": 0, "reasons_differ": 0, "formation": "Brent", "first": []}}},
+        {"case": "c2", "outcome": "passed", "reason": null, "job": "job-v1-c2",
+         "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000c21", "bytes": 410},
+         "comparison": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "outcome": "passed", "reason": null,
+                        "differences": {"count": 0, "total": 2, "largest": null, "missing": 0, "extra": 0, "reasons_differ": 0, "formation": "Brent", "first": []}}},
+        {"case": "c3", "outcome": "passed", "reason": null, "job": "job-v1-c3",
+         "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000c31", "bytes": 413},
+         "comparison": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "outcome": "passed", "reason": null,
+                        "differences": {"count": 0, "total": 2, "largest": null, "missing": 0, "extra": 0, "reasons_differ": 0, "formation": "Brent", "first": []}}}
+      ],
+      "counts": {"cases": 3, "passed": 3, "failed": 0, "not_counted": 0}}},
+    {"name": "v2", "record": {
+      "schema": "ophiolite.reference-run/1", "run_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "project": "p-ref",
+      "tool": {"name": "residual-fit", "digest": "2222222222222222222222222222222222222222222222222222222222222222", "version_number": 2, "label": "Residual fit"},
+      "cases": {"version": 1, "least": null},
+      "started_by": {"kind": "person", "id": "carol", "name_at_time": "Carol"}, "started_at": 1795002000.0, "finished_at": 1795002095.0,
+      "box": {"image": "ophiolite-sandbox:2026.11.20", "runtime": "runsc", "limits": {"memory_mb": 256, "seconds": 60, "cpus": 1.0}, "network": "none"},
+      "results": [
+        {"case": "c1", "outcome": "passed", "reason": null, "job": "job-v2-c1",
+         "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000c12", "bytes": 412},
+         "comparison": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "outcome": "passed", "reason": null,
+                        "differences": {"count": 0, "total": 2, "largest": null, "missing": 0, "extra": 0, "reasons_differ": 0, "formation": "Brent", "first": []}}},
+        {"case": "c2", "outcome": "failed", "reason": "differed", "job": "job-v2-c2",
+         "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000c22", "bytes": 410},
+         "comparison": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "outcome": "differed", "reason": null,
+                        "differences": {"count": 1, "total": 2, "largest": 0.75, "missing": 0, "extra": 0, "reasons_differ": 0, "formation": "Brent",
+                                        "first": [{"wellbore": "wellbore-00000000000000000000000000000002", "occurrence": 1, "md": 1500.0,
+                                                   "result_residual": 2.25, "reference_residual": 1.5, "result_reason": null, "reference_reason": null}]}}},
+        {"case": "c3", "outcome": "passed", "reason": null, "job": "job-v2-c3",
+         "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000c32", "bytes": 413},
+         "comparison": {"rules_id": "residual-compare/1", "tolerance": {"kind": "absolute", "value": 0.5, "unit": "m"}, "outcome": "passed", "reason": null,
+                        "differences": {"count": 0, "total": 2, "largest": null, "missing": 0, "extra": 0, "reasons_differ": 0, "formation": "Brent", "first": []}}}
+      ],
+      "counts": {"cases": 3, "passed": 2, "failed": 1, "not_counted": 0}}},
+    {"name": "endings", "record": {
+      "schema": "ophiolite.reference-run/1", "run_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "project": "p-ref",
+      "tool": {"name": "residual-fit", "digest": "3333333333333333333333333333333333333333333333333333333333333333", "version_number": 3, "label": "Residual fit"},
+      "cases": {"version": 4, "least": 7},
+      "started_by": {"kind": "person", "id": "carol", "name_at_time": null}, "started_at": 1795003000.0, "finished_at": 1795003000.0,
+      "box": {"image": "ophiolite-sandbox:2026.11.20", "runtime": "runsc", "limits": {"memory_mb": 128, "seconds": 30, "cpus": 0.5}, "network": "none"},
+      "results": [
+        {"case": "e1", "outcome": "failed", "reason": "tool_timeout", "job": "job-e1", "output": null, "comparison": null},
+        {"case": "e2", "outcome": "failed", "reason": "tool_memory", "job": "job-e2", "output": null, "comparison": null},
+        {"case": "e3", "outcome": "failed", "reason": "tool_crashed", "job": "job-e3", "output": null, "comparison": null},
+        {"case": "e4", "outcome": "failed", "reason": "output_oversized", "job": "job-e4", "output": null, "comparison": null},
+        {"case": "e5", "outcome": "failed", "reason": "output_missing", "job": "job-e5", "output": null, "comparison": null},
+        {"case": "e6", "outcome": "failed", "reason": "output_malformed", "job": "job-e6", "output": null, "comparison": null},
+        {"case": "e7", "outcome": "failed", "reason": "not_compared", "job": "job-e7",
+         "output": {"sha256": "0000000000000000000000000000000000000000000000000000000000000e71", "bytes": 98},
+         "comparison": {"rules_id": "residual-compare/1", "tolerance": null, "outcome": "not_compared", "reason": "correspondence_mismatch", "differences": null}},
+        {"case": "e8", "outcome": "not_counted", "reason": "no-longer-accepted", "job": null, "output": null, "comparison": null}
+      ],
+      "counts": {"cases": 8, "passed": 0, "failed": 7, "not_counted": 1}}}
+  ]
+}

@@ -31,7 +31,11 @@ The transport's methods (frozen here; the SDK's is `ClientTransport`, QGIS suppl
   report(reference, holder_id, event_id, **held)   optional (E70b): tell the project this holder received that exact
                                      version; called once by Receipt.confirm, after the record advanced; a failure changes
                                      nothing. E171 s1: `held` is application, holds and earlier, each only when set; a
-                                     transport that refuses them (an older gateway) is asked once more without them
+                                     transport that refuses them (an older gateway) is asked once more without them.
+                                     E184 s0: and `receipt`, the get's transfer receipt
+  keeps_receipts(version) -> bool    optional (E184 s0): whether the project keeps transfer receipts of that code
+                                     document version; without it, or answering False, no receipt is sent (`publish`
+                                     then takes `receipt=` too)
   release(holder_id, item) -> bool   optional (E171 s1): this folder no longer holds `item` (exchange/release)
 Errors a transport raises carry `status`, `code` and `stage` attributes (the SDK's errors do); the core classifies
 by code, then credential stage, then status, never by message text.
@@ -182,13 +186,120 @@ def held_line(held_by, on_an_older_version):
     return said + (', %d of them on an older version.' % on_an_older_version if on_an_older_version else '.')
 
 
+# E184 s0 (D-1, D-3, D-5, D-6): a transfer receipt (`ophiolite.transfer-receipt/1`) says what one get or send kept,
+# changed and did not carry. The connector that acts computes it; this core checks it against the code document
+# (`ophiolite.transfer-codes/1`, which the caller passes: the core reads no files) before anything is done, sends it
+# only to a project whose capabilities list the document's version, and returns it on the outcome.
+UNLISTED = 'This transfer would report a change its route does not declare, so nothing was done.'
+SHAPE = 'This transfer\'s receipt is not well formed, so nothing was done.'
+NOT_KEPT = ' This project did not keep the lists; they are on your screen only.'
+UNCONFIRMED = ' It is not known whether the project kept the lists.'
+RECEIPT_LISTS = (('kept', 'Kept'), ('changed', 'Changed'), ('not_carried', 'Not carried'))
+RECEIPT_ROWS, RECEIPT_BYTES = 8, 2048
+_CODE = re.compile(r'[a-z][a-z0-9-]{1,47}')
+_CAPABILITY = re.compile(r'[a-z0-9][a-z0-9-]{0,63}')
+_CONTRACT = re.compile(r'[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+')
+_SEMVER = re.compile(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)')
+_COPY = re.compile(r'[0-9a-f]{16}')
+
+
+def receipt_bytes(receipt):
+    """The receipt as a request carries it: compact JSON, UTF-8, keys sorted."""
+    return json.dumps(receipt, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()
+
+
+def _text(value, most):
+    return isinstance(value, str) and 1 <= len(value) <= most
+
+
+def _number(value, least):
+    return type(value) is int and value >= least
+
+
+def _exact(value, keys, optional=()):
+    return isinstance(value, dict) and set(keys) <= set(value) <= set(keys) | set(optional)
+
+
+def _receipt_shape(r):
+    """The first rule of the published contract a receipt breaks, or None (the gateway's TransferReceipt, by hand)."""
+    lists = [n for n, _ in RECEIPT_LISTS]
+    if not _exact(r, ('schema', 'direction', 'capability', 'route', 'contract', 'state', 'base', 'made', 'fingerprints', 'codes', *lists)): return 'keys'
+    if r['schema'] != 'ophiolite.transfer-receipt/1' or r['direction'] not in ('get', 'send') or r['state'] not in ('planned', 'committed'): return 'words'
+    if not (isinstance(r['capability'], str) and _CAPABILITY.fullmatch(r['capability'])): return 'capability'
+    route = r['route']
+    if not (_exact(route, ('profile', 'data', 'direction')) and _text(route['profile'], 80) and _text(route['data'], 80)
+            and route['direction'] in ('read', 'write', 'publish', 'export')): return 'route'
+    if not (isinstance(r['contract'], str) and len(r['contract']) <= 128 and _CONTRACT.fullmatch(r['contract'])): return 'contract'
+    base, made = r['base'], r['made']
+    if base is not None and not (_exact(base, ('item', 'revision', 'number')) and _text(base['item'], 512) and _text(base['revision'], 512)
+                                 and _number(base['number'], 1)): return 'base'
+    version = _exact(made, ('revision', 'number')) and _text(made['revision'], 512) and _number(made['number'], 1)
+    copy = _exact(made, ('copy',)) and isinstance(made['copy'], str) and bool(_COPY.fullmatch(made['copy']))
+    if made is not None and not (version or copy): return 'made'
+    if not (_exact(r['fingerprints'], ('source', 'target', 'converter')) and all(_text(v, 128) for v in r['fingerprints'].values())): return 'fingerprints'
+    codes = r['codes']
+    if not (_exact(codes, ('id', 'version')) and codes['id'] == 'ophiolite.transfer-codes/1' and isinstance(codes['version'], str)
+            and _SEMVER.fullmatch(codes['version'])): return 'codes'
+    for name in lists:
+        rows = r[name]
+        if not (isinstance(rows, list) and len(rows) <= RECEIPT_ROWS): return name
+        for row in rows:
+            if not (_exact(row, ('code', 'sentence'), ('count', 'value')) and isinstance(row['code'], str) and _CODE.fullmatch(row['code'])
+                    and _text(row['sentence'], 200) and ('count' not in row or _number(row['count'], 0))
+                    and ('value' not in row or _text(row['value'], 80))): return name
+    if (r['state'] == 'planned') != (made is None): return 'state'
+    if made is not None and copy != (r['direction'] == 'get'): return 'made'
+    if r['direction'] == 'get' and base is None: return 'base'
+    if len(receipt_bytes(r)) > RECEIPT_BYTES: return 'bytes'
+    return None
+
+
+def receipt_problem(receipt, codes):
+    """None, or (sentence, technical) for the first problem (D-3), with the gateway's verdicts (tests T4):
+    SHAPE when the contract refuses the receipt, its codes version is not the document's, the document lists no row for
+    its route or another contract for it, a row's sentence is not its code's template filled with the row's own
+    measure, or a code is listed twice in one list; UNLISTED for a row whose code the route does not list in that list."""
+    rule = _receipt_shape(receipt)
+    if rule is not None: return SHAPE, {'reason': 'contract', 'error': rule}
+    if not isinstance(codes, dict) or receipt['codes']['version'] != codes.get('version'):
+        return SHAPE, {'reason': 'codes-version', 'version': receipt['codes']['version']}
+    key = (receipt['capability'], receipt['route']['profile'], receipt['route']['data'], receipt['route']['direction'])
+    route = next((r for r in codes.get('routes') or () if (r['capability'], r['profile'], r['data'], r['direction']) == key), None)
+    if route is None: return SHAPE, {'reason': 'route', 'capability': receipt['capability'], 'route': receipt['route']}
+    if receipt['contract'] != route['contract']: return SHAPE, {'reason': 'contract-id', 'contract': receipt['contract']}
+    listed = {c['code']: c for c in route['codes']}
+    for name, _ in RECEIPT_LISTS:
+        if len({r['code'] for r in receipt[name]}) != len(receipt[name]): return SHAPE, {'reason': 'twice', 'list': name}
+        for row in receipt[name]:
+            entry = listed.get(row['code'])
+            if entry is None or entry['list'] != name: return UNLISTED, {'code': row['code'], 'list': name}
+            measured = {k: row[k] for k in ('count', 'value') if row.get(k) is not None}
+            if set(measured) != {entry['measure']} - {'none'} or row['sentence'] != entry['sentence'].format(**measured):
+                return SHAPE, {'reason': 'sentence', 'code': row['code']}
+    return None
+
+
+def receipt_lines(receipt):
+    """The three lists as a person reads them: a heading each, one sentence per row, `nothing` for an empty list; never
+    a code, a contract id or a fingerprint (the sentence already carries any count or value)."""
+    lines = []
+    for name, heading in RECEIPT_LISTS:
+        lines.append(heading + ':')
+        lines.extend(['  ' + row['sentence'] for row in receipt[name]] or ['  nothing'])
+    return lines
+
+
 class Outcome:
-    """A success: `outcome` (a code from OUTCOMES), `sentence`, display `facts` and `technical` detail."""
-    def __init__(self, outcome, sentence, facts=None, technical=None):
+    """A success: `outcome` (a code from OUTCOMES), `sentence`, display `facts` and `technical` detail. E184 s0 (D-5):
+    `receipt`, the transfer receipt the act was done with, when there was one."""
+    def __init__(self, outcome, sentence, facts=None, technical=None, receipt=None):
         self.outcome, self.sentence, self.facts, self.technical = outcome, sentence, facts or {}, technical or {}
+        self.receipt = receipt
 
     def to_dict(self):
-        return {'outcome': self.outcome, 'sentence': self.sentence, 'facts': self.facts, 'technical': self.technical}
+        said = {'outcome': self.outcome, 'sentence': self.sentence, 'facts': self.facts, 'technical': self.technical}
+        if self.receipt is not None: said['receipt'] = self.receipt  # only when there is one, so an answer without is unchanged
+        return said
 
     def __str__(self): return self.sentence
     def __repr__(self): return 'Outcome(%r, %r)' % (self.outcome, self.sentence)
@@ -406,13 +517,19 @@ def _takes(function, name):
 
 def _report_held(report, reference, holder_id, event_id, held):
     """One report with the held-copy fields; when the project refuses it as a request (an older gateway knows no such
-    fields), once more in E70b's shape with the same id, so the confirmed get is still recorded there."""
+    fields), once more in E70b's shape with the same id, so the confirmed get is still recorded there. E184 s0 (D-6):
+    answers whether the accepted request carried the fields (False after that fallback)."""
     held = {k: v for k, v in held.items() if v is not None and _takes(report, k)}
-    if not held: return report(reference, holder_id, event_id)
-    try: return report(reference, holder_id, event_id, **held)
+    if not held:
+        report(reference, holder_id, event_id)
+        return True
+    try:
+        report(reference, holder_id, event_id, **held)
+        return True
     except Exception as error:
         if failure(error) != 'invalid': raise
-    return report(reference, holder_id, event_id)
+    report(reference, holder_id, event_id)
+    return False
 
 
 class Receipt:
@@ -429,8 +546,12 @@ class Receipt:
         self.reported = None
         self._words = self._mode = None  # E173 s1 (D3): set by a call by name, or with stay; confirm writes them
 
-    def confirm(self, applied_to=None):
+    def confirm(self, applied_to=None, receipt=None):
+        """E184 s0: `receipt`, the transfer receipt of this get, is checked before the record advances, reported with the
+        get to a project that keeps it, and returned on the outcome. The sentence adds NOT_KEPT when the project did not
+        keep it, UNCONFIRMED when the report's answer is not known."""
         if self._lock is None: raise NotValid(self._exchange._say('not-valid', {'reasons': 'this version was already confirmed or released'}))
+        if receipt is not None: self._exchange._check_receipt(receipt)  # the lock stays: a refused receipt changes nothing
         try:
             record = self._exchange._load()
             entry = dict(self.entry, got_at=self._exchange.clock())
@@ -441,19 +562,22 @@ class Receipt:
             self._exchange._save(record)
             self.confirmed = True
         finally: self.release()
-        self.reported = self._report(record.get('holder_id'), entry)
-        return Outcome(self.outcome, self._exchange._say(self.outcome, self.facts), self.facts,
-                       {'asset_id': entry['asset_id'], 'revision': entry['revision'], 'reported': self.reported})
+        self.reported, kept = self._report(record.get('holder_id'), entry, receipt)
+        said = '' if receipt is None else NOT_KEPT if self.reported is not False and not kept else UNCONFIRMED if self.reported is False else ''
+        return Outcome(self.outcome, self._exchange._say(self.outcome, self.facts) + said, self.facts,
+                       {'asset_id': entry['asset_id'], 'revision': entry['revision'], 'reported': self.reported}, receipt)
 
-    def _report(self, holder_id, entry):
+    def _report(self, holder_id, entry, receipt=None):
+        """(reported, kept): `reported` as the class says; `kept` whether the accepted report carried `receipt`."""
         report = getattr(self._exchange.transport, 'report', None)
-        if report is None or not holder_id: return None
+        if report is None or not holder_id: return None, False
         reference = {'project_id': self._exchange.transport.project, 'asset_id': entry['asset_id'], 'revision': str(entry['revision'])}
         holds = entry.get('mode')  # E171 s1 (D4): held/2's declaration, sent as the copy's mode
         event = delivery_event(holder_id, entry['asset_id'], entry['revision'], holds, uuid.uuid4().hex if holds is not None else None)
-        try: _report_held(report, reference, holder_id, event, {'application': self._exchange.application, 'holds': holds})
-        except Exception: return False  # never fails the confirmation: the version is applied and recorded
-        return True
+        carried = receipt if receipt is not None and self._exchange._keeps_receipts(receipt, report) else None
+        try: whole = _report_held(report, reference, holder_id, event, {'application': self._exchange.application, 'holds': holds, 'receipt': carried})
+        except Exception: return False, False  # never fails the confirmation: the version is applied and recorded
+        return True, carried is not None and whole
 
     def release(self):
         lock, self._lock = self._lock, None
@@ -464,10 +588,11 @@ class Receipt:
 
 
 class Exchange:
-    def __init__(self, transport, work, *, sentences=None, lock_timeout=3.0, clock=time.time, application='script'):
+    def __init__(self, transport, work, *, sentences=None, lock_timeout=3.0, clock=time.time, application='script', codes=None):
         """E171 s1: `application` is the word of the program holding this folder's copies (`application_wire`):
         `script` for the SDK, `qgis-plugin` or `opendtect` for a connector; it is reported with each confirmed get and
-        sent with each send, and the project shows it beside the copy."""
+        sent with each send, and the project shows it beside the copy. E184 s0: `codes`, the code document
+        (`ophiolite.transfer-codes/1`, read by the caller), checks each transfer receipt a send or a get carries."""
         if sentences is not None:
             missing = [code for code in OUTCOMES if not callable(sentences.get(code))]
             if missing: raise ValueError('The sentence table has no sentence for: ' + ', '.join(missing))
@@ -475,6 +600,18 @@ class Exchange:
         self.transport, self.work = transport, Path(work).expanduser().absolute()
         self.sentences, self.lock_timeout, self.clock = sentences or SENTENCES, lock_timeout, clock
         self.path, self.lock_path = self.work / 'held.json', self.work / 'held.lock'
+        self.codes = codes
+
+    def _check_receipt(self, receipt):
+        """E184 s0 (D-3): refuses before anything is done, with UNLISTED or SHAPE and the reason in technical."""
+        problem = receipt_problem(receipt, self.codes)
+        if problem is not None: raise NotValid(problem[0], {}, problem[1])
+
+    def _keeps_receipts(self, receipt, method):
+        """E184 s0 (D-6): whether this project keeps a receipt of this codes version, and `method` can carry it."""
+        keeps = getattr(self.transport, 'keeps_receipts', None)
+        try: return callable(keeps) and _takes(method, 'receipt') and keeps(receipt['codes']['version']) is True
+        except Exception: return False  # a capabilities answer that cannot be read keeps nothing; the act goes ahead
 
     # record
 
@@ -768,8 +905,12 @@ class Exchange:
     # send to project
 
     def send(self, data, *, name, profile, how, based_on=(), of=None, declare=None, extra=None, expected=None, source=None,
-             rights_confirmed=False):
-        """Publish `data` as a new item, or (with `of`, a held item) as its next version. The parent is the version
+             rights_confirmed=False, receipt=None):
+        """E184 s0: `receipt`, the transfer receipt the connector computed for this send, is checked before anything
+        is sent, saved with the pending send (a retry of an unfinished send carries the saved one, never a new one),
+        sent only to a project that keeps it, and returned on the outcome; a project that does not keep it adds
+        NOT_KEPT to the sentence.
+        Publish `data` as a new item, or (with `of`, a held item) as its next version. The parent is the version
         this folder holds, never the project's head; `based_on` are held items. The complete request is saved before
         it is sent, so running the same send again after a crash never publishes twice. `expected` (with `of`) is the
         revision the caller built on: when this folder holds another one, nothing is sent (E104). It only refuses, is
@@ -792,6 +933,7 @@ class Exchange:
         if source is not None and not isinstance(source, dict): reasons.append('give the source as names and values')
         if not isinstance(rights_confirmed, bool): reasons.append('confirm that you may share this version, or leave it out')
         if reasons: self._raise('not-valid', {'reasons': '; '.join(reasons)})
+        if receipt is not None: self._check_receipt(receipt)
         if len(data) > MAX_SEND: self._raise('too-large', {})
         request = {'name': name, 'profile': profile, 'how': how, 'based_on': list(based_on), 'of': of, 'declare': dict(declare or {}),
                    'extra': json.loads(json.dumps(extra or {}, sort_keys=True)), 'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data)}
@@ -836,9 +978,13 @@ class Exchange:
                 # E171 s1 (Codex D4): who holds the sent version, saved with the send and sent from here, outside `request`
                 # (compared whole) and `resolved`; a send saved before the upgrade has none and is resent as it was.
                 pending['attribution'] = {k: v for k, v in (('holder', record['holder_id']), ('application', self.application)) if v is not None}
+                if receipt is not None: pending['receipt'] = receipt  # E184 s0 (B-D2): outside `request`, as attribution
                 record['pending'] = pending; self._save(record); first = True  # saved BEFORE anything is sent
             facts = {'name': display(name, 'the item')}
             attribution = {'attribution': pending['attribution']} if pending.get('attribution') and _takes(self.transport.publish, 'attribution') else {}
+            lists = pending.get('receipt')  # E184 s0: the saved receipt, also on a retry
+            kept = lists is not None and self._keeps_receipts(lists, self.transport.publish)
+            if kept: attribution['receipt'] = lists
             try:
                 receipt = self.transport.publish(data, pending['request'], pending['resolved'], pending['command_id'], **attribution)
             except ExchangeRefused as refusal:
@@ -873,11 +1019,12 @@ class Exchange:
             facts = {**facts, 'number': number}
             if change == 'unchanged':
                 self._raise('nothing-changed', facts, {'asset_id': receipt['asset_id'], 'revision': receipt['revision'], 'command_id': pending['command_id']})
-            sentence = self._say(code, facts)
+            sentence = self._say(code, facts) + (NOT_KEPT if lists is not None and not kept else '')
         held = self._held_by(receipt['asset_id'])  # E171 design 6: after the folder's lock is let go; never fails the send
         if held:  # the sentence stays as it was (qualification compares it); the CLI prints `held_line` after it
             facts = {**facts, 'held_by': held[0], 'on_an_older_version': held[1], **({'held_line': held_line(*held)} if held[0] else {})}
-        return Outcome(code, sentence, facts, {'asset_id': receipt['asset_id'], 'revision': receipt['revision'], 'command_id': pending['command_id']})
+        return Outcome(code, sentence, facts, {'asset_id': receipt['asset_id'], 'revision': receipt['revision'], 'command_id': pending['command_id']},
+                       lists)
 
     def _held_by(self, item):
         """E171 design 6 (amended 11 November): one holders read for the item just sent, when the transport has one;
@@ -1016,10 +1163,16 @@ class ClientTransport:
         return [{'number': r.get('number'), 'revision': r.get('revision'), 'by': names.get(r.get('by')), 'at': r.get('published_at')}
                 for r in page.get('revisions', [])]
 
+    FORMS = ('ophiolite.well-log-curve/1',)  # E183 s3: the forms a fetch passes on to Client.read (a connector's capability guard reads it)
+
     def fetch(self, item, revision, output, **how):
         kind, asset = item.get('kind'), item['asset_id']
         if kind == 'external-scalar-map': return self._map(asset, revision, output)
         if kind not in ('derived', 'uploaded'): raise CannotReadHere('', {'reason': 'this kind of item is not one this script can receive'})
+        form = how.get('form')
+        if form is not None:
+            if form not in self.FORMS or not how.get('curves'): raise NotValid('', {'reasons': 'a form is read for named curves, as one of %s' % ', '.join(self.FORMS)})
+            return self._form(item, revision, output, form, list(how['curves']))
         if how.get('window') is not None: return self.window(item, revision, output, how['window'])
         curves = how.get('curves')
         if curves:
@@ -1044,6 +1197,19 @@ class ClientTransport:
             (output / 'original').write_bytes(data.original); (output / named).write_bytes(data._wire_data_bytes)
             (output / 'descriptor.json').write_text(json.dumps(descriptor, indent=2) + '\n')
         return {'content': data, 'number': self._number(kind, descriptor)}
+
+    def _form(self, item, revision, output, form, curves):
+        """E183 s3: curves read in `form` (Client.read(form=)). The gateway's refusal of the form (422) is CannotReadHere
+        with its sentence verbatim and the refused revision, so a connector may read the stored form of that one version
+        instead; every other error takes the curves read's path. Nothing is written to the held record."""
+        try: data = self.client.read(item['asset_id'], revision, curves, form=form)
+        except Refused as error:
+            if getattr(error, 'status', None) != 422: raise
+            sentence = getattr(error, 'server_message', None) or error.message
+            raise CannotReadHere(sentence, {'sentence': sentence, 'reason': 'form'}, {'form': form, 'status': 422, 'revision': revision}) from None
+        descriptor = data.wire_descriptors[0] if getattr(data, 'wire_descriptors', None) else {}
+        if output is not None: data.save(output)
+        return {'content': data, 'number': self._number(item.get('kind'), descriptor)}
 
     def window(self, item, revision, output, window):
         """E141 s2 (D-S, D-X, D-W): part of a seismic volume written into `output` (the staging folder) as window.sgy,
@@ -1118,8 +1284,13 @@ class ClientTransport:
 
     appends_uploads = True  # E70d (D1): an upload's next version goes through the upload-version route
 
-    def publish(self, data, request, resolved, command_id, attribution=None):
+    def keeps_receipts(self, version):
+        """E184 s0 (D-6): whether the project's capabilities list this code document version (`transfer_receipts`)."""
+        return self.client.transfer_codes_kept(version)
+
+    def publish(self, data, request, resolved, command_id, attribution=None, receipt=None):
         held = {k: v for k, v in (attribution or {}).items() if k in ('holder', 'application') and v is not None}  # E171 s1
+        if receipt is not None: held['receipt'] = receipt  # E184 s0: only when the project keeps it (Exchange.send asks)
         if resolved.get('route') == 'upload':  # E70d: the author's own upload, at the version this folder holds
             got = self.client.upload_data(data, profile=request['profile'], name=request['name'], attribution=request['how'], audience=[],
                                           rights_confirmed=request.get('rights_confirmed') is True, declared=request.get('declare') or None,
@@ -1140,13 +1311,14 @@ class ClientTransport:
         """E70d (D4): an upload's sameness is the server's (bytes and declarations), so it is never decided here."""
         return held.get('kind') != 'uploaded' and request['sha256'] == held.get('revision')
 
-    def report(self, reference, holder_id, event_id, *, application=None, holds=None, earlier=None):
+    def report(self, reference, holder_id, event_id, *, application=None, holds=None, earlier=None, receipt=None):
         """E70b: one delivery observation on the project route (`exchange-consumer/1`); the reference names the
         project. One attempt, a short timeout: a confirmation never waits long for it. E171 s1: the held copy's
-        application word, its declared mode and `earlier`, each only when given (so E70b's body is unchanged without)."""
+        application word, its declared mode and `earlier`, each only when given (so E70b's body is unchanged without).
+        E184 s0: the get's transfer receipt likewise."""
         from .publish import json_bytes
         body = {'reference': reference, 'binding_id': holder_id, 'event_id': event_id, 'profile': 'exchange-consumer/1', 'mode': 'get'}
-        body.update({k: v for k, v in (('application', application), ('holds', holds), ('earlier', earlier)) if v is not None})
+        body.update({k: v for k, v in (('application', application), ('holds', holds), ('earlier', earlier), ('receipt', receipt)) if v is not None})
         return self.client._post_bytes('activity', 'report', json_bytes(body), timeout=REPORT_TIMEOUT)
 
     def release(self, holder_id, item):

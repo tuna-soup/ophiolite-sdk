@@ -1,0 +1,38 @@
+{
+  "schema": "ophiolite.transfer-receipt/1",
+  "direction": "send",
+  "capability": "opendtect",
+  "route": {
+    "profile": "points-csv/1",
+    "data": "Horizon",
+    "direction": "publish"
+  },
+  "contract": "points-csv/1",
+  "state": "committed",
+  "base": null,
+  "made": {
+    "revision": "r1",
+    "number": 1
+  },
+  "fingerprints": {
+    "source": "staged points-csv/1 bytes and declarations of Syn_Survey horizon Top",
+    "target": "a new item; survey EPSG:32631, inlines 10-16 step 2, crosslines 20-26 step 2, twt ms",
+    "converter": "ophiolite-opendtect points-csv/1"
+  },
+  "codes": {
+    "id": "ophiolite.transfer-codes/1",
+    "version": "1.0.0"
+  },
+  "kept": [
+    {"code": "nodes-on-grid", "sentence": "Nodes of the horizon's grid, at the survey's positions: 16", "count": 16},
+    {"code": "z-as-stored", "sentence": "Z as OpendTect stores it, in milliseconds of two-way time, positive down, below SRD"},
+    {"code": "crs", "sentence": "The survey's coordinate system, EPSG:32631", "value": "EPSG:32631"}
+  ],
+  "changed": [
+    {"code": "grid-to-points", "sentence": "The grid becomes one point per node, with its inline and crossline: 16", "count": 16},
+    {"code": "undefined-to-empty", "sentence": "Nodes without a value, sent with an empty z: 1", "count": 1}
+  ],
+  "not_carried": [
+    {"code": "display-settings", "sentence": "The horizon's colour and display settings"}
+  ]
+}

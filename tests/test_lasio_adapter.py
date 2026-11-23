@@ -60,6 +60,50 @@ def test_the_synthetic_log_as_a_reconstructed_las_file():
     assert [c.descr for c in las.curves] == ['', ''] and len(las.params) == 0
 
 
+FROZEN = f'''~Version ---------------------------------------------------
+VERS.   2.0 : CWLS log ASCII Standard -VERSION 2.0
+WRAP.    NO : One line per depth step
+DLM . SPACE : Column Data Section Delimiter
+~Well ------------------------------------------------------
+STRT.M       100.00000 : START DEPTH
+STOP.M       104.00000 : STOP DEPTH
+STEP.M         1.00000 : STEP
+NULL.          -999.25 : NULL VALUE
+COMP.                  : COMPANY
+WELL. Synthetic well 1 : WELL
+FLD .                  : FIELD
+LOC .                  : LOCATION
+PROV.                  : PROVINCE
+CNTY.                  : COUNTY
+STAT.                  : STATE
+CTRY.                  : COUNTRY
+SRVC.                  : SERVICE COMPANY
+DATE.                  : DATE
+UWI .                  : UNIQUE WELL ID
+API .                  : API NUMBER
+~Curve Information -----------------------------------------
+DEPT.M     :{' '}
+GR  .gAPI  :{' '}
+~Params ----------------------------------------------------
+~Other -----------------------------------------------------
+Project p
+Asset curve-a
+Revision {REVISION}
+~ASCII -----------------------------------------------------
+                 100                   0
+                 101                  10
+                 102             -999.25
+                 103                  30
+                 104                  40
+'''
+
+
+def test_e183s2d_t15_a_read_without_the_form_writes_the_same_bytes_as_before():
+    """E183 s2d T1.5: frozen from the adapter as it was before E183 s2d."""
+    with synthetic() as (_, data):
+        assert lasio_bytes(to_lasio(data)).decode() == FROZEN
+
+
 @pytest.mark.parametrize('answers,well,expected', [
     ({'/entities/associations': associated()}, None, ''),  # no linked entity
     ({'/entities/associations': associated()}, 'A', 'A'),

@@ -1,0 +1,38 @@
+{
+ "schema": "ophiolite.chain-run/1",
+ "id": "00000000000000000000000000000009",
+ "project": "p-chain",
+ "chain": {"id": "chain-after-new-tops", "version": 1, "label": "After new tops", "declaration": {
+  "schema": "ophiolite.chain/1",
+  "label": "After new tops",
+  "trigger": {"on": "version", "kind": "well-tops-csv/1", "selection": "wells-a"},
+  "steps": [
+   {"key": "residuals", "label": "Well residuals", "kind": "tool", "follows": [],
+    "tool": {"procedure": "well-residuals", "outcome": {"id": "outcome-tops-10m", "version": 1}, "made_from": []}},
+   {"key": "design", "label": "Design review", "kind": "outside", "follows": ["residuals"], "outside": {},
+    "applies_when": {"step": "residuals", "measure": "largest_residual", "comparison": "above", "value": 5.0, "unit": "m"}},
+   {"key": "go-on", "label": "Regrid decision", "kind": "choice", "follows": ["design"],
+    "choice": {"question": "Regrid the horizon now?", "choices": [{"id": "regrid", "label": "Regrid now"}, {"id": "hold", "label": "Hold"}]}},
+   {"key": "residuals-tight", "label": "Tight residuals", "kind": "tool", "follows": ["go-on"],
+    "tool": {"procedure": "well-residuals", "outcome": {"id": "outcome-tops-6m", "version": 1}, "made_from": []}}
+  ]}},
+ "trigger": {"on": "version", "asset_id": "tops-a", "revision": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2", "kind": "well-tops-csv/1"},
+ "started": {"by": {"person": "ben", "agent": null, "job": null}, "at": 1795600000.0},
+ "frozen": {
+  "outcomes": [{"step": "residuals", "id": "outcome-tops-10m", "version": 1}, {"step": "residuals-tight", "id": "outcome-tops-6m", "version": 1}],
+  "tools": [{"step": "residuals", "procedure": "well-residuals", "digest": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"},
+            {"step": "residuals-tight", "procedure": "well-residuals", "digest": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"}]},
+ "state": "open",
+ "steps": [
+  {"key": "residuals", "label": "Well residuals", "kind": "tool", "follows": [], "state": "open", "condition": null,
+   "result": null,
+   "newer": {"asset_id": "tops-a", "revision": "a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3"},
+   "acts": [], "acts_count": 0, "acts_next": null},
+  {"key": "design", "label": "Design review", "kind": "outside", "follows": ["residuals"], "state": "waiting-for-earlier", "condition": null,
+   "result": null, "newer": null, "acts": [], "acts_count": 0, "acts_next": null},
+  {"key": "go-on", "label": "Regrid decision", "kind": "choice", "follows": ["design"], "state": "waiting-for-earlier", "condition": null,
+   "result": null, "newer": null, "acts": [], "acts_count": 0, "acts_next": null},
+  {"key": "residuals-tight", "label": "Tight residuals", "kind": "tool", "follows": ["go-on"], "state": "waiting-for-earlier", "condition": null,
+   "result": null, "newer": null, "acts": [], "acts_count": 0, "acts_next": null}
+ ]
+}

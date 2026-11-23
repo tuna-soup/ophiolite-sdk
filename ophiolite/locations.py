@@ -10,8 +10,9 @@ from .models.api import EntityExtent, EntityPage
 def checked(model, answer):
     """E31: the answer as documented (VerificationFailed otherwise), handed on unchanged."""
     from pydantic import ValidationError
+    from .models.answers import refusal  # E187 s0
     try: model.model_validate(answer)
-    except (ValidationError, ValueError, TypeError): raise VerificationFailed('The well listing answered outside its documented shape.') from None
+    except (ValidationError, ValueError, TypeError) as error: raise refusal(error, VerificationFailed('The well listing answered outside its documented shape.')) from None
     return answer
 
 CRSS = ('OGC:CRS84', 'EPSG:4326', 'EPSG:3857', 'EPSG:28992', 'EPSG:32631', 'EPSG:23031')  # E44: ED50 / UTM zone 31N

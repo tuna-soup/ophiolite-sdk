@@ -1,0 +1,82 @@
+{
+  "schema": "ophiolite.portable-bundle/1",
+  "bundle_version": "1.18.0",
+  "created_at": "2026-11-22T16:43:31+00:00",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.22"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "curve-a",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "curves": [
+        "GR"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "curve-a",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "origin": "source-reference",
+      "profile": "las2/1",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.las",
+          "role": "original",
+          "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+          "bytes": 311
+        },
+        {
+          "path": "assets/0/descriptor-GR.json",
+          "role": "descriptor",
+          "sha256": "96b3111722af1296e6eff38155a1ea1694248b598045def0d084f95eabdac50e",
+          "bytes": 2572,
+          "curve": "GR"
+        },
+        {
+          "path": "assets/0/curve-GR.json",
+          "role": "normalized",
+          "sha256": "81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
+          "bytes": 1076,
+          "curve": "GR"
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "omissions": [
+        "Synthetic offline fixture, not a server publication",
+        "No independently verified execution environment"
+      ],
+      "losses": [
+        "Selected curve only; other LAS headers and curves remain in artifact"
+      ],
+      "sender": {
+        "schema": "ophiolite.sender/1",
+        "state": "reported",
+        "client": {
+          "product": "qgis-plugin",
+          "version": "1.4.0"
+        },
+        "host": {
+          "name": "qgis",
+          "version": "3.34.2"
+        },
+        "transport": "http",
+        "accepted_as": "las2/1"
+      }
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights."
+}

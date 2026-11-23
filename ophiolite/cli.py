@@ -7,6 +7,7 @@ import math
 import os
 from pathlib import Path
 import shlex
+import string
 import subprocess
 import uuid
 import sys
@@ -195,6 +196,7 @@ def parser():
         evidence.add_argument('--check',metavar='ID',help='A passed check of a result this version made')
         evidence.add_argument('--title',help='The title of a published method (with --author, --year and --doi or --url)')
         evidence.add_argument('--run',metavar='RUN_ID',help='A run Ophiolite made of this version in the project\'s sandbox')  # E113 s1
+        evidence.add_argument('--reference-run',metavar='RUN_ID',help='A finished reference run of this version that passed what its cases ask for')  # E180 s2
         evidence.add_argument('--withdraw',metavar='ID',help='Withdraw this verification (your own, or any as an administrator)')
         verified.add_argument('--author',action='append',default=[],help='With --title: an author; repeat for each')
         verified.add_argument('--year',type=int,help='With --title: the year it was published')
@@ -203,6 +205,28 @@ def parser():
         verified.add_argument('--command-id',metavar='ID',help='Resend a verification whose answer was lost, under the id it was first sent with')
         listed=catalogue('verifications','Who verified a version, against what and when');listed.add_argument('name')  # E165 s1
         listed.add_argument('--version',type=int,help='This version number (default: the highest enabled one)')
+        cased=steps.add_parser('reference-cases',help='The cases a tool is checked against: results people accepted, each with the inputs that made it')  # E180 s2
+        cases_steps=cased.add_subparsers(dest='cases_action',required=True)
+        cases_shown=cases_steps.add_parser('show',parents=[common],help='A tool\'s cases: each case, whether it is still accepted and how many versions ran it')
+        cases_shown.add_argument('name',help='The tool\'s name');cases_shown.add_argument('--version',type=int,help='This version of the cases (default: the newest)')
+        cases_declared=cases_steps.add_parser('declare',parents=[common],help='Declare the next version of a tool\'s cases from a file')
+        cases_declared.add_argument('name',help='The tool\'s name')
+        cases_declared.add_argument('--cases',type=Path,required=True,help='A .json list of cases: case, label, inputs, settings, compare and accepted {asset_id, revision, verdict_id}')
+        cases_declared.add_argument('--kind',required=True,help='The type of data the cases compare, for example well-residual/1')
+        cases_declared.add_argument('--least',type=int,help='How many cases must pass (default: every case)')
+        cases_declared.add_argument('--command-id',metavar='ID',help='Resend a declaration whose answer was lost, under the id it was first sent with')
+        cases_withdrawn=cases_steps.add_parser('withdraw',parents=[common],help='Withdraw a tool\'s cases: nothing runs on them again')
+        cases_withdrawn.add_argument('name',help='The tool\'s name')
+        cases_withdrawn.add_argument('--command-id',metavar='ID',help='Resend a withdrawal whose answer was lost, under the id it was first sent with')
+        referenced=steps.add_parser('reference-run',help='Run a tool version on its tool\'s cases on the server, and read the runs')  # E180 s2
+        run_steps=referenced.add_subparsers(dest='run_action',required=True)
+        run_started=run_steps.add_parser('start',parents=[common],help='Run a version on every case of its tool (a person\'s act)')
+        run_started.add_argument('name');run_started.add_argument('--version',type=int,help='This version number (default: the highest enabled one)')
+        run_started.add_argument('--command-id',metavar='ID',help='Resend a start whose answer was lost, under the id it was first sent with')
+        run_shown=run_steps.add_parser('show',parents=[common],help='One reference run: each case and how it compared')
+        run_shown.add_argument('run_id',metavar='RUN_ID',help='The run, as start or list --json answered it')
+        run_listed=run_steps.add_parser('list',parents=[common],help='The reference runs of a tool, newest first')
+        run_listed.add_argument('name');run_listed.add_argument('--version',type=int,help='Only this version\'s runs')
         published=catalogue('publish','Publish a run made with run --from-project on project versions (--input SLOT=@RESULT:REVISION): each output once, under the run')  # E106
         published.add_argument('folder',type=Path,help='The run\'s output folder');published.add_argument('--name',help='The name of the published result')
         again=catalogue('again','Run a tool-made result again on this computer; the project says whether it is the same result')  # E106
@@ -229,7 +253,8 @@ def parser():
         status=box('status','Whether sandbox runs of a version are on, or with --job where a sandbox run is')
         status.add_argument('name',nargs='?');status.add_argument('--version',type=int,help='This version number (default: the highest enabled one)')
         status.add_argument('--job',metavar='ID',help='A sandbox run\'s job, as run answered it');status.add_argument('--wait',type=float,default=0,metavar='SECONDS',help='With --job: follow it for up to this long')
-        for p in (reg,shown,one,published,again,verified,listed)+tuple(steps.choices[n] for n in ('enable','withdraw','trust'))+tuple(boxes.choices.values()):
+        for p in (reg,shown,one,published,again,verified,listed)+tuple(steps.choices[n] for n in ('enable','withdraw','trust'))+tuple(boxes.choices.values())+\
+                tuple(cases_steps.choices.values())+tuple(run_steps.choices.values()):
             p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
     tool_group('tools',help='Write, check and run your own tools on this computer (offline; nothing is published)')  # E105a; E131 s1: tools is the word
     tool_group('procedures',prog=sub._prog_prefix+' tools')  # the old spelling; main prints the notice before parsing
@@ -368,6 +393,9 @@ def parser():
     changed.add_argument('--since-asset',help='When the other version belongs to another result')
     depends=project(sub.add_parser('dependents',help='The results made from an exact version you may read'))
     depends.add_argument('asset');depends.add_argument('revision');depends.add_argument('--cursor')
+    affected=project(sub.add_parser('affected',help='What rests on the older versions of an item: results, accepted outcomes and held copies'))  # E177 s1
+    affected.add_argument('item',metavar='ITEM')
+    affected.add_argument('--next',action='store_true',help='Before publishing a new version: what will rest on the current one too')
     remake=project(sub.add_parser('remake',help='Make an exact result version again and compare; nothing is saved without --save'))
     remake.add_argument('asset');remake.add_argument('revision')
     remake.add_argument('--newer',action='store_true',help='Use the newest version of each input instead of the recorded ones')
@@ -575,12 +603,17 @@ def parser():
         o=overb(name,help)
         if name=='revise':o.add_argument('outcome',help='The outcome\'s name, as listed')
         o.add_argument('--label',required=name=='declare',help='Its name in words, such as "Tops within 5 m" (revise: a new name)')
-        o.add_argument('--tolerance',type=float,required=name=='declare',help='Every computed residual must be within this')
+        o.add_argument('--tolerance',type=float,help='Every computed residual must be within this (declare: this or --tool)')
         o.add_argument('--unit',choices=['m','ft'],default='m' if name=='declare' else None,help='The unit of --tolerance (default m)')
         o.add_argument('--not-computed',dest='not_computed',choices=['allowed','refused'],default='allowed' if name=='declare' else None,
                        help='Whether rows with no computed residual are allowed (default allowed)')
         o.add_argument('--procedure',required=name=='declare',help='The send tool that delivers it, by its name in the catalogue')
         o.add_argument('--destination',required=name=='declare',help='Where it is delivered, in words (no address), such as "Team database"')
+        if name=='declare':  # E179 s1: the rule is a verified check tool of the project instead of --tolerance
+            o.add_argument('--tool',help='Judge by this check tool, by its name in the catalogue, instead of --tolerance')
+            o.add_argument('--tool-version',dest='tool_version',type=int,help='The version of --tool (required with it)')
+            o.add_argument('--kind',help='The kind of result it judges (with --tool; default well-residual/1)')
+            o.add_argument('--setting',action='append',dest='settings',metavar='KEY=VALUE',help='A setting the tool reads (with --tool; repeat for more; a number is sent as a number)')
     for name,help in (('enable','Enable an outcome'),('disable','Disable an outcome; it is kept and can be enabled again'),
                       ('withdraw','Withdraw an outcome for good; its name is free again'),('get','One outcome with every version and every action')):
         overb(name,help).add_argument('outcome',help='The outcome\'s name, as listed')
@@ -588,6 +621,57 @@ def parser():
     for name,help in (('states','The outcome states of one result version: accepted, rejected or not checked, in words'),
                       ('evaluate','Evaluate the outcomes over one result version where no record exists yet, then its states')):
         overb(name,help).add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help='The result by its name, and its version number (default: its latest); or exactly, as @ASSET:REVISION')
+    otry=overb('try','What the outcomes would say about a run folder\'s result before you publish it; nothing is reported or kept')  # E176 s1
+    otry.add_argument('folder',help='The run folder, as procedures run left it')
+    otry.add_argument('--role',help='The output to try (default: each output outcomes are declared over)')
+    otry.add_argument('--outcome',action='append',dest='outcome_names',metavar='NAME',help='Try only this outcome, by its name (repeat for more)')
+    # E178 s2c: chains of steps after a new version, and their runs; a chain is named by its name, a run by its chain
+    chs=sub.add_parser('chains',help='Chains: the steps that follow a new version of an item, each checked, asked or done outside')
+    cverbs=chs.add_subparsers(dest='action',required=True)
+    cverb=lambda name,help:project(cverbs.add_parser(name,help=help,parents=[common]))
+    cverb('declare','Declare a chain from its JSON declaration (ophiolite.chain/1)').add_argument('file',type=Path,help='The declaration, a JSON file')
+    crev=cverb('revise','Revise a chain: its next version from a JSON declaration; earlier versions and their runs are kept')
+    crev.add_argument('chain',help='The chain\'s name, as listed')
+    crev.add_argument('file',type=Path,help='The new declaration, a JSON file')
+    for name,help in (('enable','Enable a chain: new versions published from now on are due for it'),('disable','Disable a chain; it is kept and its runs go on'),
+                      ('withdraw','Withdraw a chain for good; its name is free again and its runs are kept'),('get','One chain with every version and every action')):
+        cverb(name,help).add_argument('chain',help='The chain\'s name, as listed')
+    cverb('list','The chains of this project').add_argument('--cursor',help='The next page, as --json gave it')
+    cdue=cverb('due','The item versions a chain should start for and has not')
+    cdue.add_argument('chain',nargs='?',help='The chain\'s name, as listed (default: every chain)')
+    cdue.add_argument('--cursor',help='The next page, as --json gave it')
+    cdis=cverb('dismiss','Set one due version aside with your reason: no run starts for it')
+    cdis.add_argument('chain',help='The chain\'s name, as listed')
+    cdis.add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help='The due item by its name and version number (default: its latest); or exactly, as @ASSET:REVISION')
+    cdis.add_argument('--reason',required=True,help='Why no run starts for it, in words')
+    runs=sub.add_parser('chain-runs',help='Chain runs: start a chain over a version and act on its steps')
+    rverbs=runs.add_subparsers(dest='action',required=True)
+    rverb=lambda name,help:project(rverbs.add_parser(name,help=help,parents=[common]))
+    rstart=rverb('start','Start a run of a chain over the version that started it, or over the versions you name')
+    rstart.add_argument('chain',help='The chain\'s name, as listed')
+    rstart.add_argument('items',nargs='+',metavar='ITEM[@N]|@ASSET:REVISION',help='The version that started it; for a chain on request, each version it runs over')
+    rstart.add_argument('--chain-version',dest='chain_version',type=int,help='The chain version to run (default: its current version)')
+    RUN_HELP='The run: the chain\'s name for its newest run, or the run id as --json gives it'
+    STEP_HELP='The step, by its name as the run lists it'
+    rverb('get','One run: each step with its state and its acts').add_argument('run',help=RUN_HELP)
+    rverb('list','The runs of this project or of one chain, newest first').add_argument('chain',nargs='?',help='The chain\'s name, as listed (default: every chain)')
+    rverbs.choices['list'].add_argument('--cursor',help='The next page, as --json gave it')
+    rattach=rverb('attach','Attach a result version to a tool step; its check closes the step or the attachment is refused')
+    rchoose=rverb('choose','Answer a question step with one of its answers')
+    rack=rverb('acknowledge','Say that a step outside Ophiolite was done')
+    rdecide=rverb('decide','Decide whether a step whose condition cannot be decided applies, with your reason')
+    rcont=rverb('continue','Continue past a rejected or unchecked tool step with your reason; the check is kept')
+    for one in (rattach,rchoose,rack,rdecide,rcont):
+        one.add_argument('run',help=RUN_HELP)
+        one.add_argument('step',help=STEP_HELP)
+    rattach.add_argument('result',metavar='ITEM[@N]|@ASSET:REVISION',help='The result by its name and version number (default: its latest); or exactly, as @ASSET:REVISION')
+    rchoose.add_argument('choice',help='The answer, as the question lists it')
+    rack.add_argument('--label',required=True,help='What was done, in words')
+    rack.add_argument('--reference',help='Where it is kept, as you would write it')
+    applies=rdecide.add_mutually_exclusive_group(required=True)
+    applies.add_argument('--applies',dest='apply',action='store_true',default=None,help='The step applies')
+    applies.add_argument('--does-not-apply',dest='apply',action='store_false',help='The step does not apply; it is skipped')
+    for one in (rdecide,rcont):one.add_argument('--reason',required=True,help='Your reason, in words')
     # E134: your own consented work in a project, exported as a folder of work episodes (s2: values where the rights allow)
     traj=sub.add_parser('trajectories',help='Your own work in a project as episodes a model may learn from')
     tverbs=traj.add_subparsers(dest='action',required=True)
@@ -993,18 +1077,38 @@ def _recipes(args,client=None):
 
 
 def _outcomes(args,client):
-    """E120: outcomes declare | revise | enable | disable | withdraw | list | get | states | evaluate. Words by default; each verb's
+    """E120: outcomes declare | revise | enable | disable | withdraw | list | get | states | evaluate | try (E176 s1). Words by default; each verb's
     documented JSON under --json. An outcome is named by its name; its id is in --json."""
     from . import outcomes as told
     if args.action=='list':
         found=client.outcome_list()
         return done(args,'\n'.join(told.summary_line(o) for o in found) or 'This project has no outcomes yet.',{'outcomes':found})
     if args.action=='declare':
-        o=client.outcome_declare(told.residual_declaration(args.label,args.tolerance,args.unit,args.procedure,args.destination,args.not_computed))
+        if args.tool is not None:  # E179 s1: refused here, before anything is sent
+            if args.tolerance is not None:raise Refused('Give --tool or --tolerance, not both.')
+            if args.tool_version is None:raise Refused('--tool needs --tool-version.')
+            settings={}
+            for text in args.settings or []:
+                key,sep,raw=text.partition('=')
+                if not sep or not key:raise Refused('A setting is KEY=VALUE, such as limit=5.')
+                try:number=float(raw)
+                except ValueError:number=None
+                settings[key]=raw if number is None or not math.isfinite(number) else int(number) if number.is_integer() and '.' not in raw and 'e' not in raw.lower() else number
+            declaration=client.tool_declaration(args.label,args.tool,args.tool_version,settings,args.procedure,args.destination,kind=args.kind or told.KIND)
+        elif args.tolerance is None or args.tool_version is not None or args.kind is not None or args.settings:
+            raise Refused('Give --tolerance, or --tool with --tool-version (and --kind and --setting).')
+        else:declaration=told.residual_declaration(args.label,args.tolerance,args.unit,args.procedure,args.destination,args.not_computed)
+        o=client.outcome_declare(declaration)
         return done(args,'Declared '+told.summary_line(o),o)
     if args.action in ('states','evaluate'):  # E120 s1
         found=(client.outcome_states if args.action=='states' else client.outcome_evaluate)(*client.result_version(args.item))
         return done(args,told.state_lines(found),found)
+    if args.action=='try':  # E176 s1: words per outcome; the answer, rows included, under --json
+        from . import procedures
+        try:tried=client.try_result(args.folder,role=args.role,outcomes=args.outcome_names)
+        except procedures.NotRun as error:refuse(error)
+        lines=[('%s:\n' % role if len(tried)>1 else '')+told.trial_lines(answer) for role,answer in tried.items()]
+        return done(args,'\n'.join(lines) or 'No output of this run is a kind outcomes are declared over.',tried)
     named=client.outcome_named(args.outcome)
     if args.action=='get':
         o=client.outcome_get(named['outcome_id'])
@@ -1022,6 +1126,121 @@ def _outcomes(args,client):
     o=getattr(client,'outcome_'+args.action)(named['outcome_id'])
     text={'enable':'"%s" is enabled.','disable':'"%s" is disabled; it is kept and can be enabled again.','withdraw':'"%s" is withdrawn; its name is free again.'}[args.action]
     return done(args,text % o['label'],o)
+
+
+def _chain_named(client,label):
+    """E178 s2c: the chain that is not withdrawn and carries this name (compared without case), read page by page."""
+    cursor=None
+    while True:
+        page=client.chains.list(cursor=cursor)
+        found=[c for c in page['chains'] if c['state']!='withdrawn' and c['declaration']['label'].casefold()==label.casefold()]
+        if found:return found[0]
+        cursor=page['next']
+        if cursor is None:raise Refused('This project has no chain named "%s".' % label)
+
+
+def _declaration(path):
+    try:return json.loads(Path(path).read_text(encoding='utf-8'))
+    except (OSError,ValueError) as error:raise Refused('The declaration %s cannot be read as JSON: %s' % (path,error))
+
+
+def _chains(args,client):
+    """E178 s2c: chains declare | revise | enable | disable | withdraw | list | get | due | dismiss. Words by default
+    (names, state words and labels); the served answer as it is under --json. A chain is named by its name."""
+    from . import chains as told
+    if args.action=='list':
+        page=client.chains.list(cursor=args.cursor)
+        lines=[told.chain_line(c) for c in page['chains']] or ['This project has no chains yet.']
+        if page['next']:lines.append('More chains are listed: read on with --cursor, as --json gives it.')
+        return done(args,'\n'.join(lines),page)
+    if args.action=='declare':
+        entry=client.chains.declare(_declaration(args.file))
+        return done(args,'Declared '+told.chain_line(entry),entry)
+    if args.action=='due':
+        page=client.chains.due(None if args.chain is None else _chain_named(client,args.chain)['id'],cursor=args.cursor)
+        names=told.version_names(client,[(l['trigger']['asset_id'],l['trigger']['revision']) for l in page['lines']]) if not args.json else {}
+        lines=[told.due_line(l,names) for l in page['lines']] or ['Nothing is due.']
+        if page['next']:lines.append('More are due: read on with --cursor, as --json gives it.')
+        return done(args,'\n'.join(lines),page)
+    named=_chain_named(client,args.chain)
+    if args.action=='get':
+        detail=client.chains.get(named['id'])
+        return done(args,'\n'.join(told.detail_lines(detail)),detail)
+    if args.action=='revise':
+        entry=client.chains.revise(named['id'],_declaration(args.file))
+        return done(args,'Revised '+told.chain_line(entry),entry)
+    if args.action=='dismiss':
+        asset_id,revision=client.result_version(args.item)
+        page=client.chains.dismiss(named['id'],asset_id,revision,args.reason)
+        item=told.version_names(client,[(asset_id,revision)]).get((asset_id,revision),'that version') if not args.json else None
+        return done(args,'Set aside %s for "%s"; no run starts for it.' % (item,named['declaration']['label']),page)
+    entry=getattr(client.chains,args.action)(named['id'])
+    label=entry['declaration']['label']
+    text={'enable':'"%s" is enabled.','disable':'"%s" is disabled; it is kept and its runs go on.','withdraw':'"%s" is withdrawn; its name is free again and its runs are kept.'}[args.action] % label
+    if args.action=='enable' and entry.get('due_stops'):text+=' %s no longer listed as due.' % told._plural(entry['due_stops'],'version is','versions are')
+    return done(args,text,entry)
+
+
+def _chain_run(client,text):
+    """A run by its id (32 hex characters, as --json gives it), else the newest run of the chain with that name."""
+    if len(text)==32 and text==text.lower() and set(text)<=set(string.hexdigits):return client.chains.run_get(text)
+    named=_chain_named(client,text)
+    runs=client.chains.run_list(named['id'],limit=1)['runs']
+    if not runs:raise Refused('"%s" has no run you can read.' % named['declaration']['label'])
+    return client.chains.run_get(runs[0]['id'])
+
+
+def _chain_step(run,text):
+    """A step by its name as the run lists it (compared without case), or by its key as --json gives it."""
+    found=[s for s in run['steps'] if text.casefold() in (s['label'].casefold(),s['key'])]
+    if not found:raise Refused('This run has no step named "%s"; its steps are %s.' % (text,', '.join('"%s"' % s['label'] for s in run['steps'])))
+    return found[0]
+
+
+def _run_words(client,run,json_only):
+    from . import chains as told
+    if json_only:return None
+    trigger=run['trigger']
+    names=told.version_names(client,[(trigger['asset_id'],trigger['revision'])]) if trigger['on']=='version' else {}
+    return '\n'.join(told.run_lines(run,names))
+
+
+def _chain_runs(args,client):
+    """E178 s2c: chain-runs start | get | list | attach | choose | acknowledge | decide | continue. Words by default
+    (labels and state words; no step keys, codes, digests or ids); the served answer as it is under --json."""
+    from . import chains as told
+    if args.action=='list':
+        page=client.chains.run_list(None if args.chain is None else _chain_named(client,args.chain)['id'],cursor=args.cursor)
+        pairs=[(r['trigger']['asset_id'],r['trigger']['revision']) for r in page['runs'] if r['trigger']['on']=='version']
+        names=told.version_names(client,pairs) if not args.json else {}
+        lines=[told.run_line(r,names) for r in page['runs']] or ['No run you can read.']
+        if page['next']:lines.append('More runs are listed: read on with --cursor, as --json gives it.')
+        return done(args,'\n'.join(lines),page)
+    if args.action=='start':
+        named=_chain_named(client,args.chain)
+        versions=[client.result_version(item) for item in args.items]
+        on_request=named['declaration']['trigger']['on']=='request'
+        run=client.chains.run_start(named['id'],args.chain_version or named['version'],
+                                    **({'inputs':versions} if on_request or len(versions)>1 else {'trigger':versions[0]}))
+        return done(args,_run_words(client,run,args.json),run)
+    run=_chain_run(client,args.run)
+    if args.action=='get':return done(args,_run_words(client,run,args.json),run)
+    step=_chain_step(run,args.step)
+    if args.action=='attach':
+        run=client.chains.run_attach(run['id'],step['key'],client.result_version(args.result))
+    elif args.action=='choose':
+        declared=next(s for s in run['chain']['declaration']['steps'] if s['key']==step['key'])
+        choices=(declared.get('choice') or {}).get('choices') or []
+        found=[c['id'] for c in choices if args.choice.casefold() in (c['label'].casefold(),c['id'])]
+        if choices and not found:raise Refused('"%s" is not an answer to this question; its answers are %s.' % (args.choice,', '.join('"%s"' % c['label'] for c in choices)))
+        run=client.chains.run_choose(run['id'],step['key'],found[0] if found else args.choice)  # a step without answers: the server says why
+    elif args.action=='acknowledge':
+        run=client.chains.run_acknowledge(run['id'],step['key'],args.label,reference=args.reference)
+    elif args.action=='decide':
+        run=client.chains.run_decide(run['id'],step['key'],args.apply,args.reason)
+    else:
+        run=client.chains.run_continue(run['id'],step['key'],args.reason)
+    return done(args,_run_words(client,run,args.json),run)
 
 
 def _verdicts(args,client):
@@ -1163,6 +1382,7 @@ def _try(args,client):
     from pydantic import ValidationError
     from .agents import DryRun
     from .errors import VerificationFailed
+    from .models.answers import refusal
     area,_,name=args.operation.partition('/')
     if not area or not name:raise Refused('OPERATION is area/name, for example applications/configure.')
     try:body=json.loads(args.body.read_text(encoding='utf-8'))
@@ -1170,7 +1390,7 @@ def _try(args,client):
     if not isinstance(body,dict):raise Refused('--body holds one JSON object.')
     if 'dry_run' in body:raise Refused('--body is the request itself: leave dry_run out.')
     try:dry=DryRun.model_validate(client._post(area,name,{**body,'dry_run':True}))
-    except ValidationError:raise VerificationFailed('The dry run does not satisfy ophiolite.agent-dry-run/1.') from None
+    except ValidationError as error:raise refusal(error,VerificationFailed('The dry run does not satisfy ophiolite.agent-dry-run/1.')) from None
     if (dry.operation,dry.project_id)!=(args.operation,client.project):raise VerificationFailed('The dry run names another operation or project.')
     would=dry.would
     words=['%s would %s; nothing was kept.' % (dry.operation,'proceed' if would.outcome=='proceeds' else 'be refused')]
@@ -1221,6 +1441,37 @@ def _holders(args,client):
     found=client.holders(args.item)
     words='\n'.join(_held_words(r) for r in found['rows'])
     return done(args,words or 'Nobody you may see holds a copy.',found)
+
+
+def _plural(count,one,many):
+    return '%d %s' % (count,one if count==1 else many)
+
+
+def _affected_words(row):
+    """E177 s1 (D-8; Codex F20, F21): one row in plain words; ids, revisions and codes only in --json."""
+    from .story import _readable
+    if row['kind']=='held':return _held_words(row['held'])
+    if row['kind']=='acceptance':
+        return 'Accepted as %s on version %d; version %d exists' % (_readable(row['outcome']['label']) or 'an outcome',
+                                                                     row['accepted_on']['version'],row['newest']['version'])
+    name=_readable(row['item'].get('name')) or 'An unnamed item'
+    return '%s rests on version %d (%s)' % (name,row['rests_on']['version'],_plural(row['distance'],'step','steps'))
+
+
+def _affected(args,client):
+    """E177 s1: `results affected ITEM [--next]`, read whole; --json is the list of served pages (ophiolite.affected/1)."""
+    from .client import affected_whole
+    pages=list(client.affected_pages(args.item,against='next' if args.next else 'head'))
+    whole=affected_whole(pages)
+    if whole['item'] is None:return done(args,'No item you may open has this id.',pages)
+    counts=whole['counts']
+    lines=[_affected_words(r) for r in whole['rows']]
+    lines.append('%s, %s, %s' % (_plural(counts['results'],'result','results'),_plural(counts['acceptances'],'accepted outcome','accepted outcomes'),
+                                 _plural(counts['held'],'held copy','held copies')))
+    lines.append('%s in this project %s no recorded inputs' % (_plural(whole['without_inputs'],'item','items'),'has' if whole['without_inputs']==1 else 'have'))
+    if whole['restricted']:lines.append('Some results you cannot open are not listed.')
+    if not whole['complete']:lines.append('At least: this answer reached its read limit.')
+    return done(args,'\n'.join(lines),pages)
 
 
 def _journey(args,client):
@@ -2065,7 +2316,7 @@ def _slots(texts,flag,many=False):
     return found
 
 
-CATALOGUE_VERBS=('register','list','show','enable','withdraw','trust','verify','verifications','publish','again','sandbox')
+CATALOGUE_VERBS=('register','list','show','enable','withdraw','trust','verify','verifications','publish','again','sandbox','reference-cases','reference-run')
 SANDBOX_JOB={'queued':'Sandbox run %s is waiting for a runner.','running':'Sandbox run %s is running.','published':'Sandbox run %s published its outputs.',
              'failed':'Sandbox run %s failed: %s.','killed':'Sandbox run %s was stopped at its limit: %s.','cancelled':'Sandbox run %s was cancelled.'}  # E113 s1
 
@@ -2101,6 +2352,95 @@ def _sandbox(args,client):
     done(args,_sandbox_words(job),job)
     if job['state'] in ('failed','killed','cancelled'):raise SystemExit(EXIT['refused'])
     return job
+
+
+def _reference_lines():
+    """E180 s2 (D8): the frozen reference lines (contracts/vocabulary/v1/reference-reasons.json), as the server words them."""
+    import importlib.resources
+    return json.loads(importlib.resources.files('ophiolite').joinpath('contracts/vocabulary/v1/reference-reasons.json').read_bytes())['lines']
+
+
+
+REFERENCE_STATE={'queued':'waiting for a runner','running':'running','failed':'could not finish'}
+
+
+def _day(at):
+    import datetime
+    t=datetime.datetime.fromtimestamp(at,datetime.timezone.utc)
+    return '%d %s %d' % (t.day,t.strftime('%B'),t.year)
+
+
+def _reference_counts(counts):
+    counted=counts['passed']+counts['failed']
+    return '%d of %d counted cases passed%s' % (counts['passed'],counted,'; %d no longer accepted' % counts['not_counted'] if counts['not_counted'] else '')
+
+
+def _current_cases(client,name):
+    """The newest version of a tool's cases, or None when it has none (the server's set-unknown)."""
+    from .errors import OphioliteError
+    try:return client.reference_cases_get(name)
+    except OphioliteError as error:
+        if error.status==404:return None
+        raise
+
+
+def _reference_cases(args,client):
+    """E180 s2: `tools reference-cases show|declare|withdraw NAME`. Words by default (labels, counts, people, the
+    server's sentences); ids and digests only under --json (R1-17)."""
+    if args.cases_action=='declare':
+        try:cases=json.loads(args.cases.read_text(encoding='utf-8'))
+        except (OSError,ValueError):raise SystemExit('Give --cases as a readable .json list of cases.')
+        if not isinstance(cases,list):raise SystemExit('Give --cases as a readable .json list of cases.')
+        current=_current_cases(client,args.name)
+        v=client.reference_cases_declare(args.name,args.kind,cases,supersedes=current['version'] if current else None,least=args.least,command_id=args.command_id)
+        return done(args,'Declared version %d of the cases of %s: %d case%s, %s must pass.' % (
+            v['version'],args.name,len(v['cases']),'' if len(v['cases'])==1 else 's','every case' if v['least'] is None else 'at least %d' % v['least']),v)
+    if args.cases_action=='withdraw':
+        current=_current_cases(client,args.name)
+        if current is None:raise SystemExit('No reference cases for this tool in this project.')
+        v=client.reference_cases_withdraw(args.name,current['version'],command_id=args.command_id)
+        return done(args,'Withdrew the cases of %s (version %d): nothing runs on them again.' % (args.name,v['version']),v)
+    v=client.reference_cases_get(args.name,args.version)
+    if v['state']=='withdrawn':return done(args,'The cases of %s, version %d, are withdrawn.' % (args.name,v['version']),v)
+    lines=['The cases of %s, version %d, declared by %s on %s: %d case%s, %s must pass.' % (
+        args.name,v['version'],v['by']['name_at_time'] or 'a person whose name was not recorded',_day(v['at']),len(v['cases']),'' if len(v['cases'])==1 else 's',
+        'every case' if v['least'] is None else 'at least %d' % v['least'])]
+    for c in v['cases']:
+        if c.get('restricted'):lines.append('Case %s: you cannot open every version it names.' % c['case']);continue
+        lines.append('Case %s (%s): %s; %d other rejection%s; run by %d version%s.' % (
+            c['case'],c['label'],'still accepted' if c['still_accepted'] else 'no longer accepted',c['rejections'],'' if c['rejections']==1 else 's',
+            c['versions_run'],'' if c['versions_run']==1 else 's'))
+    return done(args,'\n'.join(lines),v)
+
+
+def _reference_run(args,client):
+    """E180 s2: `tools reference-run start NAME|show RUN_ID|list NAME`. A run is named by its tool version in words;
+    its run id only under --json (R1-17)."""
+    if args.run_action=='start':
+        chosen=client.procedure_version(args.name,args.version)
+        v=client.reference_run_start(chosen['digest'],command_id=args.command_id)
+        text='Reference run of %s, version %d, on version %d of its cases: ' % (chosen['label'],chosen['version'],v['cases_version'])
+        return done(args,text+(_reference_counts(v['record']['counts']) if v['state']=='finished' else REFERENCE_STATE[v['state']])+'.',v)
+    if args.run_action=='show':
+        v=client.reference_run_get(args.run_id);record=v['record']
+        if record is None:return done(args,'This reference run is %s.' % REFERENCE_STATE[v['state']],v)
+        tool=record['tool']
+        lines=['Reference run of %s, version %d, started by %s on %s: %s.' % (tool['label'],tool['version_number'],record['started_by']['name_at_time'] or 'a person whose name was not recorded',
+                                                                             _day(record['started_at']),_reference_counts(record['counts']))]
+        for r in record['results']:
+            said={'passed':'passed','failed':'differed','not_counted':'not counted: no longer accepted'}[r['outcome']]
+            lines.append('Case %s: %s%s.' % (r['case'],said,' (you cannot open every version it names)' if r.get('restricted') else ''))
+        return done(args,'\n'.join(lines),v)
+    chosen=client.procedure_version(args.name,args.version) if args.version is not None else None
+    entries,cursor=[],None
+    while True:
+        page=client.reference_run_list(tool=args.name,digest=chosen['digest'] if chosen else None,limit=200,cursor=cursor)
+        entries+=page['entries'];cursor=page['next']
+        if not cursor:break
+    lines=['Version %d, started by %s on %s: %s.' % (e['version_number'],e['started_by']['name_at_time'] or 'a person whose name was not recorded',_day(e['started_at']),
+                                                     _reference_counts(e['counts']) if e['counts'] else REFERENCE_STATE[e['state']]) for e in entries]
+    if not lines:lines=[_reference_lines()['not-run'] if chosen and _current_cases(client,args.name) else 'No reference runs of %s in this project.' % args.name]
+    return done(args,'\n'.join(lines),{'entries':entries})
 
 
 def _catalogue_verb(args):
@@ -2146,6 +2486,8 @@ def _catalogue(args,client):
                                           prompt=ask if sys.stdin.isatty() else None,name=args.name,for_=args.for_)
             return done(args,result['ran']+'\n'+result['sentence'],result)
         if args.procedure_action=='sandbox':return _sandbox(args,client)  # E113 s1
+        if args.procedure_action=='reference-cases':return _reference_cases(args,client)  # E180 s2
+        if args.procedure_action=='reference-run':return _reference_run(args,client)  # E180 s2
         chosen=client.procedure_version(args.name,args.version)
         if args.procedure_action=='show':
             v=client.procedure_get(chosen['digest']);w=v['words']
@@ -2158,8 +2500,8 @@ def _catalogue(args,client):
                 if not args.author or args.year is None:raise SystemExit('Give --author and --year with --title.')
                 publication={'title':args.title,'authors':args.author,'year':args.year}
                 if args.doi or args.url:publication['link']={'kind':'doi','value':args.doi} if args.doi else {'kind':'url','value':args.url}
-            v=client.procedure_verify(chosen['digest'],check=args.check,publication=publication,withdraw=args.withdraw,witnessed=args.run,statement=args.statement,
-                                      command_id=args.command_id)
+            v=client.procedure_verify(chosen['digest'],check=args.check,publication=publication,withdraw=args.withdraw,witnessed=args.run,
+                                      reference_run=args.reference_run,statement=args.statement,command_id=args.command_id)
             return done(args,v['verification']['line'],v)
         if args.procedure_action=='verifications':
             v=client.procedure_verifications(chosen['digest'])
@@ -2353,6 +2695,8 @@ def _main(argv=None):
         if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake','import'):return _journey(args,client)
         if args.command=='checks':return _checks(args,client)
         if args.command=='outcomes':return _outcomes(args,client)  # E120
+        if args.command=='chains':return _chains(args,client)  # E178 s2c
+        if args.command=='chain-runs':return _chain_runs(args,client)  # E178 s2c
         if args.command=='verdicts':return _verdicts(args,client)  # E132
         if args.command=='withdraw':return _withdraw(args,client)  # E132 s2
         if args.command=='rules':return _rules_show(args,client)  # E144 s3
@@ -2369,6 +2713,7 @@ def _main(argv=None):
         if args.command=='find':return _find(args,client)  # E145 s3
         if args.command in ('surveys','survey'):return _surveys(args,client)  # E142 s1
         if args.command=='holders':return _holders(args,client)  # E171 s1
+        if args.command=='affected':return _affected(args,client)  # E177 s1
         if args.command=='try':return _try(args,client)  # E150 s1b
         if args.command=='procedures':return _catalogue(args,client)  # E105b: the project's catalogue
         if args.command in ('check','get','send'):return _exchange(args,client)

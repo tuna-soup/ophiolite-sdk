@@ -1,0 +1,56 @@
+{
+  "schema": "ophiolite.transfer-receipt/1",
+  "direction": "send",
+  "capability": "opendtect",
+  "route": {
+    "profile": "points-csv/1",
+    "data": "Horizon",
+    "direction": "publish"
+  },
+  "contract": "points-csv/1",
+  "state": "committed",
+  "base": null,
+  "made": {
+    "revision": "r1",
+    "number": 1
+  },
+  "fingerprints": {
+    "source": "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    "target": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+    "converter": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "codes": {
+    "id": "ophiolite.transfer-codes/1",
+    "version": "1.0.0"
+  },
+  "kept": [
+    {"code": "kept-1", "sentence": "Row 1..................................................................................................................................................................................................."},
+    {"code": "kept-2", "sentence": "Row 2"},
+    {"code": "kept-3", "sentence": "Row 3"},
+    {"code": "kept-4", "sentence": "Row 4"},
+    {"code": "kept-5", "sentence": "Row 5"},
+    {"code": "kept-6", "sentence": "Row 6"},
+    {"code": "kept-7", "sentence": "Row 7"},
+    {"code": "kept-8", "sentence": "Row 8"}
+  ],
+  "changed": [
+    {"code": "changed-1", "sentence": "Row 1............................................................................................."},
+    {"code": "changed-2", "sentence": "Row 2"},
+    {"code": "changed-3", "sentence": "Row 3"},
+    {"code": "changed-4", "sentence": "Row 4"},
+    {"code": "changed-5", "sentence": "Row 5"},
+    {"code": "changed-6", "sentence": "Row 6"},
+    {"code": "changed-7", "sentence": "Row 7"},
+    {"code": "changed-8", "sentence": "Row 8"}
+  ],
+  "not_carried": [
+    {"code": "not-carried-1", "sentence": "Row 1"},
+    {"code": "not-carried-2", "sentence": "Row 2"},
+    {"code": "not-carried-3", "sentence": "Row 3"},
+    {"code": "not-carried-4", "sentence": "Row 4"},
+    {"code": "not-carried-5", "sentence": "Row 5"},
+    {"code": "not-carried-6", "sentence": "Row 6"},
+    {"code": "not-carried-7", "sentence": "Row 7"},
+    {"code": "not-carried-8", "sentence": "Row 8"}
+  ]
+}

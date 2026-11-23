@@ -1,0 +1,1026 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/outcomes/v1/outcome-trial-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.outcome-trial/1",
+    "version": "1.2.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "CheckMeasure": {
+      "additionalProperties": false,
+      "description": "E178 s0 (R1): one number the evaluation counted, named by its rule's `measures` (rules.json); a quantity in the\nresult's display unit without rounding, a count with no unit. A chain step's condition reads it (E178 design 4).",
+      "properties": {
+        "name": {
+          "maxLength": 41,
+          "pattern": "^[a-z][a-z0-9_]{0,40}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "description": "A quantity in `unit`, or a whole count when `unit` is null",
+          "title": "Value"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "enum": [
+                "m",
+                "ft"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The length unit of a quantity (the result's display unit); null for a count",
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "title": "CheckMeasure",
+      "type": "object"
+    },
+    "CheckedDataRules": {
+      "additionalProperties": false,
+      "description": "E144 s4 (D5): the named data rules as run for this record, under one registry snapshot; no sentence is kept.",
+      "properties": {
+        "registry_version": {
+          "maxLength": 32,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Registry Version",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/CheckedRuleResult"
+          },
+          "maxItems": 32768,
+          "title": "Results",
+          "type": "array"
+        }
+      },
+      "required": [
+        "registry_version",
+        "results"
+      ],
+      "title": "CheckedDataRules",
+      "type": "object"
+    },
+    "CheckedInput": {
+      "additionalProperties": false,
+      "properties": {
+        "slot": {
+          "minLength": 1,
+          "title": "Slot",
+          "type": "string"
+        },
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slot",
+        "asset_id",
+        "revision"
+      ],
+      "title": "CheckedInput",
+      "type": "object"
+    },
+    "CheckedOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "rule": {
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+          "title": "Rule",
+          "type": "string"
+        },
+        "settings_sha256": {
+          "description": "SHA-256 of the canonical settings of that version",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Settings Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "rule",
+        "settings_sha256"
+      ],
+      "title": "CheckedOutcome",
+      "type": "object"
+    },
+    "CheckedRuleResult": {
+      "additionalProperties": false,
+      "description": "E144 s4 (D5): one named data rule's result (ophiolite.rule-results/1's, unchanged) on one bound input version.",
+      "properties": {
+        "rule": {
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*/[1-9][0-9]*$",
+          "title": "Rule",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "passed",
+            "failed",
+            "not-applicable"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Count"
+        },
+        "examples": {
+          "items": {
+            "$ref": "#/$defs/Example"
+          },
+          "maxItems": 5,
+          "title": "Examples",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "offline",
+                "no-column",
+                "no-context"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ContextVersion"
+              },
+              "maxItems": 32,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Context"
+        },
+        "slot": {
+          "minLength": 1,
+          "title": "Slot",
+          "type": "string"
+        },
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "note",
+            "warn",
+            "error"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule",
+        "state",
+        "count",
+        "examples",
+        "parameters",
+        "reason",
+        "context",
+        "slot",
+        "asset_id",
+        "revision",
+        "severity"
+      ],
+      "title": "CheckedRuleResult",
+      "type": "object"
+    },
+    "ContextVersion": {
+      "additionalProperties": false,
+      "description": "Another version of the project a project-context rule read (online only).",
+      "properties": {
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "kind"
+      ],
+      "title": "ContextVersion",
+      "type": "object"
+    },
+    "Example": {
+      "additionalProperties": false,
+      "description": "One failing row, in the file's order: its 1-based data row, and its depth and value when the rule has them.",
+      "properties": {
+        "row": {
+          "minimum": 1,
+          "title": "Row",
+          "type": "integer"
+        },
+        "depth": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Depth"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "row",
+        "depth",
+        "value"
+      ],
+      "title": "Example",
+      "type": "object"
+    },
+    "TrialAccepted": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/CheckedOutcome"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "would": {
+          "const": "accepted",
+          "title": "Would",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "null"
+        },
+        "sentence": {
+          "title": "Sentence",
+          "type": "null"
+        },
+        "rows": {
+          "$ref": "#/$defs/TrialRows"
+        },
+        "data_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckedDataRules"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "measures": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CheckMeasure"
+              },
+              "maxItems": 16,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E178 s2b: the numbers the evaluation counted, as its record keeps them; absent when an earlier gate failed",
+          "title": "Measures"
+        }
+      },
+      "required": [
+        "outcome",
+        "label",
+        "would",
+        "reason",
+        "sentence",
+        "rows",
+        "data_rules"
+      ],
+      "title": "TrialAccepted",
+      "type": "object"
+    },
+    "TrialCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "output_sha256": {
+          "description": "The SHA-256 of the bytes tried, as the header declared it",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Output Sha256",
+          "type": "string"
+        },
+        "output_bytes": {
+          "maximum": 8388608,
+          "minimum": 1,
+          "title": "Output Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "output_sha256",
+        "output_bytes"
+      ],
+      "title": "TrialCandidate",
+      "type": "object"
+    },
+    "TrialFailingRow": {
+      "additionalProperties": false,
+      "description": "A row the rule failed: computed beyond the limit, or not computed under `not_computed: required`.",
+      "properties": {
+        "key": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "description": "The row's identity under the rule; well-residual-within/1: wellbore, occurrence",
+          "maxProperties": 4,
+          "title": "Key",
+          "type": "object"
+        },
+        "measure": {
+          "description": "The rule's word for the value (residual)",
+          "maxLength": 40,
+          "pattern": "^[a-z][a-z_]*$",
+          "title": "Measure",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "In `unit`, with its sign; null for a row not computed",
+          "title": "Value"
+        },
+        "unit": {
+          "enum": [
+            "m",
+            "ft"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "limit": {
+          "description": "The tolerance, in `unit`",
+          "minimum": 0,
+          "title": "Limit",
+          "type": "number"
+        },
+        "pass": {
+          "const": false,
+          "title": "Pass",
+          "type": "boolean"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The row's reason when it was not computed",
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "key",
+        "measure",
+        "value",
+        "unit",
+        "limit",
+        "pass",
+        "reason"
+      ],
+      "title": "TrialFailingRow",
+      "type": "object"
+    },
+    "TrialNotCompared": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/CheckedOutcome"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "would": {
+          "const": "not_compared",
+          "title": "Would",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "no_validity",
+            "unit_mismatch",
+            "nothing_computed",
+            "data_rule_missing",
+            "data_rule_unread"
+          ],
+          "title": "Reason",
+          "type": "string"
+        },
+        "sentence": {
+          "title": "Sentence",
+          "type": "null"
+        },
+        "rows": {
+          "$ref": "#/$defs/TrialRows"
+        },
+        "data_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckedDataRules"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "measures": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CheckMeasure"
+              },
+              "maxItems": 16,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E178 s2b: the numbers the evaluation counted, as its record keeps them; absent when an earlier gate failed",
+          "title": "Measures"
+        }
+      },
+      "required": [
+        "outcome",
+        "label",
+        "would",
+        "reason",
+        "sentence",
+        "rows",
+        "data_rules"
+      ],
+      "title": "TrialNotCompared",
+      "type": "object"
+    },
+    "TrialNotComputedRow": {
+      "additionalProperties": false,
+      "description": "A row the result did not compute; it passes exactly under `not_computed: allowed`.",
+      "properties": {
+        "key": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "maxProperties": 4,
+          "title": "Key",
+          "type": "object"
+        },
+        "measure": {
+          "maxLength": 40,
+          "pattern": "^[a-z][a-z_]*$",
+          "title": "Measure",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "null"
+        },
+        "unit": {
+          "enum": [
+            "m",
+            "ft"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "limit": {
+          "minimum": 0,
+          "title": "Limit",
+          "type": "number"
+        },
+        "pass": {
+          "title": "Pass",
+          "type": "boolean"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "measure",
+        "value",
+        "unit",
+        "limit",
+        "pass",
+        "reason"
+      ],
+      "title": "TrialNotComputedRow",
+      "type": "object"
+    },
+    "TrialNotEvaluated": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/CheckedOutcome"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "would": {
+          "const": "not_evaluated",
+          "title": "Would",
+          "type": "string"
+        },
+        "reason": {
+          "const": "declarer_cannot_read",
+          "title": "Reason",
+          "type": "string"
+        },
+        "sentence": {
+          "maxLength": 300,
+          "pattern": "^Would\\ not\\ be\\ evaluated:\\ the\\ person\\ who\\ declared\\ this\\ outcome\\ cannot\\ read\\ .+\\.$",
+          "title": "Sentence",
+          "type": "string"
+        },
+        "rows": {
+          "title": "Rows",
+          "type": "null"
+        },
+        "data_rules": {
+          "title": "Data Rules",
+          "type": "null"
+        }
+      },
+      "required": [
+        "outcome",
+        "label",
+        "would",
+        "reason",
+        "sentence",
+        "rows",
+        "data_rules"
+      ],
+      "title": "TrialNotEvaluated",
+      "type": "object"
+    },
+    "TrialNotTried": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/CheckedOutcome"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "would": {
+          "const": "not_tried",
+          "title": "Would",
+          "type": "string"
+        },
+        "reason": {
+          "const": "tool_rule",
+          "title": "Reason",
+          "type": "string"
+        },
+        "sentence": {
+          "const": "Not tried: this outcome's rule is a tool, which runs only after publication.",
+          "title": "Sentence",
+          "type": "string"
+        },
+        "rows": {
+          "title": "Rows",
+          "type": "null"
+        },
+        "data_rules": {
+          "title": "Data Rules",
+          "type": "null"
+        }
+      },
+      "required": [
+        "outcome",
+        "label",
+        "would",
+        "reason",
+        "sentence",
+        "rows",
+        "data_rules"
+      ],
+      "title": "TrialNotTried",
+      "type": "object"
+    },
+    "TrialRejected": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/CheckedOutcome"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "would": {
+          "const": "rejected",
+          "title": "Would",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "rows_missing",
+                "rows_unexpected",
+                "rows_duplicated",
+                "rows_mismatched",
+                "inputs",
+                "data_rule"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Null when rows failed the rule; otherwise validity, inputs or a named data rule",
+          "title": "Reason"
+        },
+        "sentence": {
+          "title": "Sentence",
+          "type": "null"
+        },
+        "rows": {
+          "$ref": "#/$defs/TrialRows"
+        },
+        "data_rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckedDataRules"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "measures": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CheckMeasure"
+              },
+              "maxItems": 16,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E178 s2b: the numbers the evaluation counted, as its record keeps them; absent when an earlier gate failed",
+          "title": "Measures"
+        }
+      },
+      "required": [
+        "outcome",
+        "label",
+        "would",
+        "reason",
+        "sentence",
+        "rows",
+        "data_rules"
+      ],
+      "title": "TrialRejected",
+      "type": "object"
+    },
+    "TrialRows": {
+      "additionalProperties": false,
+      "properties": {
+        "computed": {
+          "minimum": 0,
+          "title": "Computed",
+          "type": "integer"
+        },
+        "passing": {
+          "description": "Under not_computed: allowed a row not computed passes, so passing may exceed computed",
+          "minimum": 0,
+          "title": "Passing",
+          "type": "integer"
+        },
+        "failing_count": {
+          "description": "Every failing row; `failing` lists the first 20 in the rule's order",
+          "minimum": 0,
+          "title": "Failing Count",
+          "type": "integer"
+        },
+        "failing": {
+          "items": {
+            "$ref": "#/$defs/TrialFailingRow"
+          },
+          "maxItems": 20,
+          "title": "Failing",
+          "type": "array"
+        },
+        "not_computed": {
+          "items": {
+            "$ref": "#/$defs/TrialNotComputedRow"
+          },
+          "maxItems": 20,
+          "title": "Not Computed",
+          "type": "array"
+        }
+      },
+      "required": [
+        "computed",
+        "passing",
+        "failing_count",
+        "failing",
+        "not_computed"
+      ],
+      "title": "TrialRows",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "What a candidate result would meet, per enabled outcome of its kind, were it published; a trial writes nothing.",
+  "else": {
+    "properties": {
+      "sentence": {
+        "type": "null"
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "outcomes": {
+        "maxItems": 0
+      }
+    }
+  },
+  "properties": {
+    "schema": {
+      "const": "ophiolite.outcome-trial/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "trial": {
+      "const": true,
+      "title": "Trial",
+      "type": "boolean"
+    },
+    "kind": {
+      "description": "The header's profile: the result kind the outcomes are declared over",
+      "maxLength": 80,
+      "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+      "title": "Kind",
+      "type": "string"
+    },
+    "candidate": {
+      "$ref": "#/$defs/TrialCandidate"
+    },
+    "inputs": {
+      "description": "The run's bound input versions, every outcome evaluated over them",
+      "items": {
+        "$ref": "#/$defs/CheckedInput"
+      },
+      "maxItems": 4096,
+      "title": "Inputs",
+      "type": "array"
+    },
+    "at": {
+      "title": "At",
+      "type": "number"
+    },
+    "sentence": {
+      "anyOf": [
+        {
+          "const": "No outcome is declared for this kind.",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sentence"
+    },
+    "outcomes": {
+      "description": "One per enabled outcome of the kind (or of outcome_ids), in outcome id order; no maximum",
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "accepted": "#/$defs/TrialAccepted",
+            "not_compared": "#/$defs/TrialNotCompared",
+            "not_evaluated": "#/$defs/TrialNotEvaluated",
+            "not_tried": "#/$defs/TrialNotTried",
+            "rejected": "#/$defs/TrialRejected"
+          },
+          "propertyName": "would"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/TrialAccepted"
+          },
+          {
+            "$ref": "#/$defs/TrialRejected"
+          },
+          {
+            "$ref": "#/$defs/TrialNotCompared"
+          },
+          {
+            "$ref": "#/$defs/TrialNotEvaluated"
+          },
+          {
+            "$ref": "#/$defs/TrialNotTried"
+          }
+        ]
+      },
+      "title": "Outcomes",
+      "type": "array"
+    },
+    "seal": {
+      "anyOf": [
+        {
+          "maxLength": 4096,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "E176 s2a: this deployment's seal over the answer without it, so an assistant can attach the trial to its proposal of the run; integrity only, it grants nothing",
+      "title": "Seal"
+    }
+  },
+  "required": [
+    "schema",
+    "trial",
+    "kind",
+    "candidate",
+    "inputs",
+    "at",
+    "sentence",
+    "outcomes"
+  ],
+  "then": {
+    "properties": {
+      "sentence": {
+        "const": "No outcome is declared for this kind."
+      }
+    }
+  },
+  "title": "OutcomeTrial",
+  "type": "object"
+}

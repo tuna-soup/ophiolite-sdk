@@ -50,7 +50,8 @@ import time
 import uuid
 from typing import Annotated, List, Literal, Optional
 import httpx
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+from .models.answers import Answer, refusal  # E187 s0: the job and dry-run mirrors keep a field they do not know
 from . import _client_header  # E93
 from . import _deprecation  # E148
 from . import _genai  # E95
@@ -68,7 +69,8 @@ CHANGES = ('applications/configure', 'applications/start', 'applications/publish
            'well-imports/preview', 'well-imports/start', 'well-imports/step',  # E153 s1b: a database table's import
            'sources/mapping-save', 'layouts/save', 'layouts/keep',  # E153 s1b: the saves of picks the person settled
            'org-connections/request', 'org-connections/request-withdraw',  # E154 s0: a secret-free request for its person; withdraw its own
-           'sources/bind')  # E154 s1: a link job's last step; the person confirms the link, the source is kept at the reviewed version
+           'sources/bind',  # E154 s1: a link job's last step; the person confirms the link, the source is kept at the reviewed version
+           'chains/declare', 'chains/revise', 'chain-runs/start', 'chain-runs/attach')  # E178 s0: declared proposable; the server answers "not yet" until slices 1-2
 # E153 s1: table-imports/read is proposable, but its bytes go with a job (propose_job / run_job files=), never a single proposal.
 
 # E166 s0 (D3): the gateway's tool-run-refused sentences (reason -> sentence, in its order), the SDK's one copy; E155 and
@@ -86,24 +88,20 @@ NAMESPACE = uuid.UUID('f527b633-0784-5370-8bbf-06ac165826a8')  # E151 s2: publis
 FILE_STEPS = frozenset({'table-imports/read'})  # E153 s1: job steps whose bytes go to their own route (X-Ophiolite-Job-Step)
 
 
-class _Strict(BaseModel):
-    model_config = ConfigDict(extra='forbid', strict=True)
-
-
-class JobChoice(_Strict):
+class JobChoice(Answer):
     """E151 s2: one offered choice of a waiting job (job-schema.json $defs/choice)."""
     id: Annotated[str, Field(pattern=r'^c[1-8]$')]
     fragment: Annotated[dict, Field(max_length=16)]
 
 
-class JobStep(_Strict):
+class JobStep(Answer):
     """E151 s2: one step of a job as jobs/status shows it (job-schema.json $defs/step)."""
     operation: Annotated[str, Field(pattern=r'^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*$')]
     state: Literal['pending', 'reserved', 'completed']
     answer_sha256: Optional[Annotated[str, Field(pattern=r'^[0-9a-f]{64}$')]]
 
 
-class JobStatus(_Strict):
+class JobStatus(Answer):
     """E151 s2: the answer of jobs/status, mirroring the synced ophiolite.agent-job/1 (job-schema.json); the optional
     fields may be absent, never null. Checked without the optional `validation` extra (tests/test_agent_jobs_sdk.py)."""
     plan: Annotated[str, Field(pattern=r'^[0-9a-f]{64}$')]
@@ -117,7 +115,7 @@ class JobStatus(_Strict):
     review_url: Annotated[str, Field(min_length=1, max_length=2048)]
 
 
-class DryEffect(_Strict):
+class DryEffect(Answer):
     """E150 s1: one effect the real call would have (dry-run-schema.json $defs/effect)."""
     action: Literal['create', 'change', 'remove']
     kind: Annotated[str, Field(pattern=r'^[a-z][a-z-]{0,31}$')]
@@ -125,23 +123,23 @@ class DryEffect(_Strict):
     label: Annotated[str, Field(min_length=1, max_length=200)] = None
 
 
-class DryRefusal(_Strict):
+class DryRefusal(Answer):
     """E150 s1: the operation's own refusal, answered inside `would` (dry-run-schema.json $defs/refusal)."""
     code: Annotated[str, Field(pattern=r'^[A-Za-z][A-Za-z0-9_-]{0,63}$')]
     message: Annotated[str, Field(min_length=1, max_length=500)]
     reason: Annotated[str, Field(pattern=r'^[a-z][a-z0-9-]{0,63}$')] = None
 
 
-class DryWould(_Strict):
+class DryWould(Answer):
     outcome: Literal['proceeds', 'refused']
     effects: Annotated[List[DryEffect], Field(max_length=64)]
     refusal: DryRefusal = None
 
 
-class DryRun(_Strict):
+class DryRun(Answer):
     """E150 s1: the answer of a dry run, mirroring the synced ophiolite.agent-dry-run/1 (dry-run-schema.json). `would`
     is what the same request would do; nothing was kept. `digest` names exactly this dry run."""
-    model_config = ConfigDict(extra='forbid', strict=True, populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
     schema_: Literal['ophiolite.agent-dry-run/1'] = Field(alias='schema')
     dry_run: Literal[True]
     operation: Annotated[str, Field(pattern=r'^[a-z0-9-]+/[a-z0-9-]+$', max_length=128)]
@@ -311,7 +309,7 @@ class AgentClient:
         answer = self._post(area, name, {**request, 'dry_run': True}, raw=raw)
         from pydantic import ValidationError
         try: dry = DryRun.model_validate(answer)
-        except ValidationError: raise VerificationFailed('The dry run does not satisfy ophiolite.agent-dry-run/1.') from None
+        except ValidationError as error: raise refusal(error, VerificationFailed('The dry run does not satisfy ophiolite.agent-dry-run/1.')) from None
         if (dry.operation, dry.project_id) != (operation, self.project): raise VerificationFailed('The dry run names another operation or project.')
         return dry
 
@@ -416,7 +414,7 @@ class AgentClient:
         answer = self._post('jobs', 'status', {'plan': plan})
         from pydantic import ValidationError
         try: JobStatus.model_validate(answer)
-        except ValidationError: raise VerificationFailed('The job status does not satisfy ophiolite.agent-job/1.') from None
+        except ValidationError as error: raise refusal(error, VerificationFailed('The job status does not satisfy ophiolite.agent-job/1.')) from None
         if answer.get('plan') != plan: raise VerificationFailed('The job status names another plan.')
         return answer
 

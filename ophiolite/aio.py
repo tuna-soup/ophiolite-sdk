@@ -12,7 +12,7 @@ from . import _deprecation  # E148
 from . import _ranges  # E100d1
 from .client import Client, CurveSet, PROFILES
 from .client import (PROVENANCE_BYTES,NO_SOURCE_RECORDS,_provenance_path,_provenance_of,_no_provenance_route,  # E122 s5b
-                     _source_record_of,_warn_source_records_omitted)
+                     _parts_of,_warn_source_records_omitted)
 from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,IntegrityConflict,
                      CapacityExceeded,Refused,Incompatible,Busy,VerificationFailed,OphioliteError)
 
@@ -34,12 +34,13 @@ async def _complete(awaitable):
 
 
 class AsyncClient(Client):
-    def __init__(self,url,project,credential=None,http=None):
+    def __init__(self,url,project,credential=None,http=None,*,application=None,host=None):
         # Validate before allocating a transport; the inherited configuration and
         # path builders are pure and shared with the synchronous client.
         _core.origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
-        super().__init__(url,project,credential,http or httpx.AsyncClient(timeout=60,follow_redirects=False,trust_env=False))
+        _client_header.sender(application,host)  # E182 s1: refused before a transport exists
+        super().__init__(url,project,credential,http or httpx.AsyncClient(timeout=60,follow_redirects=False,trust_env=False),application=application,host=host)
         self._owns_http=http is None
         self._credential_lock=anyio.Lock()
 
@@ -58,8 +59,8 @@ class AsyncClient(Client):
                     partial(self.credential.headers,self.url,self.project),abandon_on_cancel=False)
 
     async def _headers(self):
-        if self.credential is None:return _client_header.stamp({})  # E93
-        return _client_header.stamp(await _complete(self._credential_transaction()))
+        if self.credential is None:return _client_header.stamp({},self._sender)  # E93, E182 s1
+        return _client_header.stamp(await _complete(self._credential_transaction()),self._sender)
 
     async def _get(self,path,limit,*,ranged=None,answer=None):
         headers=await self._headers()
@@ -232,7 +233,7 @@ class AsyncClient(Client):
         volume=await self.read_data(asset,revision)
         read=[await self.read_slice(asset,revision,axis,label,volume=volume) for axis,label in chosen]
         state={}
-        volume.source_record=await self._source_record(asset,revision,state)  # E122 s5b
+        volume.source_record,volume.sender=await self._provenance_parts(asset,revision,state)  # E122 s5b; E182 s2b
         _warn_source_records_omitted(state.get('omitted'))
         return await anyio.to_thread.run_sync(lambda:write_bundle(destination,[({'asset_id':asset,'revision':revision,'curves':[],'slices':[{'axis':a,'label':l} for a,l in chosen]},(volume,read))],
                                                                   source_records_omitted=state.get('omitted')))
@@ -241,13 +242,14 @@ class AsyncClient(Client):
         """E122 s5b: same as Client.provenance, awaited."""
         return _provenance_of(await self._json(_provenance_path(self.prefix,asset,revision),PROVENANCE_BYTES),asset,revision)
 
-    async def _source_record(self,asset,revision,state):
-        if state.get('omitted'):return None
+    async def _provenance_parts(self,asset,revision,state):
+        """Same as Client._provenance_parts, awaited."""
+        if state.get('omitted'):return None,None
         try:found=await self.provenance(asset,revision)
         except Unavailable as error:
             if not _no_provenance_route(error):raise
-            state['omitted']=NO_SOURCE_RECORDS;return None
-        return _source_record_of(found)
+            state['omitted']=NO_SOURCE_RECORDS;return None,None
+        return _parts_of(found)
 
     async def read_many(self,selections,**options):
         results=[None]*len(selections)
@@ -270,7 +272,7 @@ class AsyncClient(Client):
         if expected_context is not None and (url,project)!=expected_context:raise RecoveryUnavailable('The gateway or project changed during this operation.')
         path=planning.operation_path(project,area,operation)
         if extra_headers and any(key.lower() not in ('content-type','x-ophiolite-upload') for key in extra_headers):raise Refused('Saved request headers cannot replace authorization.')
-        captured=_client_header.stamp(await self._headers() if headers is None else headers)
+        captured=_client_header.stamp(await self._headers() if headers is None else headers,self._sender)
         captured.update(extra_headers or {'Content-Type':'application/json'})
         attempts=3 if operation!='share' and (retry or operation in planning.READ_OPERATIONS) else 1
         for attempt in range(attempts):
@@ -302,7 +304,7 @@ class AsyncClient(Client):
         try:
             async with self.http.stream('POST',self.url+'/api/v1/application-access/status',
                  content=json_bytes({'id':headers['X-Ophiolite-Application-Grant']}),
-                 headers=_client_header.stamp({**headers,'Content-Type':'application/json'}),follow_redirects=False) as response:
+                 headers=_client_header.stamp({**headers,'Content-Type':'application/json'},self._sender),follow_redirects=False) as response:
                 _deprecation.note(_deprecation.of(self),'POST',self.url+'/api/v1/application-access/status',response)
                 policy.status(response,'status',None if response.is_success else await policy.bounded(response));raw=bytearray()
                 async for chunk in response.aiter_bytes():
@@ -332,6 +334,10 @@ class AsyncClient(Client):
     async def holder_pages(self,item=None,*,limit=None):
         """E171 s1: every page of exchange/holders, as a list; see Client.holder_pages()."""
         return await self._listed('holder_pages',item,limit=limit)
+
+    async def affected_pages(self,item,*,against='head',limit=None):
+        """E177 s1: every page of changes/affected, as a list; see Client.affected_pages()."""
+        return await self._listed('affected_pages',item,against=against,limit=limit)
 
     async def survey_pages(self,survey_id,revision=None,*,view='revision',limit=None):
         """E142 s1: every page of one survey revision, as a list; see Client.survey_pages()."""
@@ -377,6 +383,7 @@ class _ApplicationDriver(Client):
         self.owner=client
         self.url,self.project,self.prefix=client.url,client.project,client.prefix
         self.credential,self.http,self._owns_http=client.credential,client.http,False
+        self._sender=client._sender  # E182 s1: the owner's name on the requests this driver plans
 
     def _post_bytes(self,area,operation,raw,**options):
         # Acquire the credential in this worker, not a nested worker. A work-folder
@@ -420,7 +427,9 @@ for _name in ('configure','start','run_input','publish','download','results','hi
               'survey','create_survey','add_survey_members','remove_survey_members','replace_survey_member','relate_survey_members',
               'unrelate_survey_members','rename_survey','identify_survey','withdraw_survey',  # E142 s1
               'restate_survey','link_survey_members',  # E142 s2a
-              'holders'):  # E171 s1
+              'holders',  # E171 s1
+              'affected',  # E177 s1
+              'receipts'):  # E184 s0a
     setattr(AsyncClient,_name,_async_application(_name))
 for _name in ('configure','start','input','publish','download','upload_las','recover'):
     setattr(AsyncWorkFolder,_name,_async_work(_name))

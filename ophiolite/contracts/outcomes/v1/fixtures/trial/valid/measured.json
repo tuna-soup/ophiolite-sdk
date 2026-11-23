@@ -1,0 +1,54 @@
+{
+  "schema": "ophiolite.outcome-trial/1",
+  "trial": true,
+  "kind": "well-residual/1",
+  "candidate": {"output_sha256": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210", "output_bytes": 2048},
+  "inputs": [
+    {"slot": "selection", "asset_id": "well-set-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "surface", "asset_id": "surface-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "tops", "asset_id": "tops-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "trajectories", "asset_id": "trajectories-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+  ],
+  "at": 1795000000.0,
+  "sentence": null,
+  "outcomes": [
+    {
+      "outcome": {"id": "tops-within-1m", "version": 1, "rule": "well-residual-within/1", "settings_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+      "label": "Tops within 1 m",
+      "would": "rejected",
+      "reason": null,
+      "sentence": null,
+      "rows": {
+        "computed": 3, "passing": 2, "failing_count": 1,
+        "failing": [
+          {"key": {"wellbore": "W-2", "occurrence": 0}, "measure": "residual", "value": -1.75, "unit": "m", "limit": 1.0, "pass": false, "reason": null}
+        ],
+        "not_computed": []
+      },
+      "data_rules": null,
+      "measures": [
+        {"name": "computed", "value": 3, "unit": null},
+        {"name": "failing", "value": 1, "unit": null},
+        {"name": "largest_residual", "value": 1.75, "unit": "m"},
+        {"name": "not_computed", "value": 0, "unit": null},
+        {"name": "passing", "value": 2, "unit": null}
+      ]
+    },
+    {
+      "outcome": {"id": "tops-within-5m", "version": 2, "rule": "well-residual-within/1", "settings_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+      "label": "Tops within 5 m",
+      "would": "accepted",
+      "reason": null,
+      "sentence": null,
+      "rows": {"computed": 3, "passing": 3, "failing_count": 0, "failing": [], "not_computed": []},
+      "data_rules": null,
+      "measures": [
+        {"name": "computed", "value": 3, "unit": null},
+        {"name": "failing", "value": 0, "unit": null},
+        {"name": "largest_residual", "value": 1.75, "unit": "m"},
+        {"name": "not_computed", "value": 0, "unit": null},
+        {"name": "passing", "value": 3, "unit": null}
+      ]
+    }
+  ]
+}

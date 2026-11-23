@@ -1,0 +1,29 @@
+{
+  "label": "ophiolite.transfer-receipt/1: one defect per rule (E184 s0). Each case edits one valid fixture (`document`): `set` replaces the value at a path, `append` adds a row to a list. `schema` cases are refused by the published schema at exactly the JSON paths in `fails`, and by the model; `model` cases pass the schema and are refused by the model's cross-field rules and its 2,048-byte ceiling (`over` is transfer-receipt-max.json one byte longer); `codes` cases pass both and are refused against the code document with exactly `refusal` (UNLISTED or SHAPE) and `technical`.",
+  "schema": [
+    {"name": "count-negative", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["kept", 0, "count"], -1]], "fails": ["$.kept[0].count"]},
+    {"name": "count-string", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["kept", 0, "count"], "16"]], "fails": ["$.kept[0].count"]},
+    {"name": "count-null", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["kept", 0, "count"], null]], "fails": ["$.kept[0].count"]},
+    {"name": "nine-rows", "document": "transfer-receipt-max.json", "append": [[["kept"], {"code": "kept-9", "sentence": "Row 9"}]], "fails": ["$.kept"]},
+    {"name": "unknown-list", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["lost"], []]], "fails": ["$"]},
+    {"name": "fingerprint-129", "document": "transfer-receipt-max.json", "set": [[["fingerprints", "source"], "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"]], "fails": ["$.fingerprints.source"]},
+    {"name": "sentence-201", "document": "transfer-receipt-max.json", "set": [[["kept", 0, "sentence"], "Row 1...................................................................................................................................................................................................."]], "fails": ["$.kept[0].sentence"]}
+  ],
+  "model": [
+    {"name": "made-on-planned", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["made"], {"revision": "r1", "number": 1}]]},
+    {"name": "committed-without-made", "document": "transfer-receipt-horizon-send-committed.json", "set": [[["made"], null]]},
+    {"name": "get-without-base", "document": "transfer-receipt-horizon-get-committed.json", "set": [[["base"], null]]},
+    {"name": "get-makes-version", "document": "transfer-receipt-horizon-get-committed.json", "set": [[["made"], {"revision": "r2", "number": 2}]]},
+    {"name": "over", "document": "transfer-receipt-max.json", "set": [[["kept", 1, "sentence"], "Row 2."]]}
+  ],
+  "codes": [
+    {"name": "unlisted", "document": "transfer-receipt-horizon-send-planned.json", "append": [[["changed"], {"code": "z-step", "sentence": "x", "count": 1}]], "refusal": "UNLISTED", "technical": {"code": "z-step", "list": "changed"}},
+    {"name": "wrong-list", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["kept", 0, "code"], "grid-to-points"]], "refusal": "UNLISTED", "technical": {"code": "grid-to-points", "list": "kept"}},
+    {"name": "sentence-not-template", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["kept", 0, "count"], 15]], "refusal": "SHAPE", "technical": {"reason": "sentence", "code": "nodes-on-grid"}},
+    {"name": "measure-missing", "document": "transfer-receipt-horizon-get-committed.json", "set": [[["kept", 1], {"code": "crs", "sentence": "The coordinate system, EPSG:32631"}]], "refusal": "SHAPE", "technical": {"reason": "sentence", "code": "crs"}},
+    {"name": "twice", "document": "transfer-receipt-horizon-send-planned.json", "append": [[["not_carried"], {"code": "display-settings", "sentence": "The horizon's colour and display settings"}]], "refusal": "SHAPE", "technical": {"reason": "twice", "list": "not_carried"}},
+    {"name": "route-undeclared", "document": "transfer-receipt-qgis-read-planned.json", "set": [[["route"], {"profile": "geotiff/1", "data": "Raster", "direction": "publish"}]], "refusal": "SHAPE", "technical": {"reason": "route", "capability": "qgis", "route": {"profile": "geotiff/1", "data": "Raster", "direction": "publish"}}},
+    {"name": "codes-version", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["codes", "version"], "1.1.0"]], "refusal": "SHAPE", "technical": {"reason": "codes-version", "version": "1.1.0"}},
+    {"name": "contract-other", "document": "transfer-receipt-horizon-send-planned.json", "set": [[["contract"], "horizon-grid/1"]], "refusal": "SHAPE", "technical": {"reason": "contract-id", "contract": "horizon-grid/1"}}
+  ]
+}

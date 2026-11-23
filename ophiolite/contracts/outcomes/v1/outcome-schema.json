@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/outcomes/v1/outcome-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.outcome/1",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -66,6 +66,18 @@
           "default": null,
           "description": "E144 s4: the data rules (ophiolite.data-rules/1) run on the inputs before the built-in rule, sorted and once each; which may be named is the kind's `data_rules` (rules.json) and the server's check",
           "title": "Data Rules"
+        },
+        "tool": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OutcomeTool"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E179 s0: the verified tool version that judges the result, present exactly when the rule is tool-check/1; the digest is sent, never resolved by the server, and another digest is another outcome version"
         }
       },
       "required": [
@@ -73,6 +85,22 @@
         "settings"
       ],
       "title": "OutcomeRule",
+      "type": "object"
+    },
+    "OutcomeTool": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "description": "The SHA-256 digest of the catalogue procedure version (the outcome form of a check)",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "digest"
+      ],
+      "title": "OutcomeTool",
       "type": "object"
     }
   },

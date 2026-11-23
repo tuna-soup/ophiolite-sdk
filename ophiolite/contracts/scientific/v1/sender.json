@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/sender.json",
+  "x-ophiolite": {
+    "id": "ophiolite.sender/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "SenderClient": {
+      "additionalProperties": false,
+      "properties": {
+        "product": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Product"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        }
+      },
+      "required": [
+        "product",
+        "version"
+      ],
+      "title": "SenderClient",
+      "type": "object"
+    },
+    "SenderHost": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 40,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 40,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "SenderHost",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "What a version says sent it: a report, never a proof; no access, trust or verification decision reads it.",
+  "else": {
+    "if": {
+      "properties": {
+        "state": {
+          "const": "not recorded"
+        }
+      },
+      "required": [
+        "state"
+      ]
+    },
+    "properties": {
+      "client": {
+        "type": "null"
+      },
+      "host": {
+        "type": "null"
+      }
+    },
+    "then": {
+      "properties": {
+        "transport": {
+          "type": "null"
+        },
+        "accepted_as": {
+          "type": "null"
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "state": {
+        "const": "reported"
+      }
+    },
+    "required": [
+      "state"
+    ]
+  },
+  "properties": {
+    "schema": {
+      "const": "ophiolite.sender/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "reported",
+        "not reported",
+        "not recorded"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "client": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SenderClient"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "host": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SenderHost"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "transport": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9-]{0,15}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Transport"
+    },
+    "accepted_as": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Accepted As"
+    }
+  },
+  "required": [
+    "schema",
+    "state",
+    "client",
+    "host",
+    "transport",
+    "accepted_as"
+  ],
+  "then": {
+    "properties": {
+      "client": {
+        "type": "object"
+      }
+    }
+  },
+  "title": "Sender",
+  "type": "object"
+}

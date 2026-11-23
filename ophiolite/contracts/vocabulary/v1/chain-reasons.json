@@ -1,0 +1,53 @@
+{
+ "schema": "ophiolite.chain-reasons/1",
+ "id": "ophiolite.chain-reasons/1",
+ "description": "E178. `reasons`: why a chain declaration, an action on a chain or an act on a chain run was refused, one closed key each, one sentence each; nothing was stored (the HTTP status of each is the service's `chains.STATUS`). `selection` (E178 s2a): the sentence of the reason `selection` for each way a chain's selection cannot be used, one for a selection that is not a well set and one for a selection that does not exist or the caller cannot read, so existence is not disclosed; `reasons.selection` is the second. `job`: the sentence an assistant's job step is refused with when it works on a chain step whose earlier steps are not closed (E151 admission, slice 2). `states`: the words a person reads for each step state. `comparisons`: the words of each comparison a condition makes. A measure's words come from the outcome rules (ophiolite.outcome-rules/1 `measures`). Placeholders are in braces; no sentence carries a code.",
+ "reasons": {
+  "schema": "The chain does not have the chain's shape.",
+  "label": "A chain's name must read as words: letters and spaces, not an identifier.",
+  "steps": "The steps do not fit together: a step can follow, be made from or depend on only earlier steps of the chain.",
+  "measure": "That measure is not one the step's outcome records, or its unit does not fit it.",
+  "procedure": "There is no such tool in this project.",
+  "outcome": "There is no such outcome version, or it checks another kind of result than the tool makes.",
+  "outcome-moved": "This chain names version {n} of \"{outcome}\"; version {m} is current. Revise the chain to name it.",
+  "withdrawn": "This chain was withdrawn and cannot be changed or started.",
+  "label-taken": "Another chain of this project already has this name.",
+  "unchanged": "Nothing changed: this is the chain's current version.",
+  "disabled": "This chain is turned off; turn it on before starting it.",
+  "not-due": "This version is not due for this chain: it was already started or dismissed, or it is not one the chain starts for.",
+  "step-closed": "This step is already closed.",
+  "step-waits": "This step waits for an earlier step.",
+  "not-this-kind": "This cannot be done on this kind of step.",
+  "other-tool-version": "This result was made by another tool version than the one this run checked.",
+  "not-from-checked-version": "This result was not made from the version this run checks.",
+  "permission": "You do not have the right to do this in this project.",
+  "person-only": "Only a person can do this on a chain step.",
+  "not-found": "There is no such chain or run in this project.",
+  "selection": "The well set this chain names cannot be read: it does not exist, or you cannot open it."
+ },
+ "selection": {
+  "not-a-well-set": "The selection this chain names is not a well set; name a well set.",
+  "unreadable": "The well set this chain names cannot be read: it does not exist, or you cannot open it."
+ },
+ "job": "This job step works on chain step \"{step}\", which follows \"{earlier}\": {state words}.",
+ "states": {
+  "waiting-for-earlier": "Waits for an earlier step",
+  "open": "Open",
+  "not-checked": "Not checked yet",
+  "accepted": "Accepted",
+  "rejected": "Rejected",
+  "did-not-apply": "Did not apply: the {measure words} was {read} {unit}, not {comparison words} {value} {unit}",
+  "undecided": "Cannot be decided: the check did not record the {measure words}; a person decides",
+  "skipped": "Skipped by a person",
+  "chosen": "Answered",
+  "acknowledged": "Said to be done outside",
+  "continued": "Continued by a person despite the check"
+ },
+ "comparisons": {
+  "above": "above",
+  "at-least": "at least",
+  "below": "below",
+  "at-most": "at most",
+  "between": "between {low} and {high}"
+ }
+}

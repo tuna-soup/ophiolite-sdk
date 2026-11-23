@@ -3,10 +3,85 @@
   "$id": "https://ophiolite.dev/contracts/outcomes/v1/outcome-check-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.outcome-check/1",
-    "version": "1.1.0",
+    "version": "1.4.0",
     "lifecycle": "preview"
   },
   "$defs": {
+    "AnswerRow": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "description": "What the row is about, in the tool's words (a well and a top, a cell, a line)",
+          "maxLength": 80,
+          "minLength": 1,
+          "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+          "title": "Key",
+          "type": "string"
+        },
+        "measure": {
+          "description": "What was measured, in the tool's words",
+          "maxLength": 80,
+          "minLength": 1,
+          "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+          "title": "Measure",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The measured value, or null when there is none",
+          "title": "Value"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 16,
+              "minLength": 1,
+              "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The unit of value and limit, or null",
+          "title": "Unit"
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The limit the value was held to, or null",
+          "title": "Limit"
+        },
+        "pass": {
+          "description": "Whether this row meets the limit, as the tool judged it",
+          "title": "Pass",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "measure",
+        "value",
+        "unit",
+        "limit",
+        "pass"
+      ],
+      "title": "AnswerRow",
+      "type": "object"
+    },
     "CheckEvaluator": {
       "additionalProperties": false,
       "properties": {
@@ -26,6 +101,55 @@
         "rule_version"
       ],
       "title": "CheckEvaluator",
+      "type": "object"
+    },
+    "CheckMeasure": {
+      "additionalProperties": false,
+      "description": "E178 s0 (R1): one number the evaluation counted, named by its rule's `measures` (rules.json); a quantity in the\nresult's display unit without rounding, a count with no unit. A chain step's condition reads it (E178 design 4).",
+      "properties": {
+        "name": {
+          "maxLength": 41,
+          "pattern": "^[a-z][a-z0-9_]{0,40}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "description": "A quantity in `unit`, or a whole count when `unit` is null",
+          "title": "Value"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "enum": [
+                "m",
+                "ft"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The length unit of a quantity (the result's display unit); null for a count",
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "title": "CheckMeasure",
       "type": "object"
     },
     "CheckRows": {
@@ -205,19 +329,26 @@
           "type": "string"
         },
         "display_unit": {
-          "description": "The result's display unit, as the failing rows are told",
-          "enum": [
-            "m",
-            "ft"
+          "anyOf": [
+            {
+              "enum": [
+                "m",
+                "ft"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Display Unit",
-          "type": "string"
+          "default": null,
+          "description": "The result's display unit, as the failing rows are told; required for a built-in rule, absent for a tool rule (E179 s0)",
+          "title": "Display Unit"
         }
       },
       "required": [
         "asset_id",
-        "revision",
-        "display_unit"
+        "revision"
       ],
       "title": "CheckedResult",
       "type": "object"
@@ -350,6 +481,102 @@
         "severity"
       ],
       "title": "CheckedRuleResult",
+      "type": "object"
+    },
+    "CheckedTool": {
+      "additionalProperties": false,
+      "description": "E179 s0 (design 5): the tool version that judged, the box image selected for the evaluation, and how far it got:\n`admission` (no run started), `run` (the box stopped it, or no answer could be read) or `answer` (an answer was\nread). `label` and `version_number` are the manifest's inside the digest, so the record names the tool version\nwithout a catalogue read.",
+      "properties": {
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The box image selected for the evaluation; null when the server has none",
+          "title": "Image"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "version_number": {
+          "minimum": 1,
+          "title": "Version Number",
+          "type": "integer"
+        },
+        "stage": {
+          "enum": [
+            "admission",
+            "run",
+            "answer"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "answer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolAnswer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The answer read, at stage answer; null otherwise"
+        },
+        "explanation": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The tool's not_compared text, as it wrote it; null otherwise",
+          "title": "Explanation"
+        },
+        "job": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E179 s1 (Q1d, outcome-check 1.4.0): the runner job that ran the box; null at stage admission, where no job ran. Check jobs are not listed by jobs/list or jobs/get, so an administrator finds the run here; the id grants no read",
+          "title": "Job"
+        }
+      },
+      "required": [
+        "digest",
+        "image",
+        "label",
+        "version_number",
+        "stage",
+        "answer",
+        "explanation"
+      ],
+      "title": "CheckedTool",
       "type": "object"
     },
     "ContextVersion": {
@@ -513,6 +740,62 @@
       ],
       "title": "NotComputedRow",
       "type": "object"
+    },
+    "ToolAnswer": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "passed",
+            "failed",
+            "not_compared"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "rows": {
+          "$ref": "#/$defs/ToolAnswerRows"
+        }
+      },
+      "required": [
+        "state",
+        "rows"
+      ],
+      "title": "ToolAnswer",
+      "type": "object"
+    },
+    "ToolAnswerRows": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "failing_count": {
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Failing Count",
+          "type": "integer"
+        },
+        "listed": {
+          "description": "The first 20 rows as the tool wrote them",
+          "items": {
+            "$ref": "#/$defs/AnswerRow"
+          },
+          "maxItems": 20,
+          "title": "Listed",
+          "type": "array"
+        }
+      },
+      "required": [
+        "count",
+        "failing_count",
+        "listed"
+      ],
+      "title": "ToolAnswerRows",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -569,7 +852,21 @@
             "nothing_computed",
             "data_rule",
             "data_rule_unread",
-            "data_rule_missing"
+            "data_rule_missing",
+            "tool_not_trusted",
+            "tool_not_verified",
+            "tool_withdrawn",
+            "declarer_left",
+            "sandbox_unavailable",
+            "sandbox_off",
+            "tool_timeout",
+            "tool_memory",
+            "tool_crashed",
+            "answer_missing",
+            "answer_malformed",
+            "answer_oversized",
+            "tool_not_compared",
+            "inputs_unmatched"
           ],
           "type": "string"
         },
@@ -594,6 +891,35 @@
       ],
       "default": null,
       "description": "E144 s4: present exactly when the outcome version names data rules"
+    },
+    "measures": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/CheckMeasure"
+          },
+          "maxItems": 16,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "E178 s0 (R1): the numbers the evaluation counted, sorted by name, once each; written from E178 slice 2 when rows were computed, absent on an earlier record and when an earlier gate of the evaluation failed",
+      "title": "Measures"
+    },
+    "tool": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CheckedTool"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "E179 s0: present exactly when the outcome version's rule is tool-check/1"
     },
     "at": {
       "title": "At",

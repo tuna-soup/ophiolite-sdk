@@ -1,0 +1,25 @@
+{
+ "schema": "ophiolite.outcome-check/1",
+ "outcome": {"id": "outcome-tops-10m", "version": 1, "rule": "well-residual-within/1", "settings_sha256": "1111111111111111111111111111111111111111111111111111111111111111"},
+ "evaluator": {"contract": "outcome-evaluator/1", "rule_version": 1},
+ "result": {"asset_id": "residuals-a", "revision": "2222222222222222222222222222222222222222222222222222222222222222", "display_unit": "m"},
+ "publication": {"run": "run-1", "role": "residuals", "seq": 9},
+ "inputs": [
+  {"slot": "selection", "asset_id": "wells-a", "revision": "3333333333333333333333333333333333333333333333333333333333333333"},
+  {"slot": "surface", "asset_id": "surface-a", "revision": "4444444444444444444444444444444444444444444444444444444444444444"},
+  {"slot": "tops", "asset_id": "tops-a", "revision": "5555555555555555555555555555555555555555555555555555555555555555"},
+  {"slot": "trajectories", "asset_id": "trajectory-1", "revision": "6666666666666666666666666666666666666666666666666666666666666666"}
+ ],
+ "evaluated_as": {"person": "ana"},
+ "verdict": "accepted",
+ "reason": null,
+ "rows": {"computed": 3, "passing": 3, "failing_count": 0, "failing": [], "not_computed": []},
+ "measures": [
+  {"name": "computed", "value": 3, "unit": null},
+  {"name": "failing", "value": 0, "unit": null},
+  {"name": "largest_residual", "value": 5.0, "unit": "m"},
+  {"name": "not_computed", "value": 0, "unit": null},
+  {"name": "passing", "value": 3, "unit": null}
+ ],
+ "at": 1795600000.0
+}

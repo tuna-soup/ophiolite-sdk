@@ -8,7 +8,7 @@ import httpx
 import pytest
 from ophiolite import Client, Credential, publish
 from ophiolite.errors import ChoiceRefused, PermissionRefused, Refused, VerificationFailed
-from ophiolite.publish import JOB_OPERATIONS, Proposal, ProposalChoice, ProposalEvidence, Proposals, operation_path
+from ophiolite.publish import JOB_OPERATIONS, Proposal, ProposalChoice, ProposalEvidence, Proposals, ProposalTrial, ProposalTrialInput, operation_path
 
 V1 = Path(__file__).resolve().parents[1] / 'ophiolite' / 'contracts' / 'agents' / 'v1'
 SCHEMA = json.loads((V1 / 'proposals-schema.json').read_text())
@@ -59,12 +59,21 @@ def test_proposals_posts_the_project_and_returns_the_list():
     assert gateway.requests == [('/api/v1/projects/p/agents/proposals', {'project_id': 'p'})]
     assert person(Recorder({'proposals': []})).proposals() == []
     assert person(Recorder({'proposals': [WAITING]})).proposals() == [WAITING]
+    # E176 s2a: a proposal whose newest evidence record came with a trial (the gateway's words; "not tried" alike)
+    trial = {'state': 'tried', 'as_of': 1.5, 'current': False, 'inputs': [{'slot': 'tops', 'name': 'Tops A', 'version': 2}],
+             'lines': ['Tops within 5 m: would be rejected: 1 row over 5 m']}
+    for shown in (trial, {'state': 'not_tried', 'as_of': None, 'current': False, 'inputs': [], 'lines': ['Not tried: the attached trial could not be confirmed.']}):
+        entry = {**FIXTURE['proposals'][1], 'trial': shown}
+        assert person(Recorder({'proposals': [entry]})).proposals() == [entry]
+    # E187 s0 (was the 'extra-key' refusal): a field this release does not know is kept, at the top and in an entry
+    added = {**FIXTURE['proposals'][1], 'later': {'x': 1}}
+    assert person(Recorder({'proposals': [added], 'more': True})).proposals() == [added]
 
 
 @pytest.mark.parametrize('envelope', [
     [], 'proposals', None, {}, {'proposals': None}, {'proposals': {}}, {'proposals': FIXTURE['proposals'][0]},
-    {'proposals': [], 'more': True}, {'proposals': [FIXTURE['proposals'][1]] * 201},
-], ids=['list', 'string', 'null', 'empty', 'null-list', 'object-list', 'entry-not-in-list', 'extra-key', 'over-200'])
+    {'proposals': [FIXTURE['proposals'][1]] * 201},
+], ids=['list', 'string', 'null', 'empty', 'null-list', 'object-list', 'entry-not-in-list', 'over-200'])
 def test_a_malformed_envelope_is_verification_failed(envelope):
     """Mutation: proposals not validated → each of these passes (or fails with another class)."""
     with pytest.raises(VerificationFailed) as failed: person(Recorder(envelope)).proposals()
@@ -83,19 +92,20 @@ def changed(**fields):
     changed(review_url=KeyError), changed(evidence=KeyError), changed(plan='A1' * 32), changed(operation='Jobs/run'),
     changed(summary='x' * 2001), changed(budget={'runs': -1}), changed(budget={'runs': True}), changed(expires_at='soon'),
     changed(question=None), changed(question=''), changed(choices=[WAITING['choices'][0]]), changed(choices=[{'id': 'c9', 'fragment': {}}] * 2),
-    changed(choice_token='ct1.' + 'short'), changed(evidence={'id': 'ev', 'generation': 0, 'digest': '0' * 64}), changed(by='agent'), 'entry',
+    changed(choice_token='ct1.' + 'short'), changed(evidence={'id': 'ev', 'generation': 0, 'digest': '0' * 64}), 'entry',
 ], ids=['no-review-url', 'no-evidence', 'plan-case', 'operation-case', 'long-summary', 'negative-budget', 'bool-budget', 'expiry-text',
-        'null-question', 'empty-question', 'one-choice', 'choice-id', 'token', 'evidence-generation', 'extra-field', 'not-an-object'])
+        'null-question', 'empty-question', 'one-choice', 'choice-id', 'token', 'evidence-generation', 'not-an-object'])  # E187 s0: 'extra-field' is read now (test above)
 def test_a_malformed_entry_is_verification_failed(entry):
     with pytest.raises(VerificationFailed) as failed: person(Recorder({'proposals': [FIXTURE['proposals'][1], entry]})).proposals()
     assert type(failed.value) is VerificationFailed and failed.value.code == 'verification-failed'
 
 
 @pytest.mark.parametrize('model,where', [(Proposals, None), (Proposal, 'proposal'), (ProposalChoice, 'choice'),
-                                         (ProposalEvidence, 'evidence')])
+                                         (ProposalEvidence, 'evidence'), (ProposalTrial, 'trial'), (ProposalTrialInput, 'trial-input')])
 def test_the_proposals_model_mirrors_the_synced_schema(model, where):
     """Mutation: a field dropped from Proposal (or made optional) → red. The check needs no `validation` extra."""
     if where == 'evidence': schema = SCHEMA['$defs']['proposal']['properties']['evidence']['anyOf'][0]
+    elif where == 'trial-input': schema = SCHEMA['$defs']['trial']['properties']['inputs']['items']
     else: schema = SCHEMA['$defs'][where] if where else SCHEMA
     fields = set(model.model_fields)
     required = {name for name, f in model.model_fields.items() if f.is_required()}

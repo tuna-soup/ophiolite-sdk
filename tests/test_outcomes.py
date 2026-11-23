@@ -40,8 +40,8 @@ def test_the_residual_declaration_names_data_rules_only_when_asked():
     assert list(outcomes.residual_declaration('Tops within 5 m', 5, 'm', 'tops-to-team-database', 'Team database')['rule']) == ['name', 'settings']
 
 
-@pytest.mark.parametrize('operation', ['declare', 'revise', 'enable', 'disable', 'withdraw', 'list', 'get', 'states', 'evaluate', 'deliver-as', 'claims'])
-def test_the_eleven_outcome_operations_have_their_paths(operation):  # E120 s1: states and evaluate; s3: deliver-as and claims
+@pytest.mark.parametrize('operation', ['declare', 'revise', 'enable', 'disable', 'withdraw', 'list', 'get', 'states', 'evaluate', 'deliver-as', 'claims', 'try'])
+def test_the_twelve_outcome_operations_have_their_paths(operation):  # E120 s1: states and evaluate; s3: deliver-as and claims; E176 s1: try
     assert operation_path('p one', 'outcomes', operation) == '/api/v1/projects/p%20one/outcomes/' + operation
 
 

@@ -31,7 +31,7 @@
       "properties": {
         "slot": {"$ref": "#/$defs/identifier"},
         "label": {"$ref": "#/$defs/text"},
-        "class": {"enum": ["file", "system", "version", "reference"]},
+        "class": {"enum": ["file", "system", "version", "reference", "result"]},
         "signature": {
           "type": "object",
           "additionalProperties": false,
@@ -55,7 +55,7 @@
       "properties": {
         "role": {"$ref": "#/$defs/identifier"},
         "label": {"$ref": "#/$defs/text"},
-        "class": {"enum": ["version", "delivery", "comparison"]},
+        "class": {"enum": ["version", "delivery", "comparison", "answer"]},
         "kind": {"type": "string"}
       }
     },

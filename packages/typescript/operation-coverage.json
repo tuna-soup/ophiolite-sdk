@@ -960,6 +960,114 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/acknowledge",
+    "function": "postProjectsProjectChainRunsAcknowledge",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/attach",
+    "function": "postProjectsProjectChainRunsAttach",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/choose",
+    "function": "postProjectsProjectChainRunsChoose",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/continue",
+    "function": "postProjectsProjectChainRunsContinue",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/decide",
+    "function": "postProjectsProjectChainRunsDecide",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/get",
+    "function": "postProjectsProjectChainRunsGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/list",
+    "function": "postProjectsProjectChainRunsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/start",
+    "function": "postProjectsProjectChainRunsStart",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/declare",
+    "function": "postProjectsProjectChainsDeclare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/disable",
+    "function": "postProjectsProjectChainsDisable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/dismiss",
+    "function": "postProjectsProjectChainsDismiss",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/due",
+    "function": "postProjectsProjectChainsDue",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/enable",
+    "function": "postProjectsProjectChainsEnable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/get",
+    "function": "postProjectsProjectChainsGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/list",
+    "function": "postProjectsProjectChainsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/revise",
+    "function": "postProjectsProjectChainsRevise",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chains/withdraw",
+    "function": "postProjectsProjectChainsWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/changes/affected",
+    "function": "postProjectsProjectChangesAffected",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/changes/head",
     "function": "postProjectsProjectChangesHead",
     "request": "schema",
@@ -1202,6 +1310,18 @@
   {
     "operation": "POST /api/v1/projects/{project}/exchange/holders",
     "function": "postProjectsProjectExchangeHolders",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/exchange/host-report",
+    "function": "postProjectsProjectExchangeHostReport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/exchange/receipts",
+    "function": "postProjectsProjectExchangeReceipts",
     "request": "schema",
     "response": "schema"
   },
@@ -1698,6 +1818,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/outcomes/try",
+    "function": "postProjectsProjectOutcomesTry",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/outcomes/withdraw",
     "function": "postProjectsProjectOutcomesWithdraw",
     "request": "schema",
@@ -1970,6 +2096,42 @@
   {
     "operation": "POST /api/v1/projects/{project}/read/ListRuns",
     "function": "postProjectsProjectReadListRuns",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reference-cases/declare",
+    "function": "postProjectsProjectReferenceCasesDeclare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reference-cases/get",
+    "function": "postProjectsProjectReferenceCasesGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reference-cases/withdraw",
+    "function": "postProjectsProjectReferenceCasesWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reference-runs/get",
+    "function": "postProjectsProjectReferenceRunsGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reference-runs/list",
+    "function": "postProjectsProjectReferenceRunsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reference-runs/start",
+    "function": "postProjectsProjectReferenceRunsStart",
     "request": "schema",
     "response": "schema"
   },
@@ -2876,6 +3038,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/upload-runs/status",
     "function": "postProjectsProjectUploadRunsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/verdicts/accepted",
+    "function": "postProjectsProjectVerdictsAccepted",
     "request": "schema",
     "response": "schema"
   },

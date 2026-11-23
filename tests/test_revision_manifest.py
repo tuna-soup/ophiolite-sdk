@@ -195,8 +195,9 @@ def test_a_4_manifest_with_a_reported_record_verifies_and_every_change_is_refuse
     refused(lambda c: c['manifest']['derivation_record'].__setitem__('procedure', None), 'procedure block')
     refused(lambda c: c['manifest']['derivation_record'].__setitem__('kind', 'executed'), 'procedure block')
     refused(lambda c: procedure(c).__setitem__('again_of', {'commitment': '9' * 64}), 'earlier result')
-    refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/3'), 'declared contract|derivation record')  # relabelled: /3 carries derivation/1
-    refused(lambda c: c['manifest']['derivation_record'].__setitem__('schema', 'ophiolite.derivation/1'), 'declared contract|derivation record')
+    # E187 s0: a schema id the models do not name is a newer contract's word ("... upgrade ophiolite to read it.")
+    refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/3'), 'declared contract|derivation record|does not know')  # relabelled: /3 carries derivation/1
+    refused(lambda c: c['manifest']['derivation_record'].__setitem__('schema', 'ophiolite.derivation/1'), 'declared contract|derivation record|does not know')
 
 
 def test_an_executed_record_in_a_4_manifest_carries_no_procedure_block(fixture):

@@ -1,0 +1,455 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/chains/v1/chain-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.chain/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ChainChoice": {
+      "additionalProperties": false,
+      "properties": {
+        "question": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "choices": {
+          "items": {
+            "$ref": "#/$defs/ChainChoiceOption"
+          },
+          "maxItems": 8,
+          "minItems": 2,
+          "title": "Choices",
+          "type": "array"
+        }
+      },
+      "required": [
+        "question",
+        "choices"
+      ],
+      "title": "ChainChoice",
+      "type": "object"
+    },
+    "ChainChoiceOption": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "As people name it; it must read as words (the server's check)",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "ChainChoiceOption",
+      "type": "object"
+    },
+    "ChainConditionBetween": {
+      "additionalProperties": false,
+      "properties": {
+        "step": {
+          "description": "An earlier tool step reached through follows, whose check record holds the measure",
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Step",
+          "type": "string"
+        },
+        "measure": {
+          "description": "A measure its outcome rule records (rules.json `measures`)",
+          "maxLength": 41,
+          "pattern": "^[a-z][a-z0-9_]{0,40}$",
+          "title": "Measure",
+          "type": "string"
+        },
+        "comparison": {
+          "const": "between",
+          "title": "Comparison",
+          "type": "string"
+        },
+        "value": {
+          "description": "[low, high], low at most high, both included",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Value",
+          "type": "array"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "enum": [
+                "m",
+                "ft"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The limits' length unit; null exactly for a count",
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "step",
+        "measure",
+        "comparison",
+        "value",
+        "unit"
+      ],
+      "title": "ChainConditionBetween",
+      "type": "object"
+    },
+    "ChainConditionLimit": {
+      "additionalProperties": false,
+      "properties": {
+        "step": {
+          "description": "An earlier tool step reached through follows, whose check record holds the measure",
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Step",
+          "type": "string"
+        },
+        "measure": {
+          "description": "A measure its outcome rule records (rules.json `measures`)",
+          "maxLength": 41,
+          "pattern": "^[a-z][a-z0-9_]{0,40}$",
+          "title": "Measure",
+          "type": "string"
+        },
+        "comparison": {
+          "enum": [
+            "above",
+            "at-least",
+            "below",
+            "at-most"
+          ],
+          "title": "Comparison",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "enum": [
+                "m",
+                "ft"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The limit's length unit; null exactly for a count",
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "step",
+        "measure",
+        "comparison",
+        "value",
+        "unit"
+      ],
+      "title": "ChainConditionLimit",
+      "type": "object"
+    },
+    "ChainOutcomeRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "description": "The outcome version the step is checked against; a newer one needs a new chain version (D-2)",
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "title": "ChainOutcomeRef",
+      "type": "object"
+    },
+    "ChainOutside": {
+      "additionalProperties": false,
+      "properties": {},
+      "title": "ChainOutside",
+      "type": "object"
+    },
+    "ChainStep": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "description": "As people name it; it must read as words (the server's check)",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "tool",
+            "choice",
+            "outside"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "follows": {
+          "description": "Earlier steps that close before this one opens, sorted, once each",
+          "items": {
+            "maxLength": 32,
+            "pattern": "^[a-z][a-z0-9-]{0,31}$",
+            "type": "string"
+          },
+          "maxItems": 15,
+          "title": "Follows",
+          "type": "array"
+        },
+        "tool": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChainTool"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Present exactly on a tool step"
+        },
+        "choice": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChainChoice"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Present exactly on a choice step"
+        },
+        "outside": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChainOutside"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Present exactly on an outside step"
+        },
+        "applies_when": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "above": "#/$defs/ChainConditionLimit",
+                  "at-least": "#/$defs/ChainConditionLimit",
+                  "at-most": "#/$defs/ChainConditionLimit",
+                  "below": "#/$defs/ChainConditionLimit",
+                  "between": "#/$defs/ChainConditionBetween"
+                },
+                "propertyName": "comparison"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ChainConditionLimit"
+                },
+                {
+                  "$ref": "#/$defs/ChainConditionBetween"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The step applies only when this holds",
+          "title": "Applies When"
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "kind",
+        "follows"
+      ],
+      "title": "ChainStep",
+      "type": "object"
+    },
+    "ChainTool": {
+      "additionalProperties": false,
+      "properties": {
+        "procedure": {
+          "description": "The procedure that makes the step's result; its digest is frozen at start",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}(/[a-z0-9][a-z0-9-]{0,62})?$",
+          "title": "Procedure",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/ChainOutcomeRef"
+        },
+        "made_from": {
+          "description": "Earlier unconditional tool steps whose results this result must be made from, sorted, once each",
+          "items": {
+            "maxLength": 32,
+            "pattern": "^[a-z][a-z0-9-]{0,31}$",
+            "type": "string"
+          },
+          "maxItems": 15,
+          "title": "Made From",
+          "type": "array"
+        }
+      },
+      "required": [
+        "procedure",
+        "outcome",
+        "made_from"
+      ],
+      "title": "ChainTool",
+      "type": "object"
+    },
+    "ChainTriggerOnRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "const": "request",
+          "title": "On",
+          "type": "string"
+        }
+      },
+      "required": [
+        "on"
+      ],
+      "title": "ChainTriggerOnRequest",
+      "type": "object"
+    },
+    "ChainTriggerOnVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "const": "version",
+          "title": "On",
+          "type": "string"
+        },
+        "kind": {
+          "description": "The item kind whose new versions start the chain",
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A well set (`well-set/1`) the versions must belong to; null for every version of the kind",
+          "title": "Selection"
+        }
+      },
+      "required": [
+        "on",
+        "kind",
+        "selection"
+      ],
+      "title": "ChainTriggerOnVersion",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A chain as declared: what starts it and its steps in order. The server adds the id, version, state, declarer\nand time (`ChainEntry`); any changed field is a new version.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.chain/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "label": {
+      "description": "As people name it; it must read as words (the server's check)",
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+    },
+    "trigger": {
+      "discriminator": {
+        "mapping": {
+          "request": "#/$defs/ChainTriggerOnRequest",
+          "version": "#/$defs/ChainTriggerOnVersion"
+        },
+        "propertyName": "on"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ChainTriggerOnVersion"
+        },
+        {
+          "$ref": "#/$defs/ChainTriggerOnRequest"
+        }
+      ],
+      "title": "Trigger"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/ChainStep"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Steps",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "label",
+    "trigger",
+    "steps"
+  ],
+  "title": "ChainDeclaration",
+  "type": "object"
+}

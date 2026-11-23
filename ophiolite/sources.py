@@ -39,8 +39,9 @@ OPTIONAL = ('operator', 'depth')  # dropped from the mapped view when the mappin
 
 def _checked(model, answer, what):
     from pydantic import ValidationError
+    from .models.answers import refusal  # E187 s0
     try: model.model_validate(answer)
-    except (ValidationError, ValueError, TypeError): raise VerificationFailed('The %s answered outside its documented shape.' % what) from None
+    except (ValidationError, ValueError, TypeError) as error: raise refusal(error, VerificationFailed('The %s answered outside its documented shape.' % what)) from None
     return answer
 
 

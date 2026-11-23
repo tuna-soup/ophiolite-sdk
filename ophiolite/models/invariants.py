@@ -67,6 +67,39 @@ def context(value):
     require((value['sample_count']<2)==(value['axis_order']=='insufficient'), 'Axis order needs at least two samples')
 
 
+WELL_LOG = 'ophiolite.well-log-curve/1'  # E183 s2c: the well log form a read may ask for
+WELL_LOG_CEILING = {'entries': 512, 'bytes': 65536}  # the gateway's (well_log_curve.CEILING): entries kept, and their UTF-8 bytes
+
+
+def _order(axis):
+    pairs = list(zip(axis, axis[1:]))
+    return ('insufficient' if not pairs else 'increasing' if all(a < b for a,b in pairs)
+            else 'decreasing' if all(a > b for a,b in pairs) else 'unordered')
+
+
+def well_log(value):
+    """E183 s2c (D4): the gateway's validators of `ophiolite.well-log-curve/1`, which the generated model does not
+    carry, re-run on a served well log: depth and values of equal length, a strictly increasing depth, and the
+    as-received counts and ceiling (finite numbers the generated model holds). Nothing here reads an entry's text."""
+    strict, received = value['strict'], value['as_received']
+    depth, values = strict['depth'], strict['values']
+    require(len(depth) == len(values), 'Depth and sample lengths differ')
+    require(all(a < b for a,b in zip(depth, depth[1:])), 'The depth axis is not strictly increasing')
+    entries = received['entries']
+    require(received['entries_withheld'] == received['entries_total'] - len(entries), 'entries_withheld must equal entries_total minus the entries kept')
+    require(len(entries) <= WELL_LOG_CEILING['entries'], 'The entries kept exceed %d entries' % WELL_LOG_CEILING['entries'])
+    size = sum(len(entry[key].encode('utf-8')) for entry in entries for key in ('section','mnemonic','unit','value','description'))
+    require(size <= WELL_LOG_CEILING['bytes'], 'The entries kept exceed %d bytes' % WELL_LOG_CEILING['bytes'])
+
+
+def well_log_facts(strict):
+    """E183 s2c: the descriptor's scientific facts as the strict part states them (the curve name is checked apart)."""
+    depth, values = strict['depth'], strict['values']
+    return dict(unit=strict['unit'], unit_status='declared', axis_unit=strict['depth_unit'], axis_unit_status='declared',
+                depth_reference=strict['reading']['depth_reference'], sample_count=len(depth), missing_count=values.count(None),
+                missing_value_marker=strict['missing_value_marker'], axis_order=_order(depth), axis_duplicates=len(set(depth))!=len(depth))
+
+
 def representation(value):
     profiles = registry()[1]
     require(value['profile'] in profiles, 'Reference profile is not registered')

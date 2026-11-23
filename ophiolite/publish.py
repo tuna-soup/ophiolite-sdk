@@ -129,10 +129,12 @@ CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: ch
 PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust','verify','verifications','sandbox-enable','sandbox-run'},  # E105b: the project catalogue; E165 s1: verifications; E113 s1: sandbox runs
                       'procedure-runs':{'report','get','prepare-again'},  # E106: a reported run and running a result again
                       'runners':{'job'}}  # E113 s1: following a sandbox run's job
-OUTCOME_OPERATIONS={'outcomes':{'declare','revise','enable','disable','withdraw','list','get','states','evaluate','deliver-as','claims'},  # E120: what a project accepts and where it delivers; s1: a result's states; s3: Deliver as and its claims
+OUTCOME_OPERATIONS={'outcomes':{'declare','revise','enable','disable','withdraw','list','get','states','evaluate','deliver-as','claims','try'},  # E120: what a project accepts and where it delivers; s1: a result's states; s3: Deliver as and its claims; E176 s1: try
                     'verdicts':{'record','list'},  # E132: a person's accepted or rejected on one result version, with a reason
                     'stages':{'get','transition'},  # E132 s2: withdrawing a result version (which records the withdrawer's rejection)
-                    'rule-results':{'get'}}  # E144 s3: the data rules' results stored with one version, and their lines
+                    'rule-results':{'get'},  # E144 s3: the data rules' results stored with one version, and their lines
+                    'chains':{'declare','revise','enable','disable','withdraw','list','get','due','dismiss'},  # E178: a project's chains of steps after a new version
+                    'chain-runs':{'start','attach','choose','acknowledge','decide','continue','get','list'}}  # E178 s2c: their runs
 REPORT_OPERATIONS={'activity':{'report','deliver','deliveries','trajectories'}}  # E70b: a confirmed `get` reports which version this holder received; E109: a delivery's outcome and the deliveries page; E134: your own work as episodes
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
                    'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share','sample','convert','convert-original','convert-output','basis'},  # E55: a folder upload; E85: check; E91: the sample; E107a: read on your computer (C4: the original kept); E123 S3b: basis
@@ -149,7 +151,8 @@ NEW_DATA_OPERATIONS={'context':{'new-data','new-data-save'},'las-uploads':{'audi
 JOB_OPERATIONS={'agents':{'proposals'},'jobs':{'answer'}}  # E151 s2: the person's side of an agent's job (what waits for them; their answer)
 SURVEY_OPERATIONS={'surveys':{'get','list','history','create','add','remove','replace','relate','unrelate','rename','identify','withdraw',
                                 'restate','link'}}  # E142 s1; E142 s2a: the complete lists in one revision, existing items linked
-EXCHANGE_OPERATIONS={'exchange':{'holders','release'}}  # E171 s1: who holds which version of an item; a folder's copy released
+EXCHANGE_OPERATIONS={'exchange':{'holders','release','receipts','host-report'}}  # E171 s1: who holds which version of an item; a folder's copy released; E184 s0a: a version's transfer receipts; E185 s2c: a connector's report of its record
+CHANGE_OPERATIONS={'changes':{'affected'}}  # E177 s1: what rests on the versions a change replaces
 
 
 # E39: an organisation's connections are not a project's; their routes carry no project (/api/v1/<area>/<op>).
@@ -162,7 +165,7 @@ def operation_path(project,area,operation):
         return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
              else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or OUTCOME_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or JOB_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
-    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())|EXCHANGE_OPERATIONS.get(area,set())
+    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())|EXCHANGE_OPERATIONS.get(area,set())|CHANGE_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation
@@ -170,41 +173,56 @@ def operation_path(project,area,operation):
 
 # E151 s2: the answer of agents/proposals, mirroring the synced ophiolite.agent-proposals/1 (contracts/agents/v1/
 # proposals-schema.json) without the optional `validation` extra, as agents.JobStatus mirrors job-schema.json. The
-# optional fields may be absent, never null; `evidence` is required and may be null.
-from typing import Annotated,Dict,List,Optional,Union
-from pydantic import BaseModel,ConfigDict,Field
+# optional fields may be absent, never null; `evidence` is required and may be null. E187 s0: an Answer, so a field
+# this release does not know is kept, not refused.
+from typing import Annotated,Dict,List,Literal,Optional,Union
+from pydantic import Field
+from .models.answers import Answer,refusal
 
 
-class _StrictAnswer(BaseModel):
-    model_config=ConfigDict(extra='forbid',strict=True)
-
-
-class ProposalChoice(_StrictAnswer):
+class ProposalChoice(Answer):
     """One offered choice of a waiting job (proposals-schema.json $defs/choice)."""
     id:Annotated[str,Field(pattern=r'^c[1-8]$')]
     fragment:Annotated[dict,Field(max_length=16)]
 
 
-class ProposalEvidence(_StrictAnswer):
+class ProposalEvidence(Answer):
     """The newest evidence record of a plan, as agents/approve names it."""
     id:Annotated[str,Field(min_length=1,max_length=128)]
     generation:Annotated[int,Field(ge=1)]
     digest:Annotated[str,Field(pattern=r'^[0-9a-f]{64}$')]
 
 
-class ProposalDryRun(_StrictAnswer):
+class ProposalDryRun(Answer):
     """E150 s1b: the dry run the newest evidence record names, as the gateway ran it again (its digest and `would`)."""
     digest:Annotated[str,Field(pattern=r'^[0-9a-f]{64}$')]
     would:dict
 
 
-class Proposal(_StrictAnswer):
+class ProposalTrialInput(Answer):
+    slot:str
+    name:Optional[str]
+    version:Optional[int]
+
+
+class ProposalTrial(Answer):
+    """E176 s2a: the outcomes trial the newest evidence record came with, as the gateway confirmed it (`not_tried`
+    when it could not); `lines` are its words. It grants nothing: publication checks the outcomes again."""
+    state:Literal['tried','not_tried']
+    as_of:Optional[Union[int,float]]
+    current:bool
+    inputs:Annotated[List[ProposalTrialInput],Field(max_length=4096)]
+    lines:Annotated[List[str],Field(min_length=1)]
+
+
+class Proposal(Answer):
     """One plan or waiting job the person's agents wait on (proposals-schema.json $defs/proposal)."""
     plan:Annotated[str,Field(pattern=r'^[0-9a-f]{64}$')]
     operation:Annotated[str,Field(pattern=r'^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*$')]
     summary:Annotated[str,Field(max_length=2000)]
     evidence:Optional[ProposalEvidence]
     dry_run:ProposalDryRun=None
+    trial:ProposalTrial=None
     budget:Dict[str,Annotated[int,Field(ge=0)]]
     expires_at:Union[int,float]
     review_url:Annotated[str,Field(min_length=1,max_length=2048)]
@@ -213,7 +231,7 @@ class Proposal(_StrictAnswer):
     choice_token:Annotated[str,Field(pattern=r'^ct1\.[A-Za-z0-9_-]{43}$')]=None
 
 
-class Proposals(_StrictAnswer):
+class Proposals(Answer):
     """The envelope of agents/proposals: {"proposals": [...]}, at most 200, newest first."""
     proposals:Annotated[List[Proposal],Field(max_length=200)]
 
@@ -221,13 +239,13 @@ class Proposals(_StrictAnswer):
 def parse_proposals(data):
     """The proposals of a validated ophiolite.agent-proposals/1 envelope; anything else is VerificationFailed."""
     try:Proposals.model_validate(data)
-    except (ValidationError,ValueError,TypeError):raise VerificationFailed('The proposals do not satisfy ophiolite.agent-proposals/1.') from None
+    except (ValidationError,ValueError,TypeError) as error:raise refusal(error,VerificationFailed('The proposals do not satisfy ophiolite.agent-proposals/1.')) from None
     return data['proposals']
 
 
 def parse(model,data):
     try:return model.model_validate(data)
-    except (ValidationError,ValueError,TypeError):raise VerificationFailed('The application response does not match the supported contract.') from None
+    except (ValidationError,ValueError,TypeError) as error:raise refusal(error,VerificationFailed('The application response does not match the supported contract.')) from None
 
 
 def parse_run(data,client=None):
@@ -691,8 +709,24 @@ def upload_bytes(source):
     return raw
 
 
+CURVE_DECLARATION_LAS_ONLY='Only a LAS file takes a curve declaration.'  # the gateway's sentence (E183 s1a)
+
+
+def curve_declaration_field(declaration,profile):
+    """E183 s2b: the caller's curve declaration as it is sent, checked here first and refused with the gateway's words.
+    Only what the caller gave: nothing is read from the file's header, filled in, trimmed or converted."""
+    if hasattr(declaration,'model_dump'):declaration=declaration.model_dump()
+    try:checked=api.CurveDeclarationRequest.model_validate(declaration)
+    except ValidationError as error:
+        where=sorted({'.'.join(['curve_declaration',*(str(p) for p in e['loc'])]) for e in error.errors()})
+        raise ValidationFailed([('Invalid request fields: '+', '.join(where))[:300]]) from None
+    if profile not in (None,'las2/1'):raise ValidationFailed([CURVE_DECLARATION_LAS_ONLY])
+    return checked.model_dump()
+
+
 def upload_metadata(project,command_id,*,filename,name,attribution,audience,rights_confirmed,well_notes='',profile=None,declared=None,well_log=None,origin=None,
-                    append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None):
+                    append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None,receipt=None,
+                    curve_declaration=None):
     value={'project_id':project,'command_id':command_id,'filename':filename,'name':name,'attribution':attribution,
            'audience':audience,'rights_confirmed':rights_confirmed,'well_notes':well_notes}
     # Fields are sent only when used, so existing LAS uploads keep their exact request (and retry fingerprint).
@@ -705,10 +739,12 @@ def upload_metadata(project,command_id,*,filename,name,attribution,audience,righ
     if provenance is not None:value['provenance']=provenance  # E107a C6b: the staged original kept beside this file
     if application_source is not None:value['source']=source_block(application_source)  # E122 s6: where the file was sent from
     if represents is not None:value['represents']=represents  # E173 s0b: a point set the sender marks as a horizon
+    if curve_declaration is not None:value['curve_declaration']=curve_declaration_field(curve_declaration,profile)  # E183 s2b
     held=held_fields(holder,application)  # E171 s1: the sender's copy, only when named; checked by its own grammar
     try:api.UploadRequest.model_validate(value)
     except ValidationError:raise ValidationFailed(['Confirm rights, project, name, attribution and bounded upload details.']) from None
     value.update(held)  # after the model check: the hand-kept UploadRequest model predates these two fields
+    value.update(receipt_field(receipt))  # E184 s0: likewise
     validate_recipients(audience,[])
     if not name.strip() or not attribution.strip() or any(len(recipient)>160 for recipient in audience):
         raise ValidationFailed(['Supply a name, attribution and supported recipient names.'])
@@ -717,17 +753,21 @@ def upload_metadata(project,command_id,*,filename,name,attribution,audience,righ
     return value,{'Content-Type':'application/octet-stream','X-Ophiolite-Upload':encoded}
 
 
-def _work_upload(self,source,*,name,attribution,audience,rights_confirmed,filename=None,well_notes=''):
+def _work_upload(self,source,*,name,attribution,audience,rights_confirmed,filename=None,well_notes='',curve_declaration=None):
     raw=upload_bytes(source)
     filename=filename or (Path(source).name if not isinstance(source,bytes) else 'input.las')
     # Validate before any identity lookup or mutation; the stable command is filled
     # from the folder only after taking its transaction lock.
-    upload_metadata(self.client.project,'validation',filename=filename,name=name,attribution=attribution,audience=audience,rights_confirmed=rights_confirmed,well_notes=well_notes)
+    declared=dict(curve_declaration=curve_declaration) if curve_declaration is not None else {}  # E183 s2b: only when given
+    upload_metadata(self.client.project,'validation',filename=filename,name=name,attribution=attribution,audience=audience,rights_confirmed=rights_confirmed,well_notes=well_notes,**declared)
     with self._locked(),self._identity() as headers:
         state=self._state() if (self.path/'run.json').exists() else {'config':{'url':self.client.url,'project':self.client.project,'binding':None,'parameters':{},'input':None},'command_id':uuid.uuid4().hex}
         if 'upload_command' not in state:state['upload_command']=uuid.uuid4().hex
+        if declared:  # E183 s2b: kept beside the command; the saved request resends it on recovery
+            kept=curve_declaration_field(curve_declaration,None)
+            if state.setdefault('upload_declaration',kept)!=kept:raise Refused('This operation belongs to different work; use a new run folder.')
         _checkpoint(self.path/'run.json',state,replace=True)
-        body,extra=upload_metadata(self.client.project,state['upload_command'],filename=filename,name=name,attribution=attribution,audience=audience,rights_confirmed=rights_confirmed,well_notes=well_notes)
+        body,extra=upload_metadata(self.client.project,state['upload_command'],filename=filename,name=name,attribution=attribution,audience=audience,rights_confirmed=rights_confirmed,well_notes=well_notes,**declared)
         return self._step('upload',body,headers,area='las-uploads',payload=raw,extra_headers=extra)
 
 WorkFolder.upload_las=_work_upload
@@ -784,10 +824,20 @@ def held_fields(holder,application):
     return {k:v for k,v in (('holder',holder),('application',application)) if v is not None}
 
 
+def receipt_field(receipt):
+    """E184 s0: a send's transfer receipt on the wire, only when given, refused here when the contract refuses it (the
+    route's codes are checked by the exchange core and again by the project)."""
+    if receipt is None:return {}
+    from .exchange import SHAPE,_receipt_shape
+    if _receipt_shape(receipt) is not None:raise ValidationFailed([SHAPE])
+    return {'receipt':receipt}
+
+
 def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None,
-                   holder=None,application=None):
+                   holder=None,application=None,receipt=None):
     """The X-Ophiolite-Upload header of publications/derive, validated before anything is sent. E122 s4a: `source` (see
-    `source_block`) is added only when given. E171 s1: `holder` and `application` (`held_fields`) likewise."""
+    `source_block`) is added only when given. E171 s1: `holder` and `application` (`held_fields`) likewise. E184 s0:
+    `receipt` (`receipt_field`) likewise."""
     import hashlib
     from .writers import WrittenOriginal
     if not isinstance(written,WrittenOriginal):raise ValidationFailed(['Publish a file made by ophiolite.writers (a WrittenOriginal).'])
@@ -809,6 +859,7 @@ def derive_request(project,written,*,name,from_,method,command_id,of_entity=None
         if not isinstance(procedure['for_outcome'],str) or not 0<len(procedure['for_outcome'])<=64:raise ValidationFailed(['Name the outcome to publish for by its id.'])
         body['for_outcome']=procedure['for_outcome']
     body.update(held_fields(holder,application))
+    body.update(receipt_field(receipt))
     if not 1<=len(parents)<=32 or len({(p['asset_id'],p['revision']) for p in parents})!=len(parents):raise ValidationFailed(['Name 1-32 distinct parents.'])
     if not isinstance(name,str) or not name.strip() or len(name)>160:raise ValidationFailed(['Give the result a name (up to 160 characters).'])
     try:api.MethodRecord.model_validate(method)

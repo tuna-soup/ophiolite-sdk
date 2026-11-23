@@ -8,6 +8,9 @@ The server writes the bundle to `/box/bundle`, each exact input version under `/
 calls the same `_child`, so a run on this computer and a run in the sandbox make their bytes with the same code. What
 the tool made lands in the output folder exactly as `_child` writes its exchange: `outputs.json` and `<n>.bytes`, or
 `error.json`; the server reads it and trusts nothing else. A path outside `/box` is refused before the tool runs.
+
+E179 s1: a request with `step: "check"` and `result` (the slot of the result an outcome is evaluated over) runs a
+check that answers an outcome: its entry returns `answered(...)` and only `answer.json` lands in the output folder.
 """
 import json
 import sys
@@ -17,7 +20,7 @@ from pathlib import Path, PurePosixPath
 from .procedures import LocalVersion, _child, _encode
 
 BOX = PurePosixPath('/box')
-REQUEST_KEYS = {'entry', 'settings', 'inputs'}
+REQUEST_KEYS = {'entry', 'settings', 'inputs', 'step', 'result'}  # E179 s1: `step` and `result` together, the check form (procedure-box 1.1.0)
 INPUT_KEYS = {'path', 'kind', 'declared', 'asset_id', 'revision'}
 
 
@@ -40,14 +43,18 @@ def child_request(request, output, root):
         raise Refused('The box request has entry, settings and inputs, and nothing else.')
     if not isinstance(request['inputs'], dict) or not isinstance(request.get('settings', {}), dict):
         raise Refused('The box request has entry, settings and inputs, and nothing else.')
+    if ('step' in request) != ('result' in request) or ('step' in request and (request['step'] != 'check' or request['result'] not in request['inputs'])):
+        raise Refused('A check request names step check and the input slot of its result, together.')
     inputs = {}
     for slot, items in request['inputs'].items():
         if not isinstance(items, list) or not all(isinstance(i, dict) and not set(i) - INPUT_KEYS and {'path', 'kind'} <= set(i) for i in items):
             raise Refused('Each input is {path, kind, declared, asset_id, revision}.')
         inputs[slot] = [LocalVersion(str(inside(i['path'], root)), i['kind'], dict(i.get('declared') or {}), i.get('asset_id'), i.get('revision'))
                         for i in items]
-    return {'snapshot': str(Path(root) / 'bundle'), 'exchange': str(output), 'entry': request['entry'],
-            'settings': request.get('settings', {}), 'inputs': {slot: _encode(value) for slot, value in inputs.items()}}
+    child = {'snapshot': str(Path(root) / 'bundle'), 'exchange': str(output), 'entry': request['entry'],
+             'settings': request.get('settings', {}), 'inputs': {slot: _encode(value) for slot, value in inputs.items()}}
+    if 'step' in request: child['answer'] = {'result': request['result']}  # E179 s1: `_child_answer` writes answer.json only
+    return child
 
 
 def main(request_path, output, root=str(BOX)):

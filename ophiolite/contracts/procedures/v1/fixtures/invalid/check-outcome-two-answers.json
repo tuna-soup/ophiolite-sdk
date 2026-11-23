@@ -1,0 +1,9 @@
+{
+  "schema": "ophiolite.procedure/1", "name": "residual-limit", "label": "Residuals within the team's limit", "version": 1, "step": "check",
+  "inputs": [
+    {"slot": "residuals", "label": "Residual result", "class": "result", "kinds": ["well-residual/1"], "cardinality": "one"},
+    {"slot": "tops", "label": "Tops of the wells", "class": "version", "kinds": ["well-tops-csv/1"], "cardinality": "many"}
+  ],
+  "outputs": [{"role": "answer", "label": "Answer", "class": "answer"}, {"role": "second", "label": "Second answer", "class": "answer"}],
+  "entry": "procedure:check"
+}

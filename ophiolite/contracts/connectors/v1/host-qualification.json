@@ -1,0 +1,431 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/connectors/v1/host-qualification.json",
+  "x-ophiolite": {
+    "id": "ophiolite.host-qualification/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "HostBinding": {
+      "additionalProperties": false,
+      "description": "The application's Python binding as installed: its folder and the sha256 of each file (keys are plain strings:\nthe contract type generator reads no propertyNames).",
+      "properties": {
+        "folder": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Folder",
+          "type": "string"
+        },
+        "sha256": {
+          "additionalProperties": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Sha256",
+          "type": "object"
+        }
+      },
+      "required": [
+        "folder",
+        "sha256"
+      ],
+      "title": "HostBinding",
+      "type": "object"
+    },
+    "HostInstallation": {
+      "additionalProperties": false,
+      "properties": {
+        "release": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Release",
+          "type": "string"
+        },
+        "application": {
+          "additionalProperties": true,
+          "description": "Release facts beyond `release`; closed by the package validator",
+          "title": "Application",
+          "type": "object"
+        },
+        "binding": {
+          "$ref": "#/$defs/HostBinding"
+        },
+        "native": {
+          "$ref": "#/$defs/HostNative"
+        },
+        "python": {
+          "$ref": "#/$defs/HostPython"
+        },
+        "fixture": {
+          "additionalProperties": true,
+          "description": "The data the probe runs on; closed by the package validator",
+          "title": "Fixture",
+          "type": "object"
+        },
+        "probed": {
+          "$ref": "#/$defs/HostProbed"
+        }
+      },
+      "required": [
+        "release",
+        "application",
+        "binding",
+        "native",
+        "python",
+        "fixture",
+        "probed"
+      ],
+      "title": "HostInstallation",
+      "type": "object"
+    },
+    "HostNative": {
+      "additionalProperties": false,
+      "description": "The native libraries' sha256 (empty in s0; s1 records the measured digests).",
+      "properties": {
+        "sha256": {
+          "additionalProperties": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Sha256",
+          "type": "object"
+        }
+      },
+      "required": [
+        "sha256"
+      ],
+      "title": "HostNative",
+      "type": "object"
+    },
+    "HostProbe": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Command",
+          "type": "string"
+        },
+        "prints": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Prints",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command",
+        "prints"
+      ],
+      "title": "HostProbe",
+      "type": "object"
+    },
+    "HostProbed": {
+      "additionalProperties": false,
+      "description": "Prose: the host, the fixture and the real run on this installation (E185 design 7).",
+      "properties": {
+        "host": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Host",
+          "type": "string"
+        },
+        "fixture": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Fixture",
+          "type": "string"
+        },
+        "run": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Run",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "fixture",
+        "run"
+      ],
+      "title": "HostProbed",
+      "type": "object"
+    },
+    "HostPython": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "interpreter": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Interpreter",
+          "type": "string"
+        },
+        "site_packages": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Site Packages",
+          "type": "string"
+        },
+        "modules": {
+          "additionalProperties": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Modules",
+          "type": "object"
+        }
+      },
+      "required": [
+        "version",
+        "interpreter",
+        "site_packages",
+        "modules"
+      ],
+      "title": "HostPython",
+      "type": "object"
+    },
+    "HostRow": {
+      "additionalProperties": false,
+      "else": {
+        "not": {
+          "required": [
+            "literals"
+          ]
+        },
+        "properties": {
+          "sentence": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentence",
+          "detail"
+        ]
+      },
+      "if": {
+        "properties": {
+          "availability": {
+            "const": "supported"
+          }
+        },
+        "required": [
+          "availability"
+        ]
+      },
+      "properties": {
+        "row": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Row",
+          "type": "string"
+        },
+        "availability": {
+          "enum": [
+            "supported",
+            "refused"
+          ],
+          "title": "Availability",
+          "type": "string"
+        },
+        "evidence": {
+          "enum": [
+            "proven",
+            "unproven"
+          ],
+          "title": "Evidence",
+          "type": "string"
+        },
+        "sentence": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sentence"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile"
+        },
+        "literals": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Literals"
+        },
+        "outside_profile": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outside Profile"
+        },
+        "discriminated_by": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "float32-rounding",
+                  "undefined-value",
+                  "coordinate"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Discriminated By",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "row",
+        "availability",
+        "evidence"
+      ],
+      "then": {
+        "not": {
+          "required": [
+            "sentence"
+          ]
+        },
+        "properties": {
+          "evidence": {
+            "const": "proven"
+          },
+          "profile": {
+            "minProperties": 1,
+            "type": "object"
+          },
+          "literals": {
+            "minProperties": 1,
+            "type": "object"
+          },
+          "outside_profile": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile",
+          "literals",
+          "outside_profile"
+        ]
+      },
+      "title": "HostRow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One connector's checked list and rows; `host.versions` is written from `checked[].release`.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.host-qualification/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "connector": {
+      "enum": [
+        "opendtect",
+        "resinsight",
+        "qgis"
+      ],
+      "title": "Connector",
+      "type": "string"
+    },
+    "checked": {
+      "items": {
+        "$ref": "#/$defs/HostInstallation"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Checked",
+      "type": "array"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/HostRow"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Rows",
+      "type": "array"
+    },
+    "probe": {
+      "$ref": "#/$defs/HostProbe"
+    }
+  },
+  "required": [
+    "schema",
+    "connector",
+    "checked",
+    "rows",
+    "probe"
+  ],
+  "title": "HostQualification",
+  "type": "object"
+}

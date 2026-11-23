@@ -21,8 +21,8 @@ GROUPS = (
      ('import', 'upload', 'export', 'bundle', 'send', 'deliver', 'intake', 'source', 'sources', 'repositories', 'well-imports',
       'sample', 'new-data', 'templates', 'template', 'targets', 'layouts', 'org-connections')),
     ('results', 'Make, publish and follow results',
-     ('prepare', 'run', 'publish', 'correct', 'publish-derived', 'remake', 'recover', 'withdraw', 'verdicts', 'outcomes', 'story',
-      'what-changed', 'dependents', 'trajectories', 'try')),  # try: E150 s1b
+     ('prepare', 'run', 'publish', 'correct', 'publish-derived', 'remake', 'recover', 'withdraw', 'verdicts', 'outcomes', 'chains',
+      'chain-runs', 'story', 'what-changed', 'dependents', 'affected', 'trajectories', 'try')),  # try: E150 s1b; affected: E177 s1; chains, chain-runs: E178 s2c
     ('tools', 'Write, check and run your own tools', ('init', 'skills', 'checks', 'rules', 'residuals', 'recipes')),
     ('starter', 'Starter packs of one catalogue record', ()),
     ('demo', 'A demo project on this computer, with three commands to try', ()),

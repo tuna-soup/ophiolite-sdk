@@ -47,7 +47,7 @@ def test_procedures_validate_names_the_destination_and_the_delivery(tmp_path, ca
     folder = send_folder(tmp_path)
     answer = cli.main(['procedures', 'validate', str(folder)])
     assert capsys.readouterr().out == 'Valid: Tops to team DB, version 1. It reads Well tops (CSV) and Team tops database and makes a delivery.\n'
-    assert (answer['valid'], answer['rules_version'], answer['name'], answer['version']) == (True, '1.4.0', 'tops-to-team-db', 1)  # E123 SZ: rules 1.4.0
+    assert (answer['valid'], answer['rules_version'], answer['name'], answer['version']) == (True, '1.6.0', 'tops-to-team-db', 1)  # E179 s0: rules 1.5.0; E181 s1: 1.6.0
 
 
 @pytest.mark.parametrize('name', ['send-two-systems', 'reconcile-bad-entry'])
@@ -71,7 +71,7 @@ def test_the_delivery_payload_is_the_contract_s_and_closed():
     assert delivery.CONTRACT == PACKAGE / 'contracts/procedures/v1/delivery.py'
     assert (delivery.contract().SCHEMA, delivery.contract().STATES, delivery.PROFILE, delivery.KIND) == (
         'ophiolite.delivery/1', ('confirmed', 'not-sent', 'unknown'), 'procedure-delivery/1', 'delivery.reported')
-    assert delivery.verdict(VALID) == {'valid': True, 'rules_version': '1.4.0'}
+    assert delivery.verdict(VALID) == {'valid': True, 'rules_version': '1.6.0'}  # E181 s1: 1.6.0
     assert delivery.Delivery.model_validate(VALID).model_dump() == VALID
     for name, case in EXPECTED['deliveries']['cases'].items():
         raw = json.loads((FIXTURES / 'invalid' / f'{name}.json').read_text())

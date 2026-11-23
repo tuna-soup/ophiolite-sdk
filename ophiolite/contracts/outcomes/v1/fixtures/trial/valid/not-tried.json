@@ -1,0 +1,25 @@
+{
+  "schema": "ophiolite.outcome-trial/1",
+  "trial": true,
+  "kind": "well-residual/1",
+  "candidate": {"output_sha256": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210", "output_bytes": 2048},
+  "inputs": [
+    {"slot": "selection", "asset_id": "well-set-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "surface", "asset_id": "surface-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "tops", "asset_id": "tops-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "trajectories", "asset_id": "trajectories-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+  ],
+  "at": 1795000000.0,
+  "sentence": null,
+  "outcomes": [
+    {
+      "outcome": {"id": "reviewed-by-tool", "version": 1, "rule": "tool-check/1", "settings_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+      "label": "Checked by the review tool",
+      "would": "not_tried",
+      "reason": "tool_rule",
+      "sentence": "Not tried: this outcome's rule is a tool, which runs only after publication.",
+      "rows": null,
+      "data_rules": null
+    }
+  ]
+}

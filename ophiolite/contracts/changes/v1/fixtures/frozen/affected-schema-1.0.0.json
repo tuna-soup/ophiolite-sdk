@@ -1,0 +1,655 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/changes/v1/affected-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.affected/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "AffectedAcceptance": {
+      "additionalProperties": false,
+      "description": "An outcome accepted at a result item's head (`check_id` the deciding record) that rests on `accepted_on`, a\nversion of the asked item; `newest` is the asked item's head. Nothing is invalidated: the acceptance stays the\nacceptance of its key (design 2).",
+      "properties": {
+        "kind": {
+          "const": "acceptance",
+          "title": "Kind",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/AffectedOutcome"
+        },
+        "result": {
+          "$ref": "#/$defs/AffectedAcceptedResult"
+        },
+        "check_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Check Id",
+          "type": "string"
+        },
+        "accepted_on": {
+          "$ref": "#/$defs/AffectedVersion"
+        },
+        "newest": {
+          "$ref": "#/$defs/AffectedVersion"
+        }
+      },
+      "required": [
+        "kind",
+        "outcome",
+        "result",
+        "check_id",
+        "accepted_on",
+        "newest"
+      ],
+      "title": "AffectedAcceptance",
+      "type": "object"
+    },
+    "AffectedAcceptedResult": {
+      "additionalProperties": false,
+      "description": "The result item's head, where `outcomes/states` reads the outcome as accepted.",
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "version"
+      ],
+      "title": "AffectedAcceptedResult",
+      "type": "object"
+    },
+    "AffectedCounts": {
+      "additionalProperties": false,
+      "description": "Totals over the whole answer as read at this page's `as_of`, of rows the reader may open.",
+      "properties": {
+        "results": {
+          "minimum": 0,
+          "title": "Results",
+          "type": "integer"
+        },
+        "acceptances": {
+          "minimum": 0,
+          "title": "Acceptances",
+          "type": "integer"
+        },
+        "held": {
+          "minimum": 0,
+          "title": "Held",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "results",
+        "acceptances",
+        "held"
+      ],
+      "title": "AffectedCounts",
+      "type": "object"
+    },
+    "AffectedHeld": {
+      "additionalProperties": false,
+      "description": "One of the item's held copies exactly as `exchange/holders` serves it to this reader (D-3), not recomputed.",
+      "properties": {
+        "kind": {
+          "const": "held",
+          "title": "Kind",
+          "type": "string"
+        },
+        "held": {
+          "$ref": "#/$defs/HeldCopy"
+        }
+      },
+      "required": [
+        "kind",
+        "held"
+      ],
+      "title": "AffectedHeld",
+      "type": "object"
+    },
+    "AffectedItem": {
+      "additionalProperties": false,
+      "description": "The asked item and its head when the answer was read.",
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "head": {
+          "$ref": "#/$defs/AffectedVersion"
+        }
+      },
+      "required": [
+        "asset_id",
+        "name",
+        "kind",
+        "head"
+      ],
+      "title": "AffectedItem",
+      "type": "object"
+    },
+    "AffectedOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "label": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "label"
+      ],
+      "title": "AffectedOutcome",
+      "type": "object"
+    },
+    "AffectedResult": {
+      "additionalProperties": false,
+      "description": "An item whose head rests, through `distance` recorded edges (the fewest), on `rests_on`, a version of the asked\nitem (with `against: head` never its head; on a tie in distance, the newest).",
+      "properties": {
+        "kind": {
+          "const": "result",
+          "title": "Kind",
+          "type": "string"
+        },
+        "item": {
+          "$ref": "#/$defs/AffectedResultItem"
+        },
+        "head": {
+          "$ref": "#/$defs/AffectedVersion"
+        },
+        "distance": {
+          "minimum": 1,
+          "title": "Distance",
+          "type": "integer"
+        },
+        "rests_on": {
+          "$ref": "#/$defs/AffectedVersion"
+        }
+      },
+      "required": [
+        "kind",
+        "item",
+        "head",
+        "distance",
+        "rests_on"
+      ],
+      "title": "AffectedResult",
+      "type": "object"
+    },
+    "AffectedResultItem": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "name",
+        "kind"
+      ],
+      "title": "AffectedResultItem",
+      "type": "object"
+    },
+    "AffectedVersion": {
+      "additionalProperties": false,
+      "description": "One exact version of an item: its revision and its number (1 is the first).",
+      "properties": {
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "revision",
+        "version"
+      ],
+      "title": "AffectedVersion",
+      "type": "object"
+    },
+    "HeldCopy": {
+      "additionalProperties": false,
+      "properties": {
+        "copy": {
+          "pattern": "^[0-9a-f]{16}$",
+          "title": "Copy",
+          "type": "string"
+        },
+        "item": {
+          "$ref": "#/$defs/HeldCopyItem"
+        },
+        "application": {
+          "anyOf": [
+            {
+              "pattern": "^(application:[a-z0-9._-]{1,128}|script)$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Application"
+        },
+        "person": {
+          "$ref": "#/$defs/HeldCopyPerson"
+        },
+        "key": {
+          "default": null,
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "version": {
+          "$ref": "#/$defs/HeldCopyVersion"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "stays",
+                "follows"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mode"
+        },
+        "state": {
+          "enum": [
+            "current",
+            "behind",
+            "no-longer-readable"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "behind": {
+          "$ref": "#/$defs/HeldCopyBehind",
+          "default": null
+        }
+      },
+      "required": [
+        "copy",
+        "item",
+        "application",
+        "person",
+        "version",
+        "mode",
+        "state"
+      ],
+      "title": "HeldCopy",
+      "type": "object"
+    },
+    "HeldCopyBehind": {
+      "additionalProperties": false,
+      "description": "The item's versions newer than the held one that the reader may read, and the head.",
+      "properties": {
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "newest": {
+          "$ref": "#/$defs/HeldCopyNewest"
+        }
+      },
+      "required": [
+        "count",
+        "newest"
+      ],
+      "title": "HeldCopyBehind",
+      "type": "object"
+    },
+    "HeldCopyItem": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "name",
+        "kind"
+      ],
+      "title": "HeldCopyItem",
+      "type": "object"
+    },
+    "HeldCopyNewest": {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "author": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Author",
+          "type": "string"
+        },
+        "at": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "title": "At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "author",
+        "at"
+      ],
+      "title": "HeldCopyNewest",
+      "type": "object"
+    },
+    "HeldCopyPerson": {
+      "additionalProperties": false,
+      "description": "Who the copy belongs to, as this reader may see it; a name only beside `you` or `named`.",
+      "properties": {
+        "shown": {
+          "enum": [
+            "you",
+            "named",
+            "a-member"
+          ],
+          "title": "Shown",
+          "type": "string"
+        },
+        "name": {
+          "default": null,
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "shown"
+      ],
+      "title": "HeldCopyPerson",
+      "type": "object"
+    },
+    "HeldCopyVersion": {
+      "additionalProperties": false,
+      "description": "The version the copy last confirmed: `since` its first confirmation after its last different revision,\n`confirmed_at` the latest.",
+      "properties": {
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "how": {
+          "enum": [
+            "got",
+            "sent"
+          ],
+          "title": "How",
+          "type": "string"
+        },
+        "confirmed_at": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "title": "Confirmed At",
+          "type": "string"
+        },
+        "since": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "title": "Since",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "how",
+        "confirmed_at",
+        "since"
+      ],
+      "title": "HeldCopyVersion",
+      "type": "object"
+    },
+    "AffectedRequest": {
+      "additionalProperties": false,
+      "description": "The body of `changes/affected`: the project (equal to the path's), the item, `head` (after publication) or\n`next` (before the act: what will rest on an older version once the next is published), and a page.",
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "against": {
+          "default": "head",
+          "enum": [
+            "head",
+            "next"
+          ],
+          "title": "Against",
+          "type": "string"
+        },
+        "limit": {
+          "default": 200,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "cursor": {
+          "default": null,
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Cursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset_id"
+      ],
+      "title": "AffectedRequest",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Project",
+      "type": "string"
+    },
+    "asked": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Asked",
+      "type": "string"
+    },
+    "item": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AffectedItem"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "against": {
+      "enum": [
+        "head",
+        "next"
+      ],
+      "title": "Against",
+      "type": "string"
+    },
+    "as_of": {
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+      "title": "As Of",
+      "type": "string"
+    },
+    "counts": {
+      "$ref": "#/$defs/AffectedCounts"
+    },
+    "without_inputs": {
+      "minimum": 0,
+      "title": "Without Inputs",
+      "type": "integer"
+    },
+    "restricted": {
+      "title": "Restricted",
+      "type": "boolean"
+    },
+    "complete": {
+      "title": "Complete",
+      "type": "boolean"
+    },
+    "rows": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "acceptance": "#/$defs/AffectedAcceptance",
+            "held": "#/$defs/AffectedHeld",
+            "result": "#/$defs/AffectedResult"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/AffectedResult"
+          },
+          {
+            "$ref": "#/$defs/AffectedAcceptance"
+          },
+          {
+            "$ref": "#/$defs/AffectedHeld"
+          }
+        ]
+      },
+      "maxItems": 500,
+      "title": "Rows",
+      "type": "array"
+    },
+    "next": {
+      "anyOf": [
+        {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Next"
+    }
+  },
+  "required": [
+    "project",
+    "asked",
+    "item",
+    "against",
+    "as_of",
+    "counts",
+    "without_inputs",
+    "restricted",
+    "complete",
+    "rows",
+    "next"
+  ],
+  "title": "Affected",
+  "type": "object"
+}

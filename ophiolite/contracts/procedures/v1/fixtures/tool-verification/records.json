@@ -72,5 +72,21 @@
       "reference": {"run_id": "6b1f0d7e3c2a49588e7d6c5b4a39281706f5e4d3c2b1a09f8e7d6c5b4a392817",
                     "job": "3f0c2b1e-8d4a-4c6f-9b2e-1a7d5e9c0b44"}
     }
+  ],
+  "reference_cases_note": "E180 s0 (1.2.0): a reference-cases record, kept out of `records` until slice 2 widens the table's kinds and adds the kind to the request. The run is residual-fit version 1's reference run of reference/runs.json (3 of 3 passed); the digest here is that version's.",
+  "reference_cases": [
+    {
+      "schema": "ophiolite.tool-verification/1",
+      "id": "verification-000000000000000000000000000000f1",
+      "project": "p-ref",
+      "digest": "1111111111111111111111111111111111111111111111111111111111111111",
+      "by": {"kind": "person", "id": "alice", "name_at_time": "Alice"},
+      "at": 1795001200.0,
+      "statement": null,
+      "command_id": "verify-5",
+      "request_sha256": "bae5a173239f3be8f6517f3ea5473ae5cfd7e5f0f33bc8005f008774a9c7636d",
+      "kind": "reference-cases",
+      "reference": {"run_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "cases_version": 1, "counted": 3, "passed": 3}
+    }
   ]
 }

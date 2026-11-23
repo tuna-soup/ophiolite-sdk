@@ -1,0 +1,22 @@
+{
+  "description": "Each case is a valid fixture (`base`) with exactly one change: `set` puts `value` at `path`; `append` adds `value` to the list at `path`. `field` is the name the refusal carries.",
+  "cases": {
+    "trial-false": {"base": "accepted", "op": "set", "path": ["trial"], "value": false, "field": "trial"},
+    "would-maybe": {"base": "accepted", "op": "set", "path": ["outcomes", 0, "would"], "value": "maybe", "field": "would"},
+    "twenty-one-failing": {"base": "rejected-25", "op": "append", "path": ["outcomes", 0, "rows", "failing"],
+                           "value": {"key": {"wellbore": "W-21", "occurrence": 0}, "measure": "residual", "value": 2.4, "unit": "m", "limit": 1.0, "pass": false, "reason": null},
+                           "field": "failing"},
+    "accepted-with-reason": {"base": "accepted", "op": "set", "path": ["outcomes", 0, "reason"], "value": "inputs", "field": "reason"},
+    "not-evaluated-no-sentence": {"base": "not-evaluated", "op": "set", "path": ["outcomes", 0, "sentence"], "value": null, "field": "sentence"},
+    "not-evaluated-with-rows": {"base": "not-evaluated", "op": "set", "path": ["outcomes", 0, "rows"],
+                                "value": {"computed": 0, "passing": 0, "failing_count": 0, "failing": [], "not_computed": []}, "field": "rows"},
+    "not-tried-other-reason": {"base": "not-tried", "op": "set", "path": ["outcomes", 0, "reason"], "value": "inputs", "field": "reason"},
+    "empty-without-sentence": {"base": "none-declared", "op": "set", "path": ["sentence"], "value": null, "field": "sentence"},
+    "listed-with-sentence": {"base": "accepted", "op": "set", "path": ["sentence"], "value": "No outcome is declared for this kind.", "field": "sentence"},
+    "failing-row-passes": {"base": "rejected-one", "op": "set", "path": ["outcomes", 0, "rows", "failing", 0, "pass"], "value": true, "field": "pass"},
+    "key-of-five": {"base": "rejected-one", "op": "set", "path": ["outcomes", 0, "rows", "failing", 0, "key"],
+                    "value": {"wellbore": "W-2", "occurrence": 0, "a": 1, "b": 2, "c": 3}, "field": "key"},
+    "not-compared-rejecting-reason": {"base": "not-compared-unit", "op": "set", "path": ["outcomes", 0, "reason"], "value": "inputs", "field": "reason"},
+    "measure-in-yards": {"base": "measured", "op": "set", "path": ["outcomes", 0, "measures", 2, "unit"], "value": "yd", "field": "unit"}
+  }
+}

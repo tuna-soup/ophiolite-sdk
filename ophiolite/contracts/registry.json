@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.117.0",
+  "version": "1.135.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.37.0",
+      "version": "1.38.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -428,20 +428,28 @@
       "description": "Where one version came from, in three parts kept apart: identity (source system from ophiolite.source-systems/1, instance, id scheme, source object id), content (the bytes' sha256, the source's version) and context (the comparison/1 digest of how the bytes were read); observation is joined from the run, never stored (E122)."
     },
     {
+      "id": "ophiolite.sender/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/sender.json",
+      "title": "Sender",
+      "description": "What a version says sent it, as the request that made it reported it: reported (the client product and version, the host application and release, the transport, the profile the data is stored under), not reported (no header, or one the gateway dropped) or not recorded (made before senders were kept). A report, never a proof; no access, trust or verification decision reads it (E182)."
+    },
+    {
       "id": "ophiolite.outcome/1",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "outcomes/v1/outcome-schema.json",
       "title": "OutcomeDeclaration",
-      "description": "An outcome as declared over a kind of result: a built-in rule and its settings (ophiolite.outcome-rules/1), the input kinds a result must be made from and the send procedure and destination label it is delivered by; the server adds the id, version, declarer and time (E120)."
+      "description": "An outcome as declared over a kind of result: a built-in rule and its settings (ophiolite.outcome-rules/1), or from E179 a verified tool digest (tool-check/1), the input kinds a result must be made from and the send procedure and destination label it is delivered by; the server adds the id, version, declarer and time (E120)."
     },
     {
       "id": "ophiolite.outcome-check/1",
-      "version": "1.1.0",
+      "version": "1.4.0",
       "lifecycle": "preview",
       "path": "outcomes/v1/outcome-check-schema.json",
       "title": "OutcomeCheck",
-      "description": "An acceptance record: one outcome version's built-in rule over one exact result version of one publication, with the bound input versions, as its declarer could read them; the verdict, its reason and the rows, never changed (E120)."
+      "description": "An acceptance record: one outcome version's built-in rule over one exact result version of one publication, with the bound input versions, as its declarer could read them; the verdict, its reason, the rows, from E178 the numbers it counted (measures) and from E179 the tool version that judged (tool, from E179 s1 with the runner job of its check run), never changed (E120)."
     },
     {
       "id": "ophiolite.outcome-claim/1",
@@ -450,6 +458,14 @@
       "path": "outcomes/v1/outcome-claim-schema.json",
       "title": "OutcomeClaim",
       "description": "A \"Deliver as\" claim: the outcome version, the exact result version, the acceptance record and the destination it was judged on, and its verdict; a claimed claim binds the delivery id the gate issued, a refused one keeps its reason and sentence and launched nothing; never changed (E120)."
+    },
+    {
+      "id": "ophiolite.outcome-trial/1",
+      "version": "1.2.0",
+      "lifecycle": "preview",
+      "path": "outcomes/v1/outcome-trial-schema.json",
+      "title": "OutcomeTrial",
+      "description": "What a candidate result would meet, per enabled outcome of its kind, were it published: accepted, rejected, not compared, not evaluated (its declarer cannot read an input) or not tried (reserved), with the rows in one projection and complete counts; a trial writes nothing (E176)."
     },
     {
       "id": "ophiolite.verdict/1",
@@ -498,6 +514,14 @@
       "path": "scientific/v1/profile-migration.json",
       "title": "ProfileMigration",
       "description": "A stored item moved to a released profile version: the revision it was moved from and the new revision it was written as, the profile and stored digest of each data form, the release that ran the move and the system actor; the old revision is kept as it was; never changed (E148)."
+    },
+    {
+      "id": "ophiolite.profile-migration/2",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/profile-migration-2.json",
+      "title": "ProfileMigration2",
+      "description": "A move of several representations of one stored version under one registered mapping, such as an uploaded LAS item's curves moved to the well log form: the revision moved from and the new one, the mapping, each representation moved with its stored digests, the release and the system actor; the new revision keeps every row of the old one unchanged; a move key is recorded here or in profile-migration/1, never both; never changed (E183)."
     },
     {
       "id": "ophiolite.resqml-read/1",
@@ -605,27 +629,115 @@
     },
     {
       "id": "ophiolite.tool-verification/1",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "procedures/v1/tool-verification.json",
       "title": "ToolVerification",
-      "description": "A person's verification of one procedure digest in one project, against a check of a result that version reported or against a publication with a DOI or a URL, or the withdrawal of one by its author or an administrator: who and when set by the server, a statement of at most 2000 characters, never changed or deleted; a claim, never a witness, and never inherited by another digest (E165). 1.1.0: kind witnessed, against a run Ophiolite made in the project's sandbox, named by its run id and the job the server read (E113 s0)."
+      "description": "A person's verification of one procedure digest in one project, against a check of a result that version reported or against a publication with a DOI or a URL, or the withdrawal of one by its author or an administrator: who and when set by the server, a statement of at most 2000 characters, never changed or deleted; a claim, never a witness, and never inherited by another digest (E165). 1.1.0: kind witnessed, against a run Ophiolite made in the project's sandbox, named by its run id and the job the server read (E113 s0). 1.2.0: kind reference-cases, against a reference run Ophiolite made on the project's reference cases, named by its run id with the set version and the cases counted and passed as the server read them; recorded, not yet requested (E180 s0)."
     },
     {
       "id": "ophiolite.procedure-box/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "procedures/v1/procedure-box.json",
       "title": "ProcedureBox",
-      "description": "What the server hands a tool version run in the project's sandbox, read by the SDK's ophiolite.box inside the operator's sandbox image: the entry, the settings and each exact input version at a path under /box/inputs, with its type, declarations, asset id and revision; the bundle is always /box/bundle and nothing names a host path (E113 s1)."
+      "description": "What the server hands a tool version run in the project's sandbox, read by the SDK's ophiolite.box inside the operator's sandbox image: the entry, the settings and each exact input version at a path under /box/inputs, with its type, declarations, asset id and revision; the bundle is always /box/bundle and nothing names a host path (E113 s1). 1.1.0: the check form, step check with the result slot that holds the one result a team's check answers about, both or neither; a process request has neither (E179 s0)."
+    },
+    {
+      "id": "ophiolite.check-answer/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "procedures/v1/check-answer.json",
+      "title": "CheckAnswer",
+      "description": "What the outcome form of a check writes to /output/answer.json, at most 1 MiB and the only file there: a state passed, failed or not_compared, the tool's reason exactly when not_compared, and at most 1000 rows of key, measure, value, unit, limit and pass; an answer that contradicts itself is malformed, and Ophiolite never judges a row (E179 s0)."
     },
     {
       "id": "ophiolite.held-copies/1",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "exchange/v1/held-copies-schema.json",
       "title": "HeldCopies",
-      "description": "Who holds which version of an item, as one reader may see it: one row per connected copy and item with the client-declared application, the person as the reader may see them, the version last confirmed and since when, stays, follows or not said, and current, behind (by how many, and the head) or no longer readable, computed at read time; in $defs the request of exchange/holders, paged (E171 s0)."
+      "description": "Who holds which version of an item, as one reader may see it: one row per connected copy and item with the client-declared application, the person as the reader may see them, the version last confirmed and since when, stays, follows or not said, and current, behind (by how many, and the head) or no longer readable, computed at read time; in $defs the request of exchange/holders, paged (E171 s0). Since 1.1.0 a row may carry reported: the holder's latest report of its connector's host-qualification record (connector, host, checked, rows), as reported (E185 s2c). Since 1.2.0 the version of a row whose holder sent it may carry sender: what the request that made that version said sent it, as reported (E182 s2c)."
+    },
+    {
+      "id": "ophiolite.transfer-receipt/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "exchange/v1/transfer-receipt.json",
+      "title": "TransferReceipt",
+      "description": "What one get or send kept, changed and did not carry, computed by the connector that acts: its direction, capability route and contract, planned before the act or committed after it (with the version or opaque copy made, filled in by the project), the fingerprints of source, target and converter, the code document version, and three lists of at most 8 rows, each a code the route declares, its sentence, and the count or value measured on this transfer when one was; at most 2,048 bytes as compact JSON (E184 s0)."
+    },
+    {
+      "id": "ophiolite.transfer-receipts/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "exchange/v1/transfer-receipts.json",
+      "title": "TransferReceipts",
+      "description": "One version's receipts as a reader of the item is served them: the send receipt that made the version, or null, and its gets' receipts with the application and the time but no person and no holder id, paged; in $defs the request of exchange/receipts (E184 s0)."
+    },
+    {
+      "id": "ophiolite.chain/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "chains/v1/chain-schema.json",
+      "title": "ChainDeclaration",
+      "description": "A chain as declared: what starts it (a new version of an item kind, inside a well set when named, or a person's request) and up to sixteen steps in order, each a tool step checked against one outcome version, a question with two to eight fixed answers, or work done outside, following earlier steps and applying only when a measure of an earlier tool step's check meets its condition (E178 s0)."
+    },
+    {
+      "id": "ophiolite.chain-run/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "chains/v1/chain-run-schema.json",
+      "title": "ChainRun",
+      "description": "One pass of one chain version over one trigger: the whole declaration and the tool versions frozen at start, each step's state, its condition as read, its latest result with that result's check, and every act on it with who did it (the person always; the assistant and the job only under an approval) and when, paged; the run's state computed at read (E178 s0)."
+    },
+    {
+      "id": "ophiolite.chain-due/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "chains/v1/chain-due-schema.json",
+      "title": "ChainDue",
+      "description": "The item versions a chain should start for and has not: published after the chain version was enabled, with no run started and no dismissal for that chain, item and version, read from the kept item versions, paged in publication order (E178 s0)."
+    },
+    {
+      "id": "ophiolite.reference-cases/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "procedures/v1/reference-cases.json",
+      "title": "ReferenceCases",
+      "description": "One version of a project's reference cases for one tool, chosen by a person and never changed: per case the exact input versions, the tool's settings, the one result a person accepted with the verdict that accepted it, and how the tool's output is compared with it (the E96 rule of the kind, the allowed difference, the curve or the interpretation); how many cases must pass; a withdrawn version has no cases. The accepted result is never among a case's inputs (E180 s0)."
+    },
+    {
+      "id": "ophiolite.reference-run/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "procedures/v1/reference-run.json",
+      "title": "ReferenceRun",
+      "description": "One tool version run by Ophiolite once on every case of one reference-case version, in one sandbox image, written once when every case has ended: per case passed, failed with its reason (a box ending, an output missing or malformed, a difference, not compared) and the E96 comparison, or not counted because the pinned acceptance no longer stood; counts outcome by outcome (E180 s0)."
+    },
+    {
+      "id": "ophiolite.affected/1",
+      "version": "1.2.0",
+      "lifecycle": "preview",
+      "path": "changes/v1/affected-schema.json",
+      "title": "Affected",
+      "description": "What rests on the version a change replaces, as one reader may see it: the results whose head rests on an older version of the item however many recorded steps away (one row per item, with the shortest distance), the outcomes accepted at those heads, and the item's held copies as exchange/holders serves them, with counts of what the reader may open, restricted, complete and the items with no recorded inputs; nothing is invalidated or stored; in $defs the request of changes/affected (head or next), paged (E177 s0)."
+    },
+    {
+      "id": "ophiolite.well-log-curve/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/well-log-curve.json",
+      "title": "WellLogCurve",
+      "description": "One depth-indexed log curve in two parts: a strict part that carries its meaning (the declared well, mnemonic and unit, the depth kind, unit and datum, depth and values with the reading's policies), refused unless every part is declared, and an as-received part that keeps the file's header entries as text, in file order, up to 512 entries and 64 KiB, with the count of entries withheld (E183 s0)."
+    },
+    {
+      "id": "ophiolite.host-qualification/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "connectors/v1/host-qualification.json",
+      "title": "HostQualification",
+      "description": "One host connector's checked installations (release, binding digests, Python, the fixture and the probe run on it) and what each direction can do on them, supported and proven or refused with its sentence and detail; a connector's host.versions is written from the distinct checked releases (E185 s0)."
     }
   ],
   "profiles": [
@@ -652,6 +764,14 @@
       "description": "One curve of a LAS file above 100,000 samples, stored as its depths and values in float64 after a JSON header; read in windows, never whole.",
       "lifecycle": "preview",
       "path": "profiles/v1/curve-columns.json"
+    },
+    {
+      "id": "ophiolite.well-log-curve/1",
+      "kind": "normalized",
+      "display_name": "Well log curve with its header as received",
+      "description": "A LAS curve whose well, depth kind and datum its sender declared, with the file's header entries kept as text in file order; served beside the application curve when asked for by form.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-log-curve.json"
     },
     {
       "id": "ophiolite.point-columns/1",
@@ -1220,6 +1340,18 @@
       "title": "Connector semantics vocabulary; copied byte for byte into Connectors and pinned there by digest"
     },
     {
+      "id": "ophiolite.transfer-codes/1",
+      "kind": "vocabulary",
+      "path": "connectors/v1/transfer-codes.json",
+      "title": "Transfer codes: what each capability route's get or send may say it kept, changed and did not carry, with the sentence and the difference the independent check allows (E184)"
+    },
+    {
+      "id": "ophiolite.transfer-codes/1.1.0/1",
+      "kind": "vocabulary",
+      "path": "connectors/v1/transfer-codes/1.1.0.json",
+      "title": "Transfer codes 1.1.0: the three horizon routes of 1.0.0 unchanged and OpendTect's well log get; receipts of both versions are kept (E184 slice 1)"
+    },
+    {
       "id": "ophiolite.fixture/scientific/well-curve.json/1",
       "kind": "fixture",
       "path": "scientific/v1/fixtures/well-curve.json",
@@ -1288,6 +1420,12 @@
       "id": "ophiolite.fixture/assets/derived.las/1",
       "kind": "fixture",
       "path": "assets/v1/fixtures/derived.las"
+    },
+    {
+      "id": "ophiolite.fixture/frozen/scientific-asset-1.37.0.digest.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/scientific-asset-1.37.0.digest.json",
+      "title": "The released scientific asset 1.37.0, as its digests, frozen; never regenerated (E182 s2a)"
     },
     {
       "id": "ophiolite.fixture/pre-e1/source.json/1",
@@ -2166,6 +2304,69 @@
       "schema": "ophiolite.outcome/1"
     },
     {
+      "id": "ophiolite.fixture/outcomes/with-measures.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/checks/with-measures.json",
+      "title": "An acceptance record with its measures, counted by hand: residuals 1.20, -5.00 and 3.40 m under 10 m give the largest residual 5 m and three rows computed and passing (E178 s0)",
+      "schema": "ophiolite.outcome-check/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tool-rule.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/shapes/tool-rule.json",
+      "title": "An outcome judged by a verified tool digest: schema-valid, refused `tool-unknown` because its digest names no tool version of the project (E179 s0, s1)",
+      "schema": "ophiolite.outcome/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tool-rule-data-rules.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/shapes/tool-rule-data-rules.json",
+      "title": "A tool rule that also names data rules: schema-valid, refused `data_rules` (E179 s0, D6)",
+      "schema": "ophiolite.outcome/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tool-check-admission.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/shapes/tool-check-admission.json",
+      "title": "A tool record stopped at admission: the tool version is not verified, no run started (E179 s0)",
+      "schema": "ophiolite.outcome-check/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tool-check-crashed.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/shapes/tool-check-crashed.json",
+      "title": "A tool record stopped at the run: the tool exited with an error (E179 s0)",
+      "schema": "ophiolite.outcome-check/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tool-check-malformed.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/shapes/tool-check-malformed.json",
+      "title": "A tool record whose answer could not be read (E179 s0)",
+      "schema": "ophiolite.outcome-check/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tool-check-not-compared.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/shapes/tool-check-not-compared.json",
+      "title": "A tool record whose tool answered not_compared, with its explanation (E179 s0)",
+      "schema": "ophiolite.outcome-check/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tool-check-accepted.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/shapes/tool-check-accepted.json",
+      "title": "A tool record accepted over a result with no display unit: two rows, both passing (E179 s0)",
+      "schema": "ophiolite.outcome-check/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tool-check-rejected.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/shapes/tool-check-rejected.json",
+      "title": "A tool record rejected over a result with no display unit: one of two rows failing (E179 s0)",
+      "schema": "ophiolite.outcome-check/1"
+    },
+    {
       "id": "ophiolite.fixture/outcomes/named-rules-none.json/1",
       "kind": "fixture",
       "path": "outcomes/v1/fixtures/invalid/named-rules-none.json",
@@ -2498,6 +2699,301 @@
       "kind": "fixture",
       "path": "exchange/v1/fixtures/invalid/held-copies-cases.json",
       "title": "Held-copies answers and requests the schema refuses at their paths, and schema-valid answers the structural rules refuse with their reasons (E171 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/held-copies-schema-1.1.0.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/frozen/held-copies-schema-1.1.0.json",
+      "title": "The held-copies 1.1.0 document as published by E185 s2c, frozen beside 1.2.0; never regenerated (E182 s2c)"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/held-copies-schema-1.1.0.digest.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/frozen/held-copies-schema-1.1.0.digest.json",
+      "title": "The released held-copies 1.1.0 file, as its digest, frozen; never regenerated (E182 s2c)"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/transfer-receipt-horizon-send-planned.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/transfer-receipt-horizon-send-planned.json",
+      "title": "The planned receipt of a first send of the synthetic survey's horizon Top (16 nodes, one without a value) from OpendTect, counted by hand (E184 s0)",
+      "schema": "ophiolite.transfer-receipt/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/transfer-receipt-horizon-send-committed.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/transfer-receipt-horizon-send-committed.json",
+      "title": "The same send committed: equal rows, naming version 1 (E184 s0)",
+      "schema": "ophiolite.transfer-receipt/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/transfer-receipt-horizon-get-committed.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/transfer-receipt-horizon-get-committed.json",
+      "title": "The committed receipt of a get of that version into the synthetic survey: one empty point becomes a node without a value, seven values move to OpendTect's Z steps (counted by hand), nothing not carried (E184 s0)",
+      "schema": "ophiolite.transfer-receipt/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/transfer-receipt-log-get-committed.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/transfer-receipt-log-get-committed.json",
+      "title": "The committed receipt of a well log get into the synthetic survey, code document 1.1.0: the synthetic fake log's five samples with their declared depth reference, none changed by 32-bit storage, one without a value, the header as received not carried (counted by hand; E184 s1)",
+      "schema": "ophiolite.transfer-receipt/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/transfer-receipt-qgis-read-planned.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/transfer-receipt-qgis-read-planned.json",
+      "title": "The planned receipt of QGIS adding that version as a points layer (E184 s0)",
+      "schema": "ophiolite.transfer-receipt/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/transfer-receipts-answer.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/transfer-receipts-answer.json",
+      "title": "exchange/receipts for version 1 of that horizon: its send receipt and one get's, on one page (E184 s0)",
+      "schema": "ophiolite.transfer-receipts/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/transfer-receipt-max.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/transfer-receipt-max.json",
+      "title": "The largest receipt the contract takes: 8 rows in each list, fingerprints of 128 characters, exactly 2,048 bytes as compact JSON; not a route's receipt (E184 s0)",
+      "schema": "ophiolite.transfer-receipt/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/transfer-receipt-cases.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/invalid/transfer-receipt-cases.json",
+      "title": "Receipts the schema refuses at their paths, receipts only the model's cross-field rules and ceiling refuse, and receipts the code document refuses with their sentence and reason (E184 s0)"
+    },
+    {
+      "id": "ophiolite.chain-reasons/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/chain-reasons.json",
+      "title": "Chain refusals, the job-step admission sentence, step state words and comparison words, one sentence each, no codes (E178 s0)"
+    },
+    {
+      "id": "ophiolite.reference-reasons/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/reference-reasons.json",
+      "title": "Reference-case refusals and the lines a person reads beside reference cases and runs, one sentence each, no codes (E180 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/chains/chain-after-new-tops.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/chain-after-new-tops.json",
+      "title": "The chain After new tops: residuals checked within 10 m, a design review that applies above 5 m, a regrid question, tight residuals within 6 m (E178 s0)",
+      "schema": "ophiolite.chain/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-did-not-apply.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-did-not-apply.json",
+      "title": "A run whose largest residual is 5.00 m: the design review did not apply and the question is open (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-waits-outside.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-waits-outside.json",
+      "title": "A run whose largest residual is 5.01 m: the design review applies and the run waits for it (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-stopped.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-stopped.json",
+      "title": "A run whose residuals were rejected: the run is stopped (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-continued.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-continued.json",
+      "title": "The stopped run continued by a person with a reason; the check stays rejected (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-retried.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-retried.json",
+      "title": "The stopped run retried with a new result that is accepted; both attachments are kept (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-undecided.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-undecided.json",
+      "title": "A run over a check recorded without measures: the design review cannot be decided (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-refusals.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-refusals.json",
+      "title": "A run that refused a result made by another tool version and one not made from the checked version (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-done.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-done.json",
+      "title": "A run done: the design review said to be held, the regrid chosen and the tight residuals accepted (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-newer-input.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-newer-input.json",
+      "title": "A run whose open step reads tops that have a newer version (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-on-request.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-on-request.json",
+      "title": "A run started on request naming its four input versions (E178 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/due-one.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/due-one.json",
+      "title": "One tops version due for After new tops (E178 s0)",
+      "schema": "ophiolite.chain-due/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/due-after-start.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/due-after-start.json",
+      "title": "After a run started for that version it is gone, and the version published mid-run is due (E178 s0)",
+      "schema": "ophiolite.chain-due/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/due-empty.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/due-empty.json",
+      "title": "Nothing due (E178 s0)",
+      "schema": "ophiolite.chain-due/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/chain-cases.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/invalid/chain-cases.json",
+      "title": "Chain declarations the schema refuses at their paths, and schema-valid ones the structural rules refuse with their reasons (E178 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-cases.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/invalid/run-cases.json",
+      "title": "Chain runs the schema refuses at their paths, and schema-valid ones the structural rules refuse with their reasons (E178 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-after-tops-v2.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-after-tops-v2.json",
+      "title": "What rests on tops version 1 after version 2, as the administrator reads it: the horizon and the residual at one step, the residual's acceptance on version 1, two held copies, one item with no recorded inputs (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-after-horizon-v2.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-after-horizon-v2.json",
+      "title": "The same question after a horizon version 2 made from tops version 2: the horizon is no longer a row, the residual remains once (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-restricted.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-restricted.json",
+      "title": "The same question read by a member who may not open the residual: no row for it or its acceptance, restricted (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-before-tops-v2.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-before-tops-v2.json",
+      "title": "Before tops version 2, against the next version: what will rest on an older version once it is published (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-unavailable.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-unavailable.json",
+      "title": "An item the reader may not open, answered as an unknown one: no item, no rows, zero counts (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-chain-page-1.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-chain-page-1.json",
+      "title": "A chain of results over three tops versions, first page of three rows: a tie in distance resolved to the newer version, two paths resolved to the shorter (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-chain-page-2.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-chain-page-2.json",
+      "title": "The chain's last page: a result two steps away and an acceptance reached only through the walk; the totals exceed the page's rows (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-chain-next.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-chain-next.json",
+      "title": "The chain before tops version 3, against the next version, on one page (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-chain-capped.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-chain-capped.json",
+      "title": "The chain when the walk reached its node cap: complete false, the counts at least the rows (E177 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-cases.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/invalid/affected-cases.json",
+      "title": "Affected answers and requests the schema refuses at their paths, and schema-valid answers the structural rules refuse with their reasons (E177 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-schema-1.0.0.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/frozen/affected-schema-1.0.0.json",
+      "title": "The affected 1.0.0 document as published by E177 s0, frozen beside 1.1.0; never regenerated (E185 s2c)"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-schema-1.1.0.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/frozen/affected-schema-1.1.0.json",
+      "title": "The affected 1.1.0 document as published by E185 s2c, frozen beside 1.2.0; never regenerated (E182 s2c)"
+    },
+    {
+      "id": "ophiolite.fixture/changes/affected-schema-1.1.0.digest.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/frozen/affected-schema-1.1.0.digest.json",
+      "title": "The released affected 1.1.0 file, as its digest, frozen; never regenerated (E182 s2c)"
+    },
+    {
+      "id": "ophiolite.mapping/application-curve-to-well-log-curve/1",
+      "kind": "mapping",
+      "path": "mappings/v1/application-curve-to-well-log-curve.json",
+      "title": "Application curve to well log curve: pairs, constants, additions, six eligibility causes, no losses (E183 s0)"
+    },
+    {
+      "id": "ophiolite.mapping/application-curve-to-well-log-curve/2",
+      "kind": "mapping",
+      "path": "mappings/v1/application-curve-to-well-log-curve-2.json",
+      "title": "Application curve to well log curve: /1's pairs and six causes, then registered and samples, no losses (E183 s2a)"
+    },
+    {
+      "id": "ophiolite.fixture/scientific/well-log-curve.json/1",
+      "kind": "fixture",
+      "path": "scientific/v1/fixtures/well-log-curve.json",
+      "title": "A synthetic well log curve with its header entries as received (E183 s0)",
+      "schema": "ophiolite.well-log-curve/1"
     }
   ]
 }

@@ -1,0 +1,15 @@
+{
+ "schema": "ophiolite.chain/1",
+ "label": "After new tops",
+ "trigger": {"on": "version", "kind": "well-tops-csv/1", "selection": "wells-a"},
+ "steps": [
+  {"key": "residuals", "label": "Well residuals", "kind": "tool", "follows": [],
+   "tool": {"procedure": "well-residuals", "outcome": {"id": "outcome-tops-10m", "version": 1}, "made_from": []}},
+  {"key": "design", "label": "Design review", "kind": "outside", "follows": ["residuals"], "outside": {},
+   "applies_when": {"step": "residuals", "measure": "largest_residual", "comparison": "above", "value": 5.0, "unit": "m"}},
+  {"key": "go-on", "label": "Regrid decision", "kind": "choice", "follows": ["design"],
+   "choice": {"question": "Regrid the horizon now?", "choices": [{"id": "regrid", "label": "Regrid now"}, {"id": "hold", "label": "Hold"}]}},
+  {"key": "residuals-tight", "label": "Tight residuals", "kind": "tool", "follows": ["go-on"],
+   "tool": {"procedure": "well-residuals", "outcome": {"id": "outcome-tops-6m", "version": 1}, "made_from": []}}
+ ]
+}

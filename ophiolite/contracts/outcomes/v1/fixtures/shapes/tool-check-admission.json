@@ -1,0 +1,14 @@
+{
+ "schema": "ophiolite.outcome-check/1",
+ "outcome": {"id": "outcome-tool-5m", "version": 1, "rule": "tool-check/1", "settings_sha256": "1111111111111111111111111111111111111111111111111111111111111111"},
+ "evaluator": {"contract": "outcome-evaluator/1", "rule_version": 1},
+ "result": {"asset_id": "tops-checked-a", "revision": "2222222222222222222222222222222222222222222222222222222222222222"},
+ "publication": {"run": "run-1", "role": "tops", "seq": 9},
+ "inputs": [{"slot": "selection", "asset_id": "wells-a", "revision": "3333333333333333333333333333333333333333333333333333333333333333"}],
+ "evaluated_as": {"person": "ana"},
+ "verdict": "not_compared",
+ "reason": "tool_not_verified",
+ "rows": {"computed": 0, "passing": 0, "failing_count": 0, "failing": [], "not_computed": []},
+ "tool": {"digest": "7777777777777777777777777777777777777777777777777777777777777777", "image": null, "label": "Tops check", "version_number": 2, "stage": "admission", "answer": null, "explanation": null},
+ "at": 1795600000.0
+}

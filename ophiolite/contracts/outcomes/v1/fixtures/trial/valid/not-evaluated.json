@@ -1,0 +1,25 @@
+{
+  "schema": "ophiolite.outcome-trial/1",
+  "trial": true,
+  "kind": "well-residual/1",
+  "candidate": {"output_sha256": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210", "output_bytes": 2048},
+  "inputs": [
+    {"slot": "selection", "asset_id": "well-set-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "surface", "asset_id": "surface-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "tops", "asset_id": "tops-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+    {"slot": "trajectories", "asset_id": "trajectories-a", "revision": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+  ],
+  "at": 1795000000.0,
+  "sentence": null,
+  "outcomes": [
+    {
+      "outcome": {"id": "tops-within-5m", "version": 2, "rule": "well-residual-within/1", "settings_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"},
+      "label": "Tops within 5 m",
+      "would": "not_evaluated",
+      "reason": "declarer_cannot_read",
+      "sentence": "Would not be evaluated: the person who declared this outcome cannot read Tops A.",
+      "rows": null,
+      "data_rules": null
+    }
+  ]
+}

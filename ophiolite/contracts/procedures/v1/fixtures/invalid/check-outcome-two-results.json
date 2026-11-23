@@ -1,0 +1,9 @@
+{
+  "schema": "ophiolite.procedure/1", "name": "residual-limit", "label": "Residuals within the team's limit", "version": 1, "step": "check",
+  "inputs": [
+    {"slot": "residuals", "label": "Residual result", "class": "result", "kinds": ["well-residual/1"], "cardinality": "one"},
+    {"slot": "earlier", "label": "Earlier residual result", "class": "result", "kinds": ["well-residual/1"], "cardinality": "one"}
+  ],
+  "outputs": [{"role": "answer", "label": "Answer", "class": "answer"}],
+  "entry": "procedure:check"
+}

@@ -248,7 +248,7 @@ def test_a_kept_reading_travels_in_bundle_two_nine_and_back_as_recorded(setting,
     [row] = result['report'].items
     output = next(o for o in row['outputs'] if o['role'] == 'tops')
     first = exported(setting['bob'], output, tmp_path / 'first')
-    assert first.manifest['bundle_version'] == '2.10.0' and first.assets[0].provenance == PDF
+    assert first.manifest['bundle_version'] == '2.18.0' and first.assets[0].provenance == PDF  # E182 s2b: with its sender
     recorded = first.manifest['assets'][0]['read_by']
     assert recorded['original']['sha256'] == hashlib.sha256(PDF).hexdigest() and recorded['kept'] == recorded['original']['sha256']
     [step] = setting['alice'].import_bundle(first, audience=[], attribution='NAM', rights_confirmed=True)
@@ -258,7 +258,7 @@ def test_a_kept_reading_travels_in_bundle_two_nine_and_back_as_recorded(setting,
     told = json.dumps(setting['alice'].story(mine['asset_id'], mine['revision']))
     assert 'as recorded in the exporting project' in told and 'The original file is kept.' in told
     again = exported(setting['alice'], mine, tmp_path / 'again')
-    assert again.manifest['bundle_version'] == '2.10.0' and again.manifest['assets'][0]['read_by'] == recorded and again.assets[0].provenance == PDF
+    assert again.manifest['bundle_version'] == '2.18.0' and again.manifest['assets'][0]['read_by'] == recorded and again.assets[0].provenance == PDF
     [repeat] = setting['alice'].import_bundle(first, audience=[], attribution='NAM', rights_confirmed=True)
     assert repeat['destination'] == mine  # the stable command: the same item, the original not staged twice
 

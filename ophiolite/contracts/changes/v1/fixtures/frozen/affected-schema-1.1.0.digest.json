@@ -1,0 +1,8 @@
+{
+  "id": "ophiolite.affected/1",
+  "version": "1.1.0",
+  "path": "changes/v1/fixtures/frozen/affected-schema-1.1.0.json",
+  "file_sha256": "5a5dd0d964eec43ab0257ecf272cc8a3edba4702495142b3c1fe9c5bfac084f0",
+  "file": "the released file bytes as main served them before E182 s2c (E185 s2c's merged document)",
+  "frozen_by": "E182 s2c: 1.2.0 minus the version's sender and the three copied sender definitions, version set back, is these bytes"
+}

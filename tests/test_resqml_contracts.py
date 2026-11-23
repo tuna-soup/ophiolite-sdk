@@ -14,6 +14,7 @@ import pytest
 from ophiolite import validate
 from ophiolite.errors import VerificationFailed
 from ophiolite.models import generated
+from ophiolite.models.answers import NEWER
 
 _spec = importlib.util.spec_from_file_location('models_before_e124s1', Path(__file__).with_name('frozen') / 'models_before_e124s1.py')
 before = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(before)
@@ -48,9 +49,12 @@ def schema(name):
 
 @pytest.mark.parametrize('model,_,payload', CASES, ids=[c[0] for c in CASES])
 def test_the_released_models_refuse_a_payload_read_from_a_resqml_package(model, _, payload):
+    """E187 s0 (ruled by ophiolite-66): today's reader words a refusal made only of words the earlier models do not
+    know as the upgrade sentence, and keeps the site's consequence; the header's refusal is not only words."""
     with pytest.raises(VerificationFailed) as refused:
         validate.model(getattr(before, model), payload)
-    assert (str(refused.value), refused.value.code) == (REFUSED + ' No files were saved.', 'verification-failed')
+    sentence = REFUSED if model == 'CurveColumnsHeader' else NEWER
+    assert (str(refused.value), refused.value.code) == (sentence + ' No files were saved.', 'verification-failed')
 
 
 @pytest.mark.parametrize('model,name,payload', CASES, ids=[c[0] for c in CASES])

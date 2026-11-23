@@ -1,0 +1,8 @@
+{
+  "id": "ophiolite.held-copies/1",
+  "version": "1.1.0",
+  "path": "exchange/v1/fixtures/frozen/held-copies-schema-1.1.0.json",
+  "file_sha256": "8a3732ef9fe3edfc0704a1693ed110245e3319a6985c2e2fb5d085c3b75ad58e",
+  "file": "the released file bytes as main served them before E182 s2c (E185 s2c's merged document)",
+  "frozen_by": "E182 s2c: 1.2.0 minus the version's sender and the three copied sender definitions, version set back, is these bytes"
+}

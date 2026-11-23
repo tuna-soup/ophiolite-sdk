@@ -1,0 +1,113 @@
+{
+  "schema": "ophiolite.well-log-curve/1",
+  "strict": {
+    "well": "SYNTHETIC-M1",
+    "mnemonic": "GR",
+    "unit": "gAPI",
+    "unit_status": "declared",
+    "depth_kind": "MD",
+    "depth_unit": "M",
+    "depth_datum": "unknown",
+    "depth": [
+      100.0,
+      101.0,
+      102.0,
+      103.0,
+      104.0
+    ],
+    "values": [
+      0.0,
+      10.0,
+      null,
+      30.0,
+      40.0
+    ],
+    "missing_value_marker": "-999.25",
+    "reading": {
+      "reader": "asset_connectors.las_reader/1",
+      "lasio_version": "0.32",
+      "mapping": "application-curve/1",
+      "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+      "parsing_policy": "las2-strict-null/1",
+      "depth_index": "DEPT",
+      "missing_value_policy": "Declared LAS NULL marker; missing samples are not zero",
+      "depth_reference": "source declared; not inferred"
+    }
+  },
+  "as_received": {
+    "source": {
+      "authority": "synthetic-file",
+      "key": "curve-a",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "profile": "las2/1"
+    },
+    "source_sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+    "entries": [
+      {
+        "section": "V",
+        "mnemonic": "VERS",
+        "unit": "",
+        "value": "2.0",
+        "description": "LAS version"
+      },
+      {
+        "section": "V",
+        "mnemonic": "WRAP",
+        "unit": "",
+        "value": "NO",
+        "description": "One row per depth"
+      },
+      {
+        "section": "W",
+        "mnemonic": "STRT",
+        "unit": "M",
+        "value": "100",
+        "description": "Start"
+      },
+      {
+        "section": "W",
+        "mnemonic": "STOP",
+        "unit": "M",
+        "value": "104",
+        "description": "Stop"
+      },
+      {
+        "section": "W",
+        "mnemonic": "STEP",
+        "unit": "M",
+        "value": "1",
+        "description": "Step"
+      },
+      {
+        "section": "W",
+        "mnemonic": "NULL",
+        "unit": "",
+        "value": "-999.25",
+        "description": "Missing sample marker"
+      },
+      {
+        "section": "W",
+        "mnemonic": "WELL",
+        "unit": "",
+        "value": "SYNTHETIC-M1",
+        "description": "Not an observed well"
+      },
+      {
+        "section": "C",
+        "mnemonic": "DEPT",
+        "unit": "M",
+        "value": "",
+        "description": "Source depth; datum unknown"
+      },
+      {
+        "section": "C",
+        "mnemonic": "GR",
+        "unit": "gAPI",
+        "value": "",
+        "description": "Gamma ray"
+      }
+    ],
+    "entries_total": 9,
+    "entries_withheld": 0
+  }
+}

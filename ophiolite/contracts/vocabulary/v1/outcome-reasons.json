@@ -20,7 +20,13 @@
   "not-again": "Publish for an outcome is for an output of a run made again; nothing was published.",
   "kind": "This outcome is not declared over this kind of result; nothing was published.",
   "disabled": "This outcome is disabled; nothing was published.",
-  "answered": "This output was already answered; run again to publish for this outcome."
+  "answered": "This output was already answered; run again to publish for this outcome.",
+  "tool-unknown": "There is no such tool version in this project.",
+  "tool-withdrawn": "This tool version is not enabled in this project, so it cannot judge an outcome.",
+  "tool-step": "This tool version is not a check that answers an outcome.",
+  "tool-kind": "This tool version does not check this kind of result.",
+  "tool-not-trusted": "You have not trusted this tool version.",
+  "tool-not-verified": "This tool version has no active verification in this project."
  },
  "checks": {
   "rows_missing": "rows missing: the result leaves out rows its selection requires",
@@ -33,6 +39,20 @@
   "nothing_computed": "no row of the result has a computed residual",
   "data_rule": "an input failed a data rule the outcome names",
   "data_rule_unread": "an input could not be read to run the data rules the outcome names",
-  "data_rule_missing": "a data rule the outcome names is not in the rule library"
+  "data_rule_missing": "a data rule the outcome names is not in the rule library",
+  "tool_not_trusted": "{tool} is not trusted by the person who declared this outcome",
+  "tool_not_verified": "{tool} version {version} is not verified",
+  "tool_withdrawn": "{tool} version {version} was withdrawn",
+  "declarer_left": "the person who declared this outcome can no longer run calculations here",
+  "sandbox_unavailable": "Ophiolite cannot run {tool} on this server",
+  "sandbox_off": "sandbox runs are not turned on for {tool}",
+  "tool_timeout": "{tool} ran out of time",
+  "tool_memory": "{tool} ran out of memory",
+  "tool_crashed": "{tool} stopped with an error",
+  "answer_missing": "{tool} wrote no answer",
+  "answer_malformed": "{tool} wrote an answer Ophiolite cannot read",
+  "answer_oversized": "{tool} wrote an answer over 1 MiB",
+  "tool_not_compared": "{tool} did not compare: {explanation}",
+  "inputs_unmatched": "the run that made the result did not use the inputs {tool} reads"
  }
 }

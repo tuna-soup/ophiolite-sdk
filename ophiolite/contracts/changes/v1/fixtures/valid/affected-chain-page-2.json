@@ -1,0 +1,29 @@
+{
+  "project": "p-chain",
+  "asked": "tops-a",
+  "item": {"asset_id": "tops-a", "name": "Tops A", "kind": "tops", "head": {"revision": "rev-a-3", "version": 3}},
+  "against": "head",
+  "as_of": "2026-11-19T10:31:00Z",
+  "counts": {"results": 4, "acceptances": 1, "held": 0},
+  "without_inputs": 0,
+  "restricted": false,
+  "complete": true,
+  "rows": [
+    {
+      "kind": "result",
+      "item": {"asset_id": "grid-a", "name": "Grid A", "kind": "grids"},
+      "head": {"revision": "rev-ga-1", "version": 1},
+      "distance": 2,
+      "rests_on": {"revision": "rev-a-1", "version": 1}
+    },
+    {
+      "kind": "acceptance",
+      "outcome": {"id": "grid-ok", "version": 1, "label": "Grid within tolerance"},
+      "result": {"asset_id": "grid-a", "revision": "rev-ga-1", "version": 1},
+      "check_id": "check-grid-1",
+      "accepted_on": {"revision": "rev-a-1", "version": 1},
+      "newest": {"revision": "rev-a-3", "version": 3}
+    }
+  ],
+  "next": null
+}

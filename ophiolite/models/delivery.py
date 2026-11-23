@@ -11,7 +11,9 @@ import types
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, model_validator
+from pydantic import ConfigDict, Field, StrictStr, model_validator
+
+from .answers import Request
 
 CONTRACT = Path(__file__).resolve().parent.parent / 'contracts' / 'procedures' / 'v1' / 'delivery.py'
 PROFILE = 'procedure-delivery/1'
@@ -35,8 +37,9 @@ def verdict(payload):
     return contract().verdict(payload)
 
 
-class _Closed(BaseModel):
-    model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
+class _Closed(Request):
+    """E187 s0: what this program sends, closed; the fields name their own strictness, as before."""
+    model_config = ConfigDict(strict=False)
 
 
 class Delivery(_Closed):

@@ -65,9 +65,10 @@ def test_the_sdk_reads_every_stick_in_file_order_and_exports_them_with_their_pac
     assert (c['type'], c['sticks'], c['points'], c['crs'], c['xy_unit']) == ('polyline-set', 5, 9, 'unknown', 'm')
     assert c['fidelity']['decisions'] == [STATED]
     assert read._wire_descriptor['interpretation']['reader'] == 'asset_connectors.petrel_faults/1'
-    # A-b (E123 S1f-c): the export is bundle 2.11, a polyline set with its package, kept exactly (K4).
+    # A-b (E123 S1f-c): the export is bundle 2.11, a polyline set with its package, kept exactly (K4); E182 s2b: its
+    # sender travels too, which makes it 2.18.
     exported = alice.export([(primary['asset_id'], primary['revision'], None)], tmp_path / 'out')
-    assert exported.manifest['bundle_version'] == '2.11.0'
+    assert exported.manifest['bundle_version'] == '2.18.0'
     [entry] = exported.manifest['assets']
     assert sorted(f['path'].rsplit('/', 1)[1] for f in entry['files']) == [
         'companion-1.bin', 'data.json', 'descriptor.json', 'interpretation.json', 'original.txt', 'package.json']

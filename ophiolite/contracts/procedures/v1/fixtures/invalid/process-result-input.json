@@ -1,0 +1,6 @@
+{
+  "schema": "ophiolite.procedure/1", "name": "depth-shift", "label": "Depth shift", "version": 1, "step": "process",
+  "inputs": [{"slot": "tops", "label": "Well tops", "class": "result", "kinds": ["well-tops-csv/1"], "cardinality": "one"}],
+  "outputs": [{"role": "shifted", "label": "Shifted tops", "class": "version", "kind": "well-tops-csv/1"}],
+  "entry": "procedure:shift"
+}

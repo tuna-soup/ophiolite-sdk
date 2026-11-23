@@ -5,6 +5,94 @@
 Supported 0.x client over preview contracts, published on PyPI as `ophiolite` since 29 October 2026 and numbered by
 release date (ADR 0015). No stable 1.0 or production-support promise is claimed.
 
+- What sent a version travels with it (E182 s2b). `client.provenance(...)` gains `sender` and `sender_words`, the
+  gateway's `ophiolite.sender/1` view and its sentence as served (never composed or checked here); the asynchronous
+  client gives the same. `export`, `export_slices` and their asynchronous forms write each version's sender as its
+  own entry field, `sender`, beside `source_record`, from the same provenance request; a bundle carrying one is 1.18
+  (well logs) or 2.18, and one without is the version it was before. `open_bundle` gives it as `BundleAsset.sender`
+  and refuses a sender that is not a closed `ophiolite.sender/1` view, or one in a bundle below minor 18. Descriptor
+  files keep their bytes; released readers open 1.18 and 2.18 bundles and read what they read before.
+
+- Chains and their runs can be used from Python and the command line (E178 s2c). `client.chains` is a `ChainClient`
+  (`ophiolite.chains`) bound to the client: `declare`, `revise`, `enable`, `disable`, `withdraw`, `list`, `get`, `due`
+  and `dismiss` for a project's chains, and `run_start`, `run_attach`, `run_choose`, `run_acknowledge`, `run_decide`,
+  `run_continue`, `run_get` and `run_list` for their runs (`ophiolite.chain-run/1`). Each method sends one request and
+  returns the served answer; the server decides who may declare, enable, dismiss or act, and nothing is refused on
+  this computer. `ophiolite results chains ...` and `ophiolite results chain-runs ...` name a chain by its name, a run
+  by its chain's name (its newest run) or its id, a step and an answer by their names, and print labels and state
+  words by default; `--json` prints the served answer as it is. Chain answers are new after 2026.11.19.
+- A well log read can be written as LAS (E183 s2d): `ophiolite.lasio.to_lasio` on a `WellLogSet` writes `WELL` from
+  the declared well, `STRT`, `STOP` and `STEP` from the depth (`STEP` 0 unless the spacing is the same throughout),
+  `NULL` -999.25, `~Curve` from the selected curves in the caller's order with their units, and the declared datum as
+  a line of `~Other` beside Project, Asset and Revision. The file's other header entries follow as received, in file
+  order with repeated mnemonics kept: the other `~V` and `~W` entries, every `~P` entry and every `~O` line; the
+  received `VERS`, `WRAP`, `DLM`, `WELL`, `STRT`, `STOP`, `STEP`, `NULL` and `~Curve` lines are not written. No entry
+  is compared with the declaration; nothing is converted or resampled. Curves that differ in well, depth kind or datum
+  are refused before a file is built, and `well=` is refused for a well log. `lasio_bytes` re-reads the entries written
+  as received and returns nothing when lasio wrote one otherwise (it writes an empty value that has a unit as 0).
+  `to_lasio` on a read without `form` writes the same bytes as before.
+- A curve can be read in its well log form (E183 s2c): `Client.read(asset, revision, curves,
+  form='ophiolite.well-log-curve/1')` returns a `WellLogSet` whose curves are `ophiolite.scientific.WellLog`: the
+  declared well, depth kind, depth unit and datum, depth and values (a missing sample is `None`), unit, missing-value
+  marker and the file's header as received. Each is verified against its descriptor: bytes and digest, the gateway's
+  own checks (equal lengths, a strictly increasing depth, the withheld count, the 64 KiB ceiling), source, facts, curve
+  and reader. `to_frame` names the depth index by the declared kind and carries unit, datum and well in `attrs`; curves
+  combine only when depth, depth unit, kind, datum, well and source agree (`AxisMismatch` with reason `well`, `kind`,
+  `datum`, `unit` or `values`), and the two forms are never combined. A curve without that form is `Refused` with the
+  deployment's reasons; nothing falls back, converts or resamples. `read` without `form` is unchanged.
+  `AsyncClient.read` does not take `form` yet.
+- An exchange fetch can ask for the well log form (E183 s3): `Exchange.fetch(item, curves=[...],
+  form='ophiolite.well-log-curve/1')` gives a receipt whose content is a `WellLogSet`; `ClientTransport.FORMS` names the forms a
+  fetch passes on. When the deployment refuses that form for the version, the fetch is refused with reason `form`, the
+  deployment's own sentence and the refused revision, and the folder's lock is released; the caller decides whether to
+  fetch again without a form. A form without named curves, or a form not in `FORMS`, is not valid. A fetch without
+  `form` is unchanged. The OpendTect connector needs this release or later.
+- A LAS upload can declare its curves' well, depth kind and depth datum (E183 s2b): `Client.upload_las(...,
+  curve_declaration={'well': ..., 'depth_kind': 'MD'|'TVD'|'TVDSS', 'depth_datum': ...})`, `upload_data` with profile
+  `las2/1`, and `WorkFolder.upload_las`, which keeps the declaration for a recovery. All three are given or none; the
+  datum may be `'unknown'`. The version then also holds each curve's well log form. Only what the caller gives is sent:
+  nothing is read from the file's header, filled in or converted. A blank, padded or partial declaration, an unknown
+  depth kind, or a declaration with a file that is not LAS is refused before anything is sent, with the deployment's
+  sentence. A file sent in parts declares it when the upload begins. Without it, the request is exactly as before.
+- Two new contract models (E183 s0, E185 s0): `WellLogCurve` (`ophiolite.well-log-curve/1`, a strict part and the
+  header entries as received) and `HostQualification` (`ophiolite.host-qualification/1`, a host connector's checked
+  installations and rows). Nothing the client reads or sends changes.
+- The contract snapshot carries the registered record `ophiolite.profile-migration/2` (E183 s1b): a move of several
+  representations of one version under one mapping, such as a LAS item's curves moved to the well log form. Such a
+  move writes a new version that keeps every row of the old one and adds `well-log-curve:<mnemonic>` rows; `read`
+  reads both versions as before. Nothing the client sends changes.
+- The contract snapshot carries the registered profile `ophiolite.well-log-curve/1` and the gateway's new fields
+  (E183 s1a): a LAS upload's `curve_declaration` (well, depth kind, depth datum), the inspection's `header` counts, and
+  describe's `form` query parameter. A version with a declaration also holds `well-log-curve:<mnemonic>` rows, listed
+  in its manifest; `read` verifies them as before. Nothing the client sends changes.
+- What rests on the older versions of an item can be read (E177 s1): `Client.affected_pages(item, against='head',
+  limit=None)` yields the served `ophiolite.affected/1` pages, and `Client.affected(item, against='head')` gathers them
+  into one plain dict (every page's rows; the last page's item, as_of, counts and without_inputs; restricted when any
+  page says so; complete only when every page does; the number of pages). `against='next'` asks before a new version
+  is published. `ophiolite results affected ITEM [--next]` says the results, accepted outcomes and held copies in
+  plain words, and prints the served pages with `--json`. Both have async twins.
+- Answers with fields this release does not know are read (E187 s0). Every model that reads a gateway answer or a
+  served document (`ophiolite.models.answers.Answer`) keeps an unknown field in `model_extra` and stays strict on the
+  fields it knows; the job, dry-run and proposals models no longer refuse an added field. A value of a closed
+  vocabulary this release does not know (a state, an outcome, a schema id) is still refused, now as
+  `VerificationFailed` "This answer uses a word this release of ophiolite does not know; upgrade ophiolite to read
+  it." with `details['at']` naming the field; any other malformed answer keeps its sentence and exception type. What
+  the program sends (`Request`: the upload request and the delivery models) stays closed, and the restricted views
+  keep refusing (or dropping) more than their redacted shape.
+- A result can be tried against the project's outcomes before it is published (E176 s1): `Client.try_result(folder,
+  role=None, outcomes=None)` reads a run folder as `procedure_publish` reads it and answers, per output, what each
+  enabled outcome of its kind would say (`ophiolite.outcome-trial/1`); nothing is reported, so the folder publishes
+  afterwards as before. `Client.try_output(raw, header, report=, role=, outcome_ids=)` takes a header already built.
+  `ophiolite outcomes try FOLDER [--role ROLE] [--outcome NAME ...]` prints one line per outcome in words ("would be
+  rejected: 5 rows over 1 m"); `--json` prints the answer with its rows.
+- An assistant can try its run's outputs against the outcomes before it proposes the report, and attach the trial
+  (E176 s2a): `AgentRun.try_outcomes(role=None, outcome_ids=None)` tries exactly the report `report()` proposes and
+  answers `{role: answer}` with the deployment's seal; `AgentRun.report(summary, evidence=..., trial=answer)` sends it
+  in the evidence, where the person sees it beside the proposal (or "not tried" when the gateway cannot confirm it).
+  The trial grants nothing: publication evaluates the outcomes again. `trial_lines` now counts required rows not
+  computed from the answer's counts, so more than 20 of them are no longer read as rows over the limit.
+  `proposals()` reads a proposal's `trial` (its state, inputs and lines); the gateway serves it only to releases
+  after 2026.11.19 (earlier releases read proposals strictly and would refuse the added field).
 - An assistant can say which well or wellbore a tool run's result is about (E155 s2): `AgentExchange.send_run` takes
   `of_entity=` (an entity id, or `{role: id}`; a role left out is about none). It is read once with `entities/get`
   and kept with the send, so continuing it reads nothing again; a missing one, or one of another kind, is refused

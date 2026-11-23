@@ -1,0 +1,22 @@
+{
+  "note": "E179 s0 C2: ophiolite.check-answer/1 answers the contract reads, each with what read_answer makes of it when it is the only file in /output. Synthetic values; a well name here is a label, not data.",
+  "answers": [
+    {"name": "passed",
+     "answer": {"schema": "ophiolite.check-answer/1", "state": "passed", "reason": null,
+                "rows": [{"key": "W-1 Top Brent", "measure": "residual", "value": 1.2, "unit": "m", "limit": 5, "pass": true},
+                         {"key": "W-2 Top Brent", "measure": "residual", "value": -3.4, "unit": "m", "limit": 5, "pass": true}]},
+     "read": {"verdict": "accepted", "reason": null, "explanation": null}},
+    {"name": "failed",
+     "answer": {"schema": "ophiolite.check-answer/1", "state": "failed", "reason": null,
+                "rows": [{"key": "W-1 Top Brent", "measure": "residual", "value": 1.2, "unit": "m", "limit": 5, "pass": true},
+                         {"key": "W-2 Top Brent", "measure": "residual", "value": 6.1, "unit": "m", "limit": 5, "pass": false}]},
+     "read": {"verdict": "rejected", "reason": null, "explanation": null}},
+    {"name": "not compared",
+     "answer": {"schema": "ophiolite.check-answer/1", "state": "not_compared", "reason": "The surface does not reach W-9", "rows": []},
+     "read": {"verdict": "not_compared", "reason": "tool_not_compared", "explanation": "The surface does not reach W-9"}},
+    {"name": "a row without a value or a unit",
+     "answer": {"schema": "ophiolite.check-answer/1", "state": "failed",
+                "rows": [{"key": "W-3", "measure": "top found", "value": null, "unit": null, "limit": null, "pass": false}]},
+     "read": {"verdict": "rejected", "reason": null, "explanation": null}}
+  ]
+}

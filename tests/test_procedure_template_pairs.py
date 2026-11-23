@@ -21,7 +21,8 @@ WORDS = {'points-csv/1': 'points', 'mesh-text/1': 'mesh', 'esri-ascii-grid/1': '
          'deviation-csv/1': 'deviation', 'opendtect-faultsticks/1': 'fault-sticks', 'las2/1': 'las',
          'well-location/1': 'well-location', 'wavelet-text/1': 'wavelet', 'model-section-text/1': 'model-section',
          'seismic-section-text/1': 'seismic-section', 'time-depth-csv/1': 'time-depth', 'well-set/1': 'well-set',
-         'well-residual/1': 'residual', 'segy/1': 'seismic-volume'}  # E123 SZ: rules 1.4.0, no segy/1 template
+         'well-residual/1': 'residual', 'segy/1': 'seismic-volume',  # E123 SZ: rules 1.4.0, no segy/1 template
+         'sql-wells/1': 'wells-table'}  # E181 s1: rules 1.6.0, a kept copy of a wells table is an input only; no template
 STEPS = ('read', 'source', 'process', 'send', 'check')
 
 
@@ -36,7 +37,7 @@ def test_the_listed_pairs_are_these_49():
 def test_every_step_and_kind_is_listed_or_refused_with_a_sentence():
     doc = templates.pairs()
     refused = {(row['step'], templates.word(row['kind'])) for row in doc['refused']}
-    assert len(refused) == 26 and refused | LISTED == {(s, w) for s in STEPS for w in WORDS.values()} and not refused & LISTED
+    assert len(refused) == 31 and refused | LISTED == {(s, w) for s in STEPS for w in WORDS.values()} and not refused & LISTED
     for row in doc['refused']:
         said = row['sentence']
         assert said and said.endswith('.') and len(said) <= 200 and '/' not in said and said == templates.refusal(row['step'], row['kind'])

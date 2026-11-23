@@ -4212,7 +4212,7 @@
      "options": [
       "--tolerance"
      ],
-     "required": true,
+     "required": false,
      "type": "float"
     },
     {
@@ -4272,6 +4272,58 @@
      ],
      "required": true,
      "type": null
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "tool",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--tool"
+     ],
+     "required": false,
+     "type": null
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "tool_version",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--tool-version"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "kind",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--kind"
+     ],
+     "required": false,
+     "type": null
+    },
+    {
+     "action": "_AppendAction",
+     "choices": null,
+     "default": "None",
+     "dest": "settings",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--setting"
+     ],
+     "required": false,
+     "type": null
     }
    ],
    "argv": [
@@ -4291,10 +4343,14 @@
     "credentials": null,
     "destination": "x",
     "json": false,
+    "kind": null,
     "label": "x",
     "not_computed": "allowed",
     "procedure": "x",
+    "settings": null,
     "tolerance": 1.0,
+    "tool": null,
+    "tool_version": null,
     "unit": "m"
    },
    "served": {

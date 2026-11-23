@@ -11,8 +11,9 @@ from .models import invariants as rules
 def model(kind, value):
     try: return kind.model_validate(value)
     except ValidationError as exc:
-        # Do not echo arbitrary input values or internal identifiers in messages.
-        raise VerificationFailed('Scientific data does not satisfy the declared contract.', 'No files were saved.') from exc
+        # Do not echo arbitrary input values or internal identifiers in messages (E187 s0: nor in the newer-word one).
+        from .models.answers import refusal
+        raise refusal(exc, VerificationFailed('Scientific data does not satisfy the declared contract.', 'No files were saved.')) from exc
 
 
 def pair(descriptor, raw):

@@ -28,11 +28,11 @@ def history_filters(kinds=None, person=None, actor=None, since=None, until=None,
     return {k: v for k, v in out.items() if v is not None}
 
 
-def _headers(credential, url, project):
+def _headers(credential, url, project, sender=None):
     if credential is None: raise Refused(ACCESS_KEY_NEEDED, code='access-key-required')
     if getattr(credential, 'kind', None) == 'application': raise Refused(ACCESS_KEY_NEEDED, code='access-key-required')
     headers = credential.headers(url, project) if project is not None else credential.discovery_headers(url)
-    return {**_client_header.stamp(headers), 'Content-Type': 'application/json'}
+    return {**_client_header.stamp(headers, sender), 'Content-Type': 'application/json'}  # E182 s1: a client's own name
 
 
 def _post(http, url, path, body, headers, *, raw=False, notifier=None):
@@ -91,7 +91,7 @@ class AccessHistoryClient:
     def _access_read(self, operation, body, *, raw=False):
         if 'project_id' in body and body['project_id'] != self.project: raise Refused('The request belongs to another project.')
         path = '/api/v1/projects/' + quote(self.project, safe='') + '/access/' + operation
-        return _post(self.http, self.url, path, {'project_id': self.project, **body}, _headers(self.credential, self.url, self.project), raw=raw,
+        return _post(self.http, self.url, path, {'project_id': self.project, **body}, _headers(self.credential, self.url, self.project, self._sender), raw=raw,
                      notifier=getattr(self, '_notifier', None))
 
     def access_history(self, *, kinds=None, person=None, actor=None, since=None, until=None, limit=100):

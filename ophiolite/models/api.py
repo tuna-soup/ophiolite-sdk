@@ -1,6 +1,7 @@
 """Typed preview catalogue and browser-application grant responses."""
 from pydantic import Field
 from .generated import Contract, AssetSummary, Via
+from .answers import Request  # E187 s0: the restricted views below keep answers.POLICY on purpose
 
 class ListPage(Contract):
     items: list[AssetSummary]
@@ -213,8 +214,14 @@ class Grants(Contract):
     generation: int | None = None  # None: the server does not support conditional sharing
     project: bool | None = None  # E78: shared with everyone in the project; None: the server does not report it
 
-class UploadRequest(Contract):
-    model_config=ConfigDict(extra='forbid',strict=True)
+class CurveDeclarationRequest(Request):
+    """E183 s2b: what a LAS upload's sender declares for its curves, all three or none, as the gateway's
+    `CurveDeclaration` takes it. Only the caller's text: nothing is read from the file's header, nothing is converted."""
+    well: str = Field(min_length=1,max_length=512,pattern=r'^\S(?:.*\S)?$')
+    depth_kind: Literal['MD','TVD','TVDSS']
+    depth_datum: str = Field(min_length=1,max_length=512,pattern=r'^\S(?:.*\S)?$')  # the literal 'unknown' is a declaration
+
+class UploadRequest(Request):  # E187 s0: what this program sends, closed
     project_id: str = Field(min_length=1,max_length=160)
     command_id: str = Field(min_length=1,max_length=64)
     filename: str = Field(min_length=1,max_length=160)
@@ -237,6 +244,8 @@ class UploadRequest(Contract):
     source: dict | None = None
     # E173 s0b: a point set the sender marks as a horizon (sent only when used; later versions keep it).
     represents: Literal['horizon'] | None = None
+    # E183 s2b: a LAS file's curve declaration (sent only when given; in parts, with begin).
+    curve_declaration: CurveDeclarationRequest | None = None
 
     @model_validator(mode='after')
     def appended(self):
