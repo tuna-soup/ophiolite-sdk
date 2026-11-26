@@ -7,6 +7,7 @@ from .las_header import curves as source_curves, null_marker as source_null_mark
 
 MAX_REQUEST_BYTES=2_100_000
 CHECK_REQUEST_BYTES=33_658_436  # D-38: the gateway's bound on checks publish and compare (three 8 MiB files in base64 + 104 000)
+FIGURE_REQUEST_BYTES=4*math.ceil(16*1024*1024/3)+32_768  # E191 s1 (F7): attachments/add at the schema's ceiling (the gateway's body_bound); a deployment's own bound is the server's
 
 
 def _number(value,marker):
@@ -153,6 +154,8 @@ SURVEY_OPERATIONS={'surveys':{'get','list','history','create','add','remove','re
                                 'restate','link'}}  # E142 s1; E142 s2a: the complete lists in one revision, existing items linked
 EXCHANGE_OPERATIONS={'exchange':{'holders','release','receipts','host-report'}}  # E171 s1: who holds which version of an item; a folder's copy released; E184 s0a: a version's transfer receipts; E185 s2c: a connector's report of its record
 CHANGE_OPERATIONS={'changes':{'affected'}}  # E177 s1: what rests on the versions a change replaces
+ATTACHMENT_OPERATIONS={'attachments':{'add','list','read','withdraw'}}  # E191 s1: figures kept with an item version
+TABLE_KIND_OPERATIONS={'table-kinds':{'declare','list','show'}}  # E203 s1: a project's kinds of table
 
 
 # E39: an organisation's connections are not a project's; their routes carry no project (/api/v1/<area>/<op>).
@@ -165,7 +168,7 @@ def operation_path(project,area,operation):
         return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
              else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or OUTCOME_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or JOB_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
-    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())|EXCHANGE_OPERATIONS.get(area,set())|CHANGE_OPERATIONS.get(area,set())
+    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())|EXCHANGE_OPERATIONS.get(area,set())|CHANGE_OPERATIONS.get(area,set())|ATTACHMENT_OPERATIONS.get(area,set())|TABLE_KIND_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation
@@ -726,7 +729,7 @@ def curve_declaration_field(declaration,profile):
 
 def upload_metadata(project,command_id,*,filename,name,attribution,audience,rights_confirmed,well_notes='',profile=None,declared=None,well_log=None,origin=None,
                     append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None,receipt=None,
-                    curve_declaration=None):
+                    curve_declaration=None,made_for=None):
     value={'project_id':project,'command_id':command_id,'filename':filename,'name':name,'attribution':attribution,
            'audience':audience,'rights_confirmed':rights_confirmed,'well_notes':well_notes}
     # Fields are sent only when used, so existing LAS uploads keep their exact request (and retry fingerprint).
@@ -745,6 +748,7 @@ def upload_metadata(project,command_id,*,filename,name,attribution,audience,righ
     except ValidationError:raise ValidationFailed(['Confirm rights, project, name, attribution and bounded upload details.']) from None
     value.update(held)  # after the model check: the hand-kept UploadRequest model predates these two fields
     value.update(receipt_field(receipt))  # E184 s0: likewise
+    value.update(made_for_field(made_for))  # E192 s2: likewise
     validate_recipients(audience,[])
     if not name.strip() or not attribution.strip() or any(len(recipient)>160 for recipient in audience):
         raise ValidationFailed(['Supply a name, attribution and supported recipient names.'])
@@ -824,6 +828,38 @@ def held_fields(holder,application):
     return {k:v for k,v in (('holder',holder),('application',application)) if v is not None}
 
 
+MADE_FOR_SHAPE='Name between 1 and 32 exact versions it was made for, each once, none that it was made from.'  # E192 s2 (D1)
+MADE_FOR_ONE_REQUEST='A file sent with what it was made for goes in one request, up to %d MB.'
+MADE_FOR_UNRECORDED="This project's release does not record what a version was made for."
+MADE_FOR_FIELDS='Invalid request fields: made_for'  # a release before E192 s0 refuses the unknown field in these words
+_MADE_FOR_REVISION=re.compile(r'^[0-9a-f]{64}$')  # the gateway's Parent.revision
+
+
+def made_for_field(made_for,parents=()):
+    """E192 s2 (D1): the exact versions a file was made for on the wire, only when given: 1 to 32, each a
+    {'asset_id', 'revision'} (those keys only) or an (asset_id, revision) pair, each once and none also a parent."""
+    if made_for is None:return {}
+    if not isinstance(made_for,(list,tuple)):raise ValidationFailed([MADE_FOR_SHAPE])
+    named=[]
+    for value in made_for:
+        if isinstance(value,dict) and set(value)=={'asset_id','revision'}:pair=(value['asset_id'],value['revision'])
+        elif isinstance(value,(list,tuple)) and len(value)==2:pair=tuple(value)
+        else:raise ValidationFailed([MADE_FOR_SHAPE])
+        if not (isinstance(pair[0],str) and 0<len(pair[0])<=160 and isinstance(pair[1],str) and _MADE_FOR_REVISION.match(pair[1])):raise ValidationFailed([MADE_FOR_SHAPE])
+        named.append(pair)
+    if not 1<=len(named)<=32 or len(set(named))!=len(named) or set(named)&{(p['asset_id'],p['revision']) for p in parents}:raise ValidationFailed([MADE_FOR_SHAPE])
+    return {'made_for':[{'asset_id':a,'revision':r} for a,r in named]}
+
+
+def made_for_refused(error,body):
+    """E192 s2 (D1): a release that does not record made_for (E192 s0's stub reason, or the unknown field before s0) is
+    said in one sentence; only for a request that carried made_for and passed made_for_field. Anything else is unchanged."""
+    from .errors import Refused
+    if 'made_for' not in body or not isinstance(error,Refused) or error.status!=400:return error
+    if (error.details or {}).get('reason')!='made-for-not-recorded' and error.server_message!=MADE_FOR_FIELDS:return error
+    return Refused(MADE_FOR_UNRECORDED,status=400,code=error.code,details=error.details,request_id=error.request_id,server_message=error.server_message)
+
+
 def receipt_field(receipt):
     """E184 s0: a send's transfer receipt on the wire, only when given, refused here when the contract refuses it (the
     route's codes are checked by the exchange core and again by the project)."""
@@ -834,10 +870,10 @@ def receipt_field(receipt):
 
 
 def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None,
-                   holder=None,application=None,receipt=None):
+                   holder=None,application=None,receipt=None,made_for=None):
     """The X-Ophiolite-Upload header of publications/derive, validated before anything is sent. E122 s4a: `source` (see
     `source_block`) is added only when given. E171 s1: `holder` and `application` (`held_fields`) likewise. E184 s0:
-    `receipt` (`receipt_field`) likewise."""
+    `receipt` (`receipt_field`) likewise. E192 s2: `made_for` (`made_for_field`) likewise."""
     import hashlib
     from .writers import WrittenOriginal
     if not isinstance(written,WrittenOriginal):raise ValidationFailed(['Publish a file made by ophiolite.writers (a WrittenOriginal).'])
@@ -860,6 +896,7 @@ def derive_request(project,written,*,name,from_,method,command_id,of_entity=None
         body['for_outcome']=procedure['for_outcome']
     body.update(held_fields(holder,application))
     body.update(receipt_field(receipt))
+    body.update(made_for_field(made_for,parents))
     if not 1<=len(parents)<=32 or len({(p['asset_id'],p['revision']) for p in parents})!=len(parents):raise ValidationFailed(['Name 1-32 distinct parents.'])
     if not isinstance(name,str) or not name.strip() or len(name)>160:raise ValidationFailed(['Give the result a name (up to 160 characters).'])
     try:api.MethodRecord.model_validate(method)

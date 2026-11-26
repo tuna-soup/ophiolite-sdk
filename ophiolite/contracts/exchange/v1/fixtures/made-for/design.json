@@ -1,0 +1,9 @@
+{
+  "about": "E192 s0: the synthetic version table.csv states it was made for (made-for, class stated). Every value here is invented; the revision is sha256 of the text 'E192 s0 synthetic design, version 5'.",
+  "asset_id": "design-a",
+  "name": "Design A",
+  "kind": "tables",
+  "version": 5,
+  "revision": "ce707862b735eff5fa02d216b96730a12b6982ebe0ae5cb52f92d580d5531bf5",
+  "profile": "table-csv/1"
+}

@@ -2,7 +2,7 @@
   "schema": "ophiolite.contract-profile/1",
   "id": "points-csv/1",
   "kind": "source",
-  "lifecycle": "preview",
+  "lifecycle": "supported",
   "display_name": "Point set (CSV)",
   "description": "A CSV of points (x, y, optional z and numeric attributes), kept byte for byte as the uploader provided it.",
   "serves": [

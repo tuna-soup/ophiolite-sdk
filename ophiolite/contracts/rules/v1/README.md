@@ -14,3 +14,14 @@
 
 The registry and snapshots are authored in Connectors (`asset_connectors/data_rules/v1/`) and copied here byte for byte
 by `generate.py --targets`. Slice 0 releases snapshot 1.0.0 with no rules; slice 1 adds the first library.
+
+## Rule evidence (E189)
+
+`rule-evidence-schema.json` (`ophiolite.rule-evidence/1`) is one released rule run on one version with a team's
+parameter values, for a chain step's `rule` criterion. `parameters` holds every parameter the rule declares, defaults
+filled in; `parameters_sha256` is the sha256 of those parameters as `json.dumps(parameters, sort_keys=True,
+separators=(',', ':'))` with each `number` or `quantity` value first made a float, so 150 and 150.0 give one digest.
+The record is keyed by `(asset_id, revision, rule, parameters_sha256)` and, like a rule-results block, carries no id,
+time or person. `result` is the rule-results/1 result of that run. `fixtures/evidence-gr-200.json` and
+`evidence-gr-150.json` are one version run with a maximum of 200 (passed) and 150 (three rows fail). Nothing writes
+or serves these records before E189 slice 2.

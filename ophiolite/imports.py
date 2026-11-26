@@ -13,7 +13,7 @@ import uuid
 from pathlib import Path
 
 from .errors import Refused, VerificationFailed
-from .publish import json_bytes
+from .publish import MADE_FOR_UNRECORDED, json_bytes, made_for_field, made_for_refused
 from .well_imports import _checked
 
 FINAL = ('complete', 'complete-with-skipped', 'cancelled', 'incomplete')
@@ -62,7 +62,9 @@ def said(error, *, reading=False):
     status, text = error.status or 0, error.server_message or ''
     if status == 413 and error.code != 'capacity-exceeded': return error.message  # the deployment's own limit sentence
     if reading and status == 400: return UNREADABLE
+    if status == 400 and error.message == MADE_FOR_UNRECORDED: return MADE_FOR_UNRECORDED  # E192 s2b: Imports._post said it
     if text in SAID or re.match(ROOM, text) or re.match(MOVING, text) or re.match(MIXED, text): return text
+    if error.code == 'table-kind-refused' and text: return text  # E203 s1: the kind's sentence and each problem's (table-kind-words/1)
     if status == 409: return RUNNING if re.search('already running', text) else CHANGED
     if status == 403: return NOT_CONTRIBUTOR
     if status == 400 and text and len(text) <= 500 and not re.search(r'[0-9a-f]{16}|[\x00-\x1f]', text) and _from_words(text): return text
@@ -202,11 +204,15 @@ class Imports:
         self.client = client
 
     def _call(self, operation, body, *models):
-        answer = _said(lambda: self.client._post('table-imports', operation, body, retry=True))
+        answer = _said(lambda: self._post(operation, body))
         for model in models:
             try: return _checked(model, answer, 'table import ' + operation)
             except VerificationFailed: continue
         raise VerificationFailed('The table import %s answered outside its documented shape.' % operation)
+
+    def _post(self, operation, body):
+        try: return self.client._post('table-imports', operation, body, retry=True)
+        except Refused as error: raise made_for_refused(error, body) from error  # E192 s2b: an older release, said before `said` drops the details
 
     def read(self, source, *, name=None, reading=None):
         """Keep the file as your private input and say how it was read (`context.decisions`), its columns and the
@@ -220,13 +226,13 @@ class Imports:
         headers = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json_bytes(meta)).decode()}
         return _checked(TableImportRead, _said(lambda: self.client._post_bytes('table-imports', 'read', raw, extra_headers=headers), reading=True), 'table import read')
 
-    def _body(self, read, target, mapping, *, reading=None, well=None, separate=None, authority=None, layout=None):
+    def _body(self, read, target, mapping, *, reading=None, well=None, separate=None, authority=None, layout=None, made_for=None, table_kind=None):
         if target not in TARGETS: raise Refused('Say what the table holds: one of %s.' % ', '.join(TARGETS))
         mapping = {**mapping, 'schema_digest': read['schema_digest']}
         if target == 'wells': mapping.setdefault('entity', 'well')
         return {'target': target, 'input_id': read['input_id'], 'mapping': mapping, **({'reading': reading} if reading else {}),
                 **({'well': well} if well else {}), **({'separate': list(separate)} if separate else {}), **({'authority': authority} if authority else {}),
-                **({'layout': layout} if layout else {})}
+                **({'layout': layout} if layout else {}), **made_for_field(made_for), **({'table_kind': table_kind} if table_kind is not None else {})}
 
     def preview(self, read, target, mapping, **options):
         """What a start would add (sets per well, rows skipped with their reasons, wells found); nothing is kept."""
@@ -267,15 +273,20 @@ class Imports:
         raise VerificationFailed('The import did not finish in %d steps; run it again to continue.' % max_steps)
 
     def from_table(self, source, target=None, mapping=None, *, declarations=None, columns=None, name=None, reading=None, well=None, separate=None,
-                   authority=None, audience=(), command_id=None, dry_run=False, progress=None, on_start=None, layout=None):
+                   authority=None, audience=(), command_id=None, dry_run=False, progress=None, on_start=None, layout=None, made_for=None, table_kind=None):
         """Read, preview and (unless dry_run) start and run: returns {'read', 'preview', 'run'} ('run' is None for a dry
         run, which adds nothing). `mapping` is {field: column}; omitted, the table must be in the target's standard layout.
         E89: `layout` names a project layout these columns are; its mapping is used and the landing records it (the target
         is the layout's). A project layout is never used unless named: a table that matches one without a mapping or
         `layout` is refused with the layout's name.
         E58b: `target="table"` keeps the file as it is (no mapping needed); `columns` gives what each column holds,
-        {column: {'unit', 'quantity', 'missing', 'description'}}; read it back with client.read_data(asset, revision)."""
+        {column: {'unit', 'quantity', 'missing', 'description'}}; read it back with client.read_data(asset, revision).
+        E192 s2b: `made_for` names 1 to 32 exact versions a kept table (`target="table"`) was made for, as
+        [(asset_id, revision), ...] or [{'asset_id', 'revision'}, ...]; each is recorded as stated by you.
+        E203 s1: `table_kind` names one of the project's kinds of table by its word (`target="table"`): the table is
+        checked against the kind's latest version and refused with each problem, or published as that version."""
         from .layouts import Layouts, needs_decision
+        made_for = made_for_field(made_for).get('made_for')  # malformed: refused before the file is read
         notes = dict(columns or {})  # `columns` below is the table's own column names
         read = self.read(source, name=name, reading=reading)
         if read.get('columns') is None: raise Refused('Answer the questions about how to read this table first: give reading=%s.' % sorted(
@@ -305,7 +316,8 @@ class Imports:
         declared = {**kept, **(declarations or {})}
         body = {'fields': fields, **(declared if target == 'wells' else {'declarations': declared}), **({'columns': notes} if notes else {})}
         options = {'reading': reading, 'well': well, 'separate': separate, 'authority': authority,
-                   'layout': {'id': chosen['asset_id'], 'version': chosen['version'], 'generation': chosen['generation']} if chosen else None}
+                   'layout': {'id': chosen['asset_id'], 'version': chosen['version'], 'generation': chosen['generation']} if chosen else None,
+                   'made_for': made_for, 'table_kind': table_kind}
         review = self.preview(read, target, body, **options)
         if dry_run: return {'read': read, 'preview': review, 'run': None}
         started = self.start(read, target, body, preview_digest=review['preview_digest'], audience=audience, command_id=command_id, **options)

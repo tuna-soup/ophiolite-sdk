@@ -2,7 +2,7 @@
   "schema": "ophiolite.contract-profile/1",
   "id": "well-tops-csv/1",
   "kind": "source",
-  "lifecycle": "preview",
+  "lifecycle": "supported",
   "display_name": "Well tops (CSV)",
   "description": "A CSV of formation tops by name and measured depth, kept byte for byte as the uploader provided it.",
   "serves": [

@@ -1,0 +1,24 @@
+{
+ "description": "E211 s0 (T3). `manifests`: the SHA-256 of each manifest fixture added for T3, by sha256sum over the committed file, so an entry naming it passes the digest gate and the case reaches its own check. `invalid_manifests`: manifest bytes that are not a valid ophiolite.portable-bundle/2 manifest, written as text (UTF-8, no trailing newline), each with its sha256sum digest and the path samples.py refuses it at. `contents_cases`: one change each to the contents of entry 0 of valid/index-four.json and the path of the first projected item that differs.",
+ "manifests": {
+  "synthetic-null-names.manifest.json": "363421443ebb003e1e553f33671ec1f1cd9491b0c97317971b236759db735537",
+  "synthetic-revisions.manifest.json": "221eeebc6557b6586ec8ed21e081712477d4a7086ff368dc8e6b0159a0aa27e6",
+  "synthetic-repeat.manifest.json": "b9bd78cdeff810d1739e2965486a8285d57e90db5a708f53725ef869065d1b76"
+ },
+ "invalid_manifests": [
+  {"name": "only-a-schema", "text": "{\"schema\": \"ophiolite.portable-bundle/2\"}", "sha256": "1107c65f83c8974f09364009b3e438b55d996a4471c07f3d44b03c0dba3e45c5", "path": "manifest:$"},
+  {"name": "not-json", "text": "not a manifest", "sha256": "a4444be78e9ef8033711b3caf21f6a8902046fc502bde48185b45fe735c55d67", "path": "manifest:$"}
+ ],
+ "contents_cases": [
+  {"name": "an-asset-left-out", "remove": ["assets", 1], "path": "$.contents.assets[1]"},
+  {"name": "the-first-asset-left-out", "remove": ["assets", 0], "path": "$.contents.assets[0]"},
+  {"name": "an-entity-left-out", "remove": ["entities", 1], "path": "$.contents.entities[1]"},
+  {"name": "an-asset-twice", "append": ["assets", 0], "path": "$.contents.assets[1]"},
+  {"name": "an-entity-twice", "append": ["entities", 1], "path": "$.contents.entities[2]"},
+  {"name": "an-asset-retyped", "set": [["assets", 0, "type"], "well-tops"], "path": "$.contents.assets[0]"},
+  {"name": "an-asset-renamed", "set": [["assets", 1, "name"], "synthetic-tops-renamed"], "path": "$.contents.assets[1]"},
+  {"name": "an-asset-of-another-revision", "set": [["assets", 0, "revision"], "1212121212121212121212121212121212121212121212121212121212121212"], "path": "$.contents.assets[0]"},
+  {"name": "an-entity-of-another-kind", "set": [["entities", 0, "kind"], "wellbore"], "path": "$.contents.entities[0]"},
+  {"name": "an-item-not-in-the-bundle", "append_value": ["assets", {"type": "well-log", "asset_id": "synthetic-not-there", "revision": "1111111111111111111111111111111111111111111111111111111111111111", "name": "synthetic-not-there"}], "path": "$.contents.assets[2]"}
+ ]
+}

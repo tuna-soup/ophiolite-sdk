@@ -3,8 +3,8 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/trajectory-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.trajectory/1",
-    "version": "1.1.0",
-    "lifecycle": "preview"
+    "version": "1.2.0",
+    "lifecycle": "supported"
   },
   "$defs": {
     "Fidelity": {
@@ -382,6 +382,15 @@
       "minItems": 1,
       "title": "Stations",
       "type": "array"
+    },
+    "status": {
+      "description": "E205: whether the stations are the plan or what was drilled, as stated; omitted when not said",
+      "enum": [
+        "planned",
+        "drilled"
+      ],
+      "title": "Status",
+      "type": "string"
     }
   },
   "required": [

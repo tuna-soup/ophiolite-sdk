@@ -1,0 +1,27 @@
+{
+ "schema": "ophiolite.data-label-words/1",
+ "id": "ophiolite.data-label-words/1",
+ "description": "E205. The words of what a person or the sending source states about a version: what a volume's samples are (with a velocity's kind and unit) and whether a trajectory is the plan or what was drilled. `reasons`: why a statement was refused, one closed key each, one sentence each. `labels`: the word a person reads for each stored value, and for a statement not made. `unavailable`: the sentence every request carrying a statement answers until statements are served. A unit's class is named as a person reads it: the `quantities` word of ophiolite.table-kind-words/1 where it lists the class, otherwise the unit registry's class name. Placeholders are in braces; no sentence carries a code.",
+ "reasons": {
+  "holds-not-a-cube": "Only a seismic cube as published can say what its samples are.",
+  "status-not-a-survey": "Only a deviation survey can say whether it is planned or drilled.",
+  "velocity-type-missing": "Velocities need their kind: interval, average or RMS.",
+  "velocity-unit-missing": "Velocities need their unit, such as m/s.",
+  "velocity-type-not-velocity": "Only velocities have a kind; leave it out for these samples.",
+  "velocity-unit-not-velocity": "Only velocities have a unit here; leave it out for these samples.",
+  "unit-unknown": "{unit} is not a unit the units table knows.",
+  "unit-not-velocity": "{unit} is a unit of {class}, not of velocity."
+ },
+ "labels": {
+  "amplitude": "Amplitude",
+  "velocity": "Velocity",
+  "other": "Other",
+  "interval": "Interval velocity",
+  "average": "Average velocity",
+  "rms": "RMS velocity",
+  "planned": "Planned",
+  "drilled": "Drilled",
+  "not-said": "Not said"
+ },
+ "unavailable": "Labels on volumes and trajectories are not available on this deployment yet."
+}

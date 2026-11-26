@@ -1,0 +1,52 @@
+{
+  "label": "ophiolite.attachment/1: one defect per rule (E191 s0). Each case edits one valid fixture (`document`) or one request body (`request`, validated against that $defs entry). `schema` cases are refused by the published schema at exactly the JSON paths in `fails` and by the model; `model` cases pass the schema (a regex cannot state Unicode normal form C) and are refused by the model only. A value `fill:N` stands for N letters x. A defect inside the nullable `withdrawal` is reported at `$.withdrawal` (its anyOf with null).",
+  "requests": {
+    "AttachmentAddRequest": {"project_id": "p-figures", "command_id": "add-1", "asset_id": "tops-residuals", "revision": "2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3", "label": "Residuals by well", "file_name": "residuals.png", "content": "iVBORw0KGgo="},
+    "AttachmentListRequest": {"project_id": "p-figures", "asset_id": "tops-residuals", "revision": "2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3", "limit": 50},
+    "AttachmentReadRequest": {"project_id": "p-figures", "attachment_id": "5d1c0b7e9a4f42c3b8e60f1a2d3c4b5a"},
+    "AttachmentWithdrawRequest": {"project_id": "p-figures", "command_id": "withdraw-1", "attachment_id": "5d1c0b7e9a4f42c3b8e60f1a2d3c4b5a", "reason": "Superseded by the corrected figure."}
+  },
+  "schema": [
+    {"name": "unknown-key", "document": "current.json", "set": [["thumbnail"], "x"], "fails": ["$"]},
+    {"name": "unknown-key-nested", "document": "current.json", "set": [["version", "path"], "x"], "fails": ["$.version"]},
+    {"name": "media-type-gif", "document": "current.json", "set": [["media_type"], "image/gif"], "fails": ["$.media_type"]},
+    {"name": "media-type-svg", "document": "current.json", "set": [["media_type"], "image/svg+xml"], "fails": ["$.media_type"]},
+    {"name": "bytes-zero", "document": "current.json", "set": [["bytes"], 0], "fails": ["$.bytes"]},
+    {"name": "bytes-over-ceiling", "document": "current.json", "set": [["bytes"], 16777217], "fails": ["$.bytes"]},
+    {"name": "sha256-63", "document": "current.json", "set": [["sha256"], "159669b7fdf136e0e3e054a869fed0b99372f762999b32393adc5079cde14a0"], "fails": ["$.sha256"]},
+    {"name": "sha256-upper-case", "document": "current.json", "set": [["sha256"], "159669B7FDF136E0E3E054A869FED0B99372F762999B32393ADC5079CDE14A04"], "fails": ["$.sha256"]},
+    {"name": "attachment-id-31", "document": "current.json", "set": [["attachment_id"], "5d1c0b7e9a4f42c3b8e60f1a2d3c4b5"], "fails": ["$.attachment_id"]},
+    {"name": "revision-not-hex", "document": "current.json", "set": [["version", "revision"], "v2"], "fails": ["$.version.revision"]},
+    {"name": "label-empty", "document": "current.json", "set": [["label"], ""], "fails": ["$.label"]},
+    {"name": "label-81", "document": "current.json", "set": [["label"], "fill:81"], "fails": ["$.label"]},
+    {"name": "label-control-character", "document": "current.json", "set": [["label"], "Residuals\u0007by well"], "fails": ["$.label"]},
+    {"name": "label-leading-space", "document": "current.json", "set": [["label"], " Residuals by well"], "fails": ["$.label"]},
+    {"name": "label-trailing-space", "document": "current.json", "set": [["label"], "Residuals by well "], "fails": ["$.label"]},
+    {"name": "file-name-control-character", "document": "current.json", "set": [["file_name"], "residuals\n.png"], "fails": ["$.file_name"]},
+    {"name": "file-name-256", "document": "current.json", "set": [["file_name"], "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.png"], "fails": ["$.file_name"]},
+    {"name": "added-at-not-utc", "document": "current.json", "set": [["added_at"], "2026-11-23T10:00:00+01:00"], "fails": ["$.added_at"]},
+    {"name": "state-unknown", "document": "current.json", "set": [["state"], "replaced"], "fails": ["$.state"]},
+    {"name": "withdrawn-without-withdrawal", "document": "current.json", "set": [["state"], "withdrawn"], "fails": ["$.withdrawal"]},
+    {"name": "current-with-withdrawal", "document": "withdrawn.json", "set": [["state"], "current"], "fails": ["$.withdrawal"]},
+    {"name": "assistant-without-job", "document": "by-assistant.json", "set": [["added_by", "job"], null], "fails": ["$.added_by.job"]},
+    {"name": "job-without-assistant", "document": "current.json", "set": [["added_by", "job"], "job-0042"], "fails": ["$.added_by.job"]},
+    {"name": "withdrawn-by-an-assistant", "document": "withdrawn.json", "set": [["withdrawal", "by"], {"person": "a.person", "agent": "assistant-1", "job": "job-0042"}], "fails": ["$.withdrawal"]},
+    {"name": "withdrawal-reason-empty", "document": "withdrawn.json", "set": [["withdrawal", "reason"], ""], "fails": ["$.withdrawal"]},
+    {"name": "sender-names-a-profile", "document": "current.json", "set": [["sender", "accepted_as"], "las2/1"], "fails": ["$.sender.accepted_as"]},
+    {"name": "list-unknown-key", "document": "list.json", "set": [["total"], 2], "fails": ["$"]},
+    {"name": "add-content-not-base64", "request": "AttachmentAddRequest", "set": [["content"], "iVBORw0KGgo"], "fails": ["$.content"]},
+    {"name": "add-content-empty", "request": "AttachmentAddRequest", "set": [["content"], ""], "fails": ["$.content"]},
+    {"name": "add-unknown-key", "request": "AttachmentAddRequest", "set": [["media_type"], "image/png"], "fails": ["$"]},
+    {"name": "add-revision-not-hex", "request": "AttachmentAddRequest", "set": [["revision"], "v2"], "fails": ["$.revision"]},
+    {"name": "list-limit-zero", "request": "AttachmentListRequest", "set": [["limit"], 0], "fails": ["$.limit"]},
+    {"name": "list-limit-201", "request": "AttachmentListRequest", "set": [["limit"], 201], "fails": ["$.limit"]},
+    {"name": "read-attachment-id-33", "request": "AttachmentReadRequest", "set": [["attachment_id"], "5d1c0b7e9a4f42c3b8e60f1a2d3c4b5a0"], "fails": ["$.attachment_id"]},
+    {"name": "read-attachment-id-upper-case", "request": "AttachmentReadRequest", "set": [["attachment_id"], "5D1C0B7E9A4F42C3B8E60F1A2D3C4B5A"], "fails": ["$.attachment_id"]},
+    {"name": "withdraw-reason-501", "request": "AttachmentWithdrawRequest", "set": [["reason"], "fill:501"], "fails": ["$.reason"]}
+  ],
+  "model": [
+    {"name": "label-not-nfc", "document": "current.json", "set": [["label"], "Café residuals"]},
+    {"name": "file-name-not-nfc", "document": "current.json", "set": [["file_name"], "café.png"]},
+    {"name": "withdrawal-reason-not-nfc", "document": "withdrawn.json", "set": [["withdrawal", "reason"], "Café figure superseded."]}
+  ]
+}

@@ -1,0 +1,30 @@
+{
+ "description": "E205 s0. Statements about a volume's samples and a trajectory's status, each with its one expected result: `valid`; `schema` (refused by the contract's schema, at `path`); or `problems` (passes the schema; data_labels.label_problems gives exactly these keys, sorted). `on` names the payload the statement is placed on: `volume` (holds) or `trajectory` (status). Written by hand.",
+ "cases": [
+  {"name": "velocity interval m/s", "on": "volume", "holds": {"samples": "velocity", "velocity_type": "interval", "velocity_unit": "m/s"}, "valid": true},
+  {"name": "velocity average ft/s", "on": "volume", "holds": {"samples": "velocity", "velocity_type": "average", "velocity_unit": "ft/s"}, "valid": true},
+  {"name": "velocity rms km/s", "on": "volume", "holds": {"samples": "velocity", "velocity_type": "rms", "velocity_unit": "km/s"}, "valid": true},
+  {"name": "amplitude alone", "on": "volume", "holds": {"samples": "amplitude"}, "valid": true},
+  {"name": "other alone", "on": "volume", "holds": {"samples": "other"}, "valid": true},
+  {"name": "planned", "on": "trajectory", "status": "planned", "valid": true},
+  {"name": "drilled", "on": "trajectory", "status": "drilled", "valid": true},
+
+  {"name": "holds null", "on": "volume", "holds": null, "schema": "holds"},
+  {"name": "status null", "on": "trajectory", "status": null, "schema": "status"},
+  {"name": "velocity_type null", "on": "volume", "holds": {"samples": "velocity", "velocity_type": null, "velocity_unit": "m/s"}, "schema": "holds.velocity_type"},
+  {"name": "velocity_unit null", "on": "volume", "holds": {"samples": "velocity", "velocity_type": "interval", "velocity_unit": null}, "schema": "holds.velocity_unit"},
+  {"name": "samples capitalised", "on": "volume", "holds": {"samples": "Velocity"}, "schema": "holds.samples"},
+  {"name": "velocity_type capitalised", "on": "volume", "holds": {"samples": "velocity", "velocity_type": "RMS", "velocity_unit": "m/s"}, "schema": "holds.velocity_type"},
+  {"name": "status not a word", "on": "trajectory", "status": "plan", "schema": "status"},
+  {"name": "extra key in holds", "on": "volume", "holds": {"samples": "amplitude", "unit": "m/s"}, "schema": "holds.unit"},
+
+  {"name": "velocity without its type", "on": "volume", "holds": {"samples": "velocity", "velocity_unit": "m/s"}, "problems": ["velocity-type-missing"]},
+  {"name": "velocity without its unit", "on": "volume", "holds": {"samples": "velocity", "velocity_type": "interval"}, "problems": ["velocity-unit-missing"]},
+  {"name": "velocity with neither", "on": "volume", "holds": {"samples": "velocity"}, "problems": ["velocity-type-missing", "velocity-unit-missing"]},
+  {"name": "a unit of pressure", "on": "volume", "holds": {"samples": "velocity", "velocity_type": "interval", "velocity_unit": "bar"}, "problems": ["unit-not-velocity"]},
+  {"name": "a unit nobody knows", "on": "volume", "holds": {"samples": "velocity", "velocity_type": "interval", "velocity_unit": "lenght/s"}, "problems": ["unit-unknown"]},
+  {"name": "amplitude with a type", "on": "volume", "holds": {"samples": "amplitude", "velocity_type": "interval"}, "problems": ["velocity-type-not-velocity"]},
+  {"name": "other with a unit", "on": "volume", "holds": {"samples": "other", "velocity_unit": "m/s"}, "problems": ["velocity-unit-not-velocity"]},
+  {"name": "amplitude with both", "on": "volume", "holds": {"samples": "amplitude", "velocity_type": "rms", "velocity_unit": "m/s"}, "problems": ["velocity-type-not-velocity", "velocity-unit-not-velocity"]}
+ ]
+}

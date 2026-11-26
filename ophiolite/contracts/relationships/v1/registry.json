@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.relationship-registry/1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "kinds": [
     {"id": "revision", "title": "An exact revision of an asset"},
     {"id": "well", "title": "Well"},
@@ -31,6 +31,8 @@
     {"id": "line-of", "class": "structural", "title": "A survey's 2D line belongs with its cube (written by survey commands)", "subject": ["revision"], "object": ["revision"],
      "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "projection", "inverse": "lines"},
     {"id": "time-depth-of", "class": "structural", "title": "A survey's time-depth model belongs to its well (written by survey commands)", "subject": ["revision"], "object": ["revision"],
-     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "projection", "inverse": "time-depth-models"}
+     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "projection", "inverse": "time-depth-models"},
+    {"id": "made-for", "class": "stated", "title": "An exact revision was made for another exact revision, as its sender stated (never a derivation)", "subject": ["revision"], "object": ["revision"],
+     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "people", "evidence": "declaration", "status": "active", "inverse": "made-for-of"}
   ]
 }

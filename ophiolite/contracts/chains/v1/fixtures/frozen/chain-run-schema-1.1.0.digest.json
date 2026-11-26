@@ -1,0 +1,8 @@
+{
+  "id": "ophiolite.chain-run/1",
+  "version": "1.1.0",
+  "path": "chains/v1/chain-run-schema.json",
+  "file_sha256": "dd330edf7d6bd6df4440adf6c9ab9dc7a579dd0d5893c4786affc2f1d1afff4b",
+  "file": "the released file bytes: the document with indent 2 and one trailing newline, as main served them before E190 s0",
+  "frozen_by": "E190 s0 C1: 1.2.0 minus job_kind and counts, not_applying on a step and an item, the take-out and put-back act, the state does-not-apply, the declaration's 1.2.0 additions and their definitions, version set back, is these bytes"
+}

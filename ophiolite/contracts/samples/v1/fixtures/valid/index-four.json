@@ -1,0 +1,339 @@
+{
+ "schema": "ophiolite.sample-index/1",
+ "samples": [
+  {
+   "id": "f3-block",
+   "title": "Synthetic sample A",
+   "card": {
+    "title": "Synthetic sample A",
+    "place": "A synthetic place",
+    "holds": "Two synthetic inputs without an SPDX licence, each credited by a sentence we wrote"
+   },
+   "bundle": {
+    "key": "synthetic/f3-block/bundle.zip",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bytes": 2048,
+    "manifest_sha256": "0aaed03f0638d6d72f18e7d47a2088c3650c72fc16eed8b1523d9afefbb99fcc"
+   },
+   "sources": [
+    {
+     "osd_record": "synthetic/source-a1",
+     "retrieved": "2026-11-25",
+     "origin": {
+      "url": "https://example.org/synthetic/source-a1",
+      "access": "anonymous"
+     },
+     "acquired_from": {
+      "url": "https://example.org/synthetic/source-a1/input"
+     },
+     "licence": {
+      "name": "Synthetic terms A (no SPDX identifier)",
+      "spdx": null,
+      "url": "https://example.org/synthetic/terms-a",
+      "redistribution": "allowed",
+      "attribution": "required"
+     },
+     "reading": {
+      "date": "2026-11-25",
+      "commercial_use": "allowed"
+     },
+     "credit": {
+      "text": "Contains synthetic data A1, used under synthetic terms A.",
+      "kind": "authored",
+      "evidence": {
+       "read_on": "2026-11-25",
+       "where": "The synthetic rights row A, read for the fixtures."
+      }
+     }
+    },
+    {
+     "osd_record": "synthetic/source-a2",
+     "retrieved": "2026-11-25",
+     "origin": {
+      "url": "https://example.org/synthetic/source-a2",
+      "access": "anonymous"
+     },
+     "acquired_from": {
+      "url": "https://example.org/synthetic/source-a2/input"
+     },
+     "licence": {
+      "name": "Synthetic terms A (no SPDX identifier)",
+      "spdx": null,
+      "url": "https://example.org/synthetic/terms-a",
+      "redistribution": "allowed",
+      "attribution": "required"
+     },
+     "reading": {
+      "date": "2026-11-25",
+      "commercial_use": "allowed"
+     },
+     "credit": {
+      "text": "Contains synthetic data A2, used under synthetic terms A.",
+      "kind": "authored",
+      "evidence": {
+       "read_on": "2026-11-25",
+       "where": "The synthetic rights row A, read for the fixtures."
+      }
+     }
+    }
+   ],
+   "licence": {
+    "spdx": null,
+    "redistribution": "allowed",
+    "attribution": "required",
+    "share_alike": false,
+    "statements": [
+     "Contains synthetic data A1, used under synthetic terms A.",
+     "Contains synthetic data A2, used under synthetic terms A."
+    ]
+   },
+   "contents": {
+    "assets": [
+     {
+      "type": "well-log",
+      "asset_id": "synthetic-log-a",
+      "revision": "1111111111111111111111111111111111111111111111111111111111111111",
+      "name": "synthetic-log-a"
+     },
+     {
+      "type": "well-tops",
+      "asset_id": "synthetic-tops-a",
+      "revision": "2222222222222222222222222222222222222222222222222222222222222222",
+      "name": "synthetic-tops-a"
+     }
+    ],
+    "entities": [
+     {
+      "kind": "well",
+      "entity_id": "synthetic-well-a",
+      "name": "synthetic-well-a"
+     },
+     {
+      "kind": "wellbore",
+      "entity_id": "synthetic-wellbore-a1",
+      "name": "synthetic-wellbore-a1"
+     }
+    ]
+   }
+  },
+  {
+   "id": "penobscot",
+   "title": "Synthetic sample B",
+   "card": {
+    "title": "Synthetic sample B",
+    "place": "A synthetic place",
+    "holds": "One synthetic input under a share-alike licence"
+   },
+   "bundle": {
+    "key": "synthetic/penobscot/bundle.zip",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bytes": 1024,
+    "manifest_sha256": "556582b6e328491782c9083abdc621ad53bd077057b710ed2239484f60fd28a6"
+   },
+   "sources": [
+    {
+     "osd_record": "synthetic/source-b",
+     "retrieved": "2026-11-25",
+     "origin": {
+      "url": "https://example.org/synthetic/source-b",
+      "access": "anonymous"
+     },
+     "acquired_from": {
+      "url": "https://example.org/synthetic/source-b/input"
+     },
+     "licence": {
+      "name": "Synthetic share-alike terms B",
+      "spdx": "CC-BY-SA-3.0",
+      "url": "https://example.org/synthetic/terms-b",
+      "redistribution": "allowed",
+      "attribution": "required",
+      "share_alike": true
+     },
+     "reading": {
+      "date": "2026-11-25",
+      "commercial_use": "allowed"
+     },
+     "credit": {
+      "text": "Contains synthetic data B, shared alike under synthetic terms B.",
+      "kind": "authored",
+      "evidence": {
+       "read_on": "2026-11-25",
+       "where": "The synthetic rights row B, read for the fixtures."
+      }
+     }
+    }
+   ],
+   "licence": {
+    "spdx": "CC-BY-SA-3.0",
+    "redistribution": "allowed",
+    "attribution": "required",
+    "share_alike": true,
+    "statements": [
+     "Contains synthetic data B, shared alike under synthetic terms B."
+    ]
+   },
+   "contents": {
+    "assets": [
+     {
+      "type": "trajectory",
+      "asset_id": "synthetic-path-b",
+      "revision": "7777777777777777777777777777777777777777777777777777777777777777",
+      "name": "synthetic-path-b"
+     }
+    ],
+    "entities": []
+   }
+  },
+  {
+   "id": "poseidon",
+   "title": "Synthetic sample C",
+   "card": {
+    "title": "Synthetic sample C",
+    "place": "A synthetic place",
+    "holds": "One synthetic input under an attribution licence"
+   },
+   "bundle": {
+    "key": "synthetic/poseidon/bundle.zip",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "bytes": 2048,
+    "manifest_sha256": "0aaed03f0638d6d72f18e7d47a2088c3650c72fc16eed8b1523d9afefbb99fcc"
+   },
+   "sources": [
+    {
+     "osd_record": "synthetic/source-c",
+     "retrieved": "2026-11-25",
+     "origin": {
+      "url": "https://example.org/synthetic/source-c",
+      "access": "anonymous"
+     },
+     "acquired_from": {
+      "url": "https://example.org/synthetic/source-c/input"
+     },
+     "licence": {
+      "name": "Synthetic attribution terms C",
+      "spdx": "CC-BY-4.0",
+      "url": "https://example.org/synthetic/terms-c",
+      "redistribution": "allowed",
+      "attribution": "required"
+     },
+     "reading": {
+      "date": "2026-11-25",
+      "commercial_use": "allowed"
+     },
+     "credit": {
+      "text": "Contains synthetic data C, used under synthetic terms C.",
+      "kind": "authored",
+      "evidence": {
+       "read_on": "2026-11-25",
+       "where": "The synthetic rights row C, read for the fixtures."
+      }
+     }
+    }
+   ],
+   "licence": {
+    "spdx": "CC-BY-4.0",
+    "redistribution": "allowed",
+    "attribution": "required",
+    "share_alike": false,
+    "statements": [
+     "Contains synthetic data C, used under synthetic terms C."
+    ]
+   },
+   "contents": {
+    "assets": [
+     {
+      "type": "well-log",
+      "asset_id": "synthetic-log-a",
+      "revision": "1111111111111111111111111111111111111111111111111111111111111111",
+      "name": "synthetic-log-a"
+     },
+     {
+      "type": "well-tops",
+      "asset_id": "synthetic-tops-a",
+      "revision": "2222222222222222222222222222222222222222222222222222222222222222",
+      "name": "synthetic-tops-a"
+     }
+    ],
+    "entities": [
+     {
+      "kind": "well",
+      "entity_id": "synthetic-well-a",
+      "name": "synthetic-well-a"
+     },
+     {
+      "kind": "wellbore",
+      "entity_id": "synthetic-wellbore-a1",
+      "name": "synthetic-wellbore-a1"
+     }
+    ]
+   }
+  },
+  {
+   "id": "utah-forge",
+   "title": "Synthetic sample D",
+   "card": {
+    "title": "Synthetic sample D",
+    "place": "A synthetic place",
+    "holds": "One synthetic input whose publisher prescribes the credit"
+   },
+   "bundle": {
+    "key": "synthetic/utah-forge/bundle.zip",
+    "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "bytes": 1024,
+    "manifest_sha256": "556582b6e328491782c9083abdc621ad53bd077057b710ed2239484f60fd28a6"
+   },
+   "sources": [
+    {
+     "osd_record": "synthetic/source-d",
+     "retrieved": "2026-11-25",
+     "origin": {
+      "url": "https://example.org/synthetic/source-d",
+      "access": "anonymous"
+     },
+     "acquired_from": {
+      "url": "https://example.org/synthetic/source-d/input"
+     },
+     "licence": {
+      "name": "Synthetic attribution terms D",
+      "spdx": "CC-BY-4.0",
+      "url": "https://example.org/synthetic/terms-d",
+      "redistribution": "allowed",
+      "attribution": "required",
+      "statement": "Synthetic data D, courtesy of a synthetic publisher.",
+      "terms": {
+       "stated": "Synthetic terms D, stated for the fixtures."
+      }
+     },
+     "reading": {
+      "date": "2026-11-25",
+      "commercial_use": "allowed"
+     },
+     "credit": {
+      "text": "Synthetic data D, courtesy of a synthetic publisher.",
+      "kind": "prescribed"
+     }
+    }
+   ],
+   "licence": {
+    "spdx": "CC-BY-4.0",
+    "redistribution": "allowed",
+    "attribution": "required",
+    "share_alike": false,
+    "statements": [
+     "Synthetic data D, courtesy of a synthetic publisher."
+    ]
+   },
+   "contents": {
+    "assets": [
+     {
+      "type": "trajectory",
+      "asset_id": "synthetic-path-b",
+      "revision": "7777777777777777777777777777777777777777777777777777777777777777",
+      "name": "synthetic-path-b"
+     }
+    ],
+    "entities": []
+   }
+  }
+ ]
+}

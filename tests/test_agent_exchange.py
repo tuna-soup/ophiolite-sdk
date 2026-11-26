@@ -151,7 +151,7 @@ def test_the_vendored_core_is_unchanged():
     assert exchange.OUTCOMES == ('nothing-new', 'updates', 'access-changed', 'got', 'already-latest', 'not-visible', 'cannot-read-here', 'damaged',
                                  'map-unavailable', 'sent-new', 'sent-version', 'newer-version-exists', 'nothing-changed', 'earlier-version',
                                  'access-refused', 'not-valid', 'not-held', 'too-large', 'outcome-unknown', 'abandoned', 'folder-busy', 'rate-limited',
-                                 'sign-in-needed', 'could-not-reach', 'stays', 'name-unclear', 'name-not-found')
+                                 'sign-in-needed', 'could-not-reach', 'stays', 'name-unclear', 'name-not-found', 'made-for')  # E192 s2: made-for
     assert set(exchange.SENTENCES) == set(exchange.OUTCOMES) and set(exchange.REFUSALS) == {
         'not-visible', 'cannot-read-here', 'damaged', 'map-unavailable', 'newer-version-exists', 'nothing-changed', 'earlier-version', 'access-refused',
         'not-valid', 'not-held', 'too-large', 'outcome-unknown', 'folder-busy', 'rate-limited', 'sign-in-needed', 'could-not-reach',

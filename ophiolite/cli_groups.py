@@ -18,11 +18,11 @@ GROUPS = (
      ('curves', 'wells', 'list', 'fetch', 'read-data', 'entities', 'changes', 'check', 'get', 'find', 'kinds', 'surveys', 'survey',
       'holders')),  # find: E145 s3; kinds: E168 s1; surveys: E142 s1; holders: E171 s1
     ('exchange', 'Bring files in and take bundles out',
-     ('import', 'upload', 'export', 'bundle', 'send', 'deliver', 'intake', 'source', 'sources', 'repositories', 'well-imports',
-      'sample', 'new-data', 'templates', 'template', 'targets', 'layouts', 'org-connections')),
+     ('import', 'upload', 'export', 'bundle', 'send', 'made-for', 'deliver', 'intake', 'source', 'sources', 'repositories', 'well-imports',
+      'sample', 'new-data', 'templates', 'template', 'targets', 'layouts', 'table-kinds', 'org-connections')),  # table-kinds: E203 s1
     ('results', 'Make, publish and follow results',
      ('prepare', 'run', 'publish', 'correct', 'publish-derived', 'remake', 'recover', 'withdraw', 'verdicts', 'outcomes', 'chains',
-      'chain-runs', 'story', 'what-changed', 'dependents', 'affected', 'trajectories', 'try')),  # try: E150 s1b; affected: E177 s1; chains, chain-runs: E178 s2c
+      'chain-runs', 'figures', 'story', 'what-changed', 'dependents', 'affected', 'trajectories', 'try')),  # try: E150 s1b; affected: E177 s1; chains, chain-runs: E178 s2c; figures: E191 s1
     ('tools', 'Write, check and run your own tools', ('init', 'skills', 'checks', 'rules', 'residuals', 'recipes')),
     ('starter', 'Starter packs of one catalogue record', ()),
     ('demo', 'A demo project on this computer, with three commands to try', ()),

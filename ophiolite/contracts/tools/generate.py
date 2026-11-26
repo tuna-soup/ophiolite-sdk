@@ -91,6 +91,11 @@ def schemas():
     from project_gateway.sender import Sender; write(CONTRACTS / Sender.CONTRACT['path'], Sender.model_json_schema())  # E182 s0: one line, apart from the shared tuple
     from project_gateway.well_log_curve import WellLogCurve; write(CONTRACTS / WellLogCurve.CONTRACT['path'], WellLogCurve.model_json_schema())  # E183 s0: one line, apart from the shared tuple
     from project_gateway.host_qualification import HostQualification; write(CONTRACTS / HostQualification.CONTRACT['path'], HostQualification.model_json_schema())  # E185 s0: one line, apart from the shared tuple
+    from project_gateway.attachments import Attachment; write(CONTRACTS / Attachment.CONTRACT['path'], Attachment.model_json_schema())  # E191 s0: one line, apart from the shared tuple
+    from project_gateway.table_kinds import TableKindVersion; write(CONTRACTS / TableKindVersion.CONTRACT['path'], TableKindVersion.model_json_schema())  # E203 s0: one line, apart from the shared tuple
+    from project_gateway.sample_index import SampleIndex; write(CONTRACTS / SampleIndex.CONTRACT['path'], SampleIndex.model_json_schema())  # E211 s0: one line, apart from the shared tuple
+    from project_gateway.criteria import StepCriteria, RuleEvidence  # E189 s0: one line, apart from the shared tuple
+    for model in (StepCriteria, RuleEvidence): write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())  # E189 s0
     for model in (CheckRecord, DerivationRecord, DerivationRecordV2, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
                   Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2, CurveColumnsHeader, TableFile, SourceProvenance, WellPath, BasisGrouping, WellSet,

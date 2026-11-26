@@ -1,0 +1,7 @@
+section,item,cost,currency,hours
+A,Site survey,1200,EUR,16
+A,Permits,450,EUR,-1
+B,Equipment hire,,EUR,8
+B,Transport,800,EUR,12
+C,Labour,,,40
+C,Reporting,300,EUR,6

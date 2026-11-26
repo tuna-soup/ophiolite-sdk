@@ -8,7 +8,7 @@ The reference that was the SDK README. Stability, compatibility and qualificatio
 Python 3.10 or later is required. Install from a reviewed commit of this repository:
 
 ```sh
-python -m pip install 'git+https://github.com/tuna-soup/ophiolite-sdk@<reviewed-commit>'
+python -m pip install 'git+https://github.com/ophiolite-labs/ophiolite-sdk@<reviewed-commit>'
 ```
 
 Once a release is published, the same SDK is on PyPI under the release name:

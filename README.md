@@ -49,9 +49,9 @@ ophiolite demo stop
 
 ## Where to go
 
-- [The documentation](https://ophiolite.dev/docs/) and [the SDK guide](https://github.com/tuna-soup/ophiolite-sdk/blob/main/docs/sdk-guide.md).
+- [The documentation](https://ophiolite.dev/docs/) and [the SDK guide](https://github.com/ophiolite-labs/ophiolite-sdk/blob/main/docs/sdk-guide.md).
 - [Run Ophiolite on your own host](https://ophiolite.dev/docs/operate/install/) and [try it there](https://ophiolite.dev/docs/try/next/).
 - Against a real deployment, sign in with `ophiolite account login` and never put a credential in source files or logs ([sign-in](https://ophiolite.dev/docs/guides/sign-in/)).
-- [Licence: Apache-2.0](https://github.com/tuna-soup/ophiolite-sdk/blob/main/LICENSE).
+- [Licence: Apache-2.0](https://github.com/ophiolite-labs/ophiolite-sdk/blob/main/LICENSE).
 
-Stability, compatibility and qualification statements: [CONTRACTS.md](https://github.com/tuna-soup/ophiolite-sdk/blob/main/CONTRACTS.md).
+Stability, compatibility and qualification statements: [CONTRACTS.md](https://github.com/ophiolite-labs/ophiolite-sdk/blob/main/CONTRACTS.md).

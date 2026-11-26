@@ -5,6 +5,17 @@
 Supported 0.x client over preview contracts, published on PyPI as `ophiolite` since 29 October 2026 and numbered by
 release date (ADR 0015). No stable 1.0 or production-support promise is claimed.
 
+- A team's own kind of table (E203 s1). `client.table_kinds` declares, lists and shows a project's kinds of table;
+  `imports.from_table(..., table_kind=WORD)` and `ophiolite exchange import table --table-kind WORD` publish a kept
+  table as one, refused with each problem when it is not one. A CSV export of such a version gets
+  `<file>.table-kind.json` beside it; a Parquet export carries the kind in its record. `ophiolite.table_kinds.check`
+  and `ophiolite exchange table-kinds check FILE` check either file on this computer, without the server: exit 0 when
+  it fits, 1 with each problem, 2 when it carries no kind or one changed after export.
+- An edited log goes back as its next version (E188). `Exchange.send(..., curve_declaration={'well', 'depth_kind',
+  'depth_datum'})` declares the curve of the next version of one's own uploaded LAS 2.0 file (refused anywhere else);
+  it is saved with the send, so a send finished after a lost answer carries the same declaration, and
+  `ClientTransport.publish` passes it to `upload_data`. A sent item keeps the place it was got into (`applied_to`), so a
+  log got into an application can be sent back more than once. The OpendTect connector's `send log` uses both.
 - What sent a version travels with it (E182 s2b). `client.provenance(...)` gains `sender` and `sender_words`, the
   gateway's `ophiolite.sender/1` view and its sentence as served (never composed or checked here); the asynchronous
   client gives the same. `export`, `export_slices` and their asynchronous forms write each version's sender as its

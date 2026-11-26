@@ -1,0 +1,16 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "no-empty/1",
+ "title": "No empty cells in the named columns",
+ "description": "No cell of a named column is empty: null or blank as read, or equal to the missing marker the kept table declares for its column. Each empty cell fails; its example names its row and column, and the row's key cell when the run names a key column. A named column that is absent makes the rule not apply.",
+ "class": "file-local",
+ "kinds": ["table-csv/1", "table-excel/1", "table-parquet/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [
+  {"name": "columns", "type": "columns", "unit": null, "default": null, "minimum": null, "maximum": null, "compare": null, "choices": null, "source": "Named by the run: the columns the team needs filled (E192)."},
+  {"name": "key", "type": "column", "unit": null, "default": null, "minimum": null, "maximum": null, "compare": null, "choices": null, "source": "Named by the run, or none: the column whose cell names a failing row (E192)."}
+ ],
+ "words": {"template": "{count} cells in the named columns are empty, the first at {first}.", "examples": "cells"},
+ "since": "1.4.0"
+}

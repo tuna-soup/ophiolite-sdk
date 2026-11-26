@@ -20,8 +20,16 @@ extra. The vocabulary gains sampling_domains, the active WellLogSamplingDomainTy
 E116 s3 C2 (D8): run against the repository's own document, --check is also the one command for the two other files
 pinned to the same checkout: the Connectors' units.json must equal tools/units-from-osdu.py's output from this
 checkout's lists, and contracts/vocabulary/v1/quantities.json must name PIN's commit and only active curve families.
+
+E210 s0b (D-1, D-3, D-6): run on the repository's own document it also writes, and --check regenerates, the `family_from`
+rule of each FAMILY_ROWS row of quantities.json (`family_rules`, `family_units`), reading LogCurveType.1.json and
+PropertyType.1.json of the same checkout, pinned apart in FAMILY_PIN (PIN and osdu-vocabulary.json do not change) and
+recorded in quantities.json's `osdu.family_files`. A row's `family_from.ruled` entries (a supervisor's or owner's ruling,
+each with its source) are data, never generated: kept as they are when writing, and not compared by --check.
 """
+import collections
 import contextlib
+import copy
 import hashlib
 import importlib.util
 import io
@@ -129,6 +137,30 @@ PIN = {
     },
 }
 ORDER = ('kinds', 'units', 'quantities', 'curve_families', 'sampling_domains', 'crs', 'crs_absent', 'source')
+# E210 s0b (D-6): the two further files the family rule reads, at PIN's commit; kept out of PIN so osdu-vocabulary.json's
+# source block (every PIN file) and its test's map stay as they are.
+CURVE_TYPES, PROPERTY_TYPES = REFERENCE + 'LOCAL/LogCurveType.1.json', REFERENCE + 'OPEN/PropertyType.1.json'
+FAMILY_PIN = {
+    CURVE_TYPES: ('1aff161655609de5e409b4db6ce057b8892a684e574cb2441441da902e2ee283', 76541097),
+    PROPERTY_TYPES: ('34aa87664d0f4d8b9a64d64d8a18b48a68042cfffeb77c4f2d456b827c1b7d87', 6406435),
+}
+# E210 s0b (§2): the curve families that carry a rule in quantities.json, one row each (a row is found by its
+# osdu_log_curve_family; a missing one is added with the family's name, in this order).
+FAMILY_ROWS = ('Gamma Ray', 'Bulk Density', 'Thermal Neutron Porosity', 'Neutron Porosity', 'Compressional Slowness',
+               'Shear Slowness', 'Resistivity', 'Spontaneous Potential', 'Caliper', 'Borehole Diameter',
+               'Photoelectric Factor')
+FAMILY_SOURCE = ("Ophiolite's rule over PWLS-3 and the PWLS property tree, not an assignment OSDU publishes: OSDU "
+                 "data-definitions at the osdu block's commit, LogCurveType.1.json (every company's row of a mnemonic), "
+                 "PropertyType.1.json and LogCurveFamily.1.json. A mnemonic names this family when the property types of "
+                 "all its rows lie on one line of the property tree and the nearest one at or above the deepest that "
+                 "carries a family of its own name carries this one. The units are the Energistics symbols (units.json) "
+                 "of the family's unit quantity, or E52's suggesting units where the row has them, less a symbol LAS "
+                 "files write for another unit (MV, a millivolt in LAS, is a megavolt in units.json).")
+# E210 s0b C2b (coordinator default, supervisor approved 25 Nov): symbols a family's rule leaves out although they are of the
+# family's unit quantity. LAS files write MV for millivolts; units.json (E64) reads MV as megavolt, so a curve suggested
+# Spontaneous Potential in MV would be scaled by 1e9 by change_units on a request to mV. Left out, SP in MV suggests nothing.
+# The grep that found no other such symbol is in the lane's logs/c2b-collisions.txt.
+FAMILY_UNITS_LEFT_OUT = {'Spontaneous Potential': ('MV',)}
 
 
 class Refused(Exception):
@@ -260,7 +292,146 @@ def companion_difference(checkout, doc, pin, companions):
     for row in quantities['quantities']:
         if row['osdu_log_curve_family'] not in families:
             return f'quantities.json {row["name"]}: {row["osdu_log_curve_family"]} is not an active curve family at {pin["tag"]}'
-    return None
+    family_pin = companions.get('family_pin', FAMILY_PIN)
+    return family_difference(quantities, Path(companions['quantities']).read_text(encoding='utf-8'),
+                             read_families(checkout, family_pin), family_pin, companions.get('families', FAMILY_ROWS))
+
+
+# ---- E210 s0b: the family rule ------------------------------------------------------------------------------------
+
+def read_families(checkout, family_pin):
+    """FAMILY_PIN's bytes after each digest is confirmed, with the three PIN lists the rule also reads (whose digests and
+    commit read() has confirmed)."""
+    raw = {}
+    for path, (digest, _) in sorted(family_pin.items()):
+        file = Path(checkout) / path
+        if not file.is_file(): raise Refused(f'{path} is missing from the checkout')
+        raw[path] = file.read_bytes()
+        if hashlib.sha256(raw[path]).hexdigest() != digest: raise Refused(f'{path} does not have the pinned sha256')
+    for path in (UNITS, QUANTITIES, FAMILIES): raw[path] = (Path(checkout) / path).read_bytes()
+    return raw
+
+
+def _id(reference):
+    """The record id of an OSDU reference ('{{NAMESPACE}}:reference-data--PropertyType:<id>:'), else None."""
+    return reference.split(':')[-2] if isinstance(reference, str) and reference.count(':') >= 2 else None
+
+
+def _active(raw, path):
+    return [r['data'] for r in json.loads(raw[path])['ReferenceData'] if not r['data'].get('InactiveIndicator')]
+
+
+def family_rules(raw, families):
+    """§2 (D-1): {family: sorted mnemonics} for the named families. A mnemonic (the part of a LogCurveType Code after its
+    company, upper-cased) names family F when the property types of all its rows lie on one line of the property tree
+    (each is the deepest one or an ancestor of it; otherwise the vendors conflict), and walking up from the deepest the
+    first property type carrying a family of its own name (case-insensitive) carries F. A mnemonic with no property type,
+    a conflict, or no own-name family up to the root names none."""
+    types = {d['ID']: d for d in _active(raw, PROPERTY_TYPES)}
+    named = collections.defaultdict(list)
+    for d in _active(raw, FAMILIES):
+        named[_id((d.get('PropertyType') or {}).get('PropertyTypeID'))].append(d['Name'])
+
+    def chain(pid):
+        out = []
+        while pid and pid not in out:
+            out.append(pid); pid = _id((types.get(pid) or {}).get('ParentPropertyTypeID'))
+        return out
+
+    def family(pid):
+        for p in chain(pid):
+            own = [f for f in named.get(p, []) if f.lower() == (types.get(p) or {}).get('Name', '').lower()]
+            if own: return own[0]
+        return None
+
+    rows = collections.defaultdict(set)
+    for d in _active(raw, CURVE_TYPES):
+        pid = _id((d.get('PropertyType') or {}).get('PropertyTypeID'))
+        if pid: rows[d['Code'].split(':', 1)[1].upper()].add(pid)
+    found = {f: [] for f in families}
+    for mnemonic in sorted(rows):
+        lines = {p: chain(p) for p in rows[mnemonic]}
+        deepest = max(sorted(lines), key=lambda p: len(lines[p]))
+        if not all(p in lines[deepest] for p in lines): continue
+        f = family(deepest)
+        if f in found: found[f].append(mnemonic)
+    return found
+
+
+def family_units(raw, families):
+    """D-3: {family: sorted unit symbols}: every active unit of the dimension class of the family's unit quantity (the
+    symbols units.json holds for that quantity), less FAMILY_UNITS_LEFT_OUT."""
+    dimension = {d['Code']: d['UnitDimension'] for d in _active(raw, QUANTITIES)}
+    quantity = collections.defaultdict(set)
+    for d in _active(raw, FAMILIES):
+        if d['Name'] in families: quantity[d['Name']].add(_suffix(d['UnitQuantityID'], 'UnitQuantity'))
+    by_class = collections.defaultdict(list)
+    for d in _active(raw, UNITS): by_class[_suffix(d['UnitQuantityID'], 'UnitQuantity')].append(d['Code'])
+    out = {}
+    for name in families:
+        if len(quantity[name]) != 1: raise Refused(f'curve family {name} has {len(quantity[name])} unit quantities, not one')
+        left_out = FAMILY_UNITS_LEFT_OUT.get(name, ())
+        out[name] = sorted(u for u in by_class[dimension[next(iter(quantity[name]))]] if u not in left_out)
+    return out
+
+
+def with_families(quantities, raw, family_pin, families):
+    """quantities.json with each family row's generated `family_from` (its `ruled` entries kept) and `osdu.family_files`;
+    a missing row is added. Refused when a generated mnemonic is another row's (stop rule 4)."""
+    doc = copy.deepcopy(quantities)
+    rules, units = family_rules(raw, families), family_units(raw, families)
+    rows = {q['osdu_log_curve_family']: q for q in doc['quantities']}
+    for name in families:
+        if name not in rows:
+            rows[name] = {'name': name, 'osdu_log_curve_family': name, 'units': []}
+            doc['quantities'].append(rows[name])
+        row = rows[name]
+        suggesting = (row.get('suggest_from') or {}).get('units')
+        generated = list(suggesting) if suggesting else units[name]
+        ruled = (row.get('family_from') or {}).get('ruled')
+        row['family_from'] = {'mnemonics': rules[name], 'units': generated, 'source': FAMILY_SOURCE,
+                              **({'ruled': ruled} if ruled is not None else {})}
+        row['units'] = row['units'] + [u for u in generated if u not in row['units']]
+    for name in families:
+        for other in doc['quantities']:
+            if other is rows[name]: continue
+            held = set((other.get('suggest_from') or {}).get('mnemonics', [])) | set((other.get('family_from') or {}).get('mnemonics', []))
+            for entry in (other.get('family_from') or {}).get('ruled') or []: held |= set(entry.get('mnemonics', []))
+            both = sorted(held & set(rules[name]))
+            if both: raise Refused(f'{both[0]} would suggest both {name} and {other["name"]}')
+    doc['osdu']['family_files'] = [{'path': p, 'sha256': d, 'bytes': b} for p, (d, b) in sorted(family_pin.items())]
+    return doc
+
+
+def quantities_text(doc):
+    return json.dumps(doc, indent=1, ensure_ascii=False) + '\n'
+
+
+def family_difference(committed, text_now, raw, family_pin, families):
+    """The first way quantities.json's generated family rules differ from this checkout's, named; `ruled` is not read."""
+    generated = with_families(committed, raw, family_pin, families)
+    if committed['osdu'].get('family_files') != generated['osdu']['family_files']:
+        return 'quantities.json osdu.family_files differs from FAMILY_PIN'
+    rows = {q['osdu_log_curve_family']: q for q in committed['quantities']}
+    for row in generated['quantities']:
+        name = row['osdu_log_curve_family']
+        if name not in families: continue
+        if name not in rows: return f'quantities.json has no row for the curve family {name}'
+        have, want = rows[name].get('family_from') or {}, row['family_from']
+        for key in ('mnemonics', 'units'):
+            absent, extra = sorted(set(want[key]) - set(have.get(key, []))), sorted(set(have.get(key, [])) - set(want[key]))
+            if absent: return f'quantities.json {name}: family_from {key} lacks {absent[0]} ({len(absent)} absent)'
+            if extra: return f'quantities.json {name}: family_from {key} has {extra[0]}, which the rule does not give ({len(extra)} extra)'
+        if have != want: return f'quantities.json {name}: family_from differs from the generator'
+        if rows[name]['units'] != row['units']: return f'quantities.json {name}: units lack a family_from unit'
+    return 'quantities.json layout differs' if text_now != quantities_text(generated) else None
+
+
+def write_families(checkout, companions):
+    path, family_pin = Path(companions['quantities']), companions.get('family_pin', FAMILY_PIN)
+    doc = with_families(json.loads(path.read_text(encoding='utf-8')), read_families(checkout, family_pin), family_pin,
+                        companions.get('families', FAMILY_ROWS))
+    path.write_text(quantities_text(doc), encoding='utf-8')
 
 
 def main(argv, pin=PIN, out=OUT, systems=None, companions=None):
@@ -279,10 +450,16 @@ def main(argv, pin=PIN, out=OUT, systems=None, companions=None):
         committed = json.loads(Path(out).read_text(encoding='utf-8')) if Path(out).exists() else {}
         found = difference(committed, doc) or (None if Path(out).read_text(encoding='utf-8') == text(doc) else 'layout differs')
         found = found or vendor_difference(folder, files)
-        found = found or (companion_difference(Path(args[0]), doc, pin, companions) if companions else None)
+        try: found = found or (companion_difference(Path(args[0]), doc, pin, companions) if companions else None)
+        except Refused as error:
+            print(f'osdu-vocabulary: refused: {error}', file=sys.stderr); return 1
         print(f'osdu-vocabulary: {found}' if found else 'osdu-vocabulary.json and the vendored schemas equal the generator',
               file=sys.stderr if found else sys.stdout)
         return 1 if found else 0
+    if companions:  # E210 s0b: the family rules first, so a refusal writes nothing
+        try: write_families(Path(args[0]), companions)
+        except Refused as error:
+            print(f'osdu-vocabulary: refused: {error}', file=sys.stderr); return 1
     for name, body in files.items():
         (folder / name).parent.mkdir(parents=True, exist_ok=True); (folder / name).write_bytes(body)
     for extra in sorted(set(_present(folder)) - set(files)): (folder / extra).unlink()

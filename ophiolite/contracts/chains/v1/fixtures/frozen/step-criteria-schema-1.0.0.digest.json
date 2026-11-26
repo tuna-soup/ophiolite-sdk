@@ -1,0 +1,8 @@
+{
+  "id": "ophiolite.step-criteria/1",
+  "version": "1.0.0",
+  "path": "chains/v1/step-criteria-schema.json",
+  "file_sha256": "58276bb2be3f9761329d85409b98c0cc3bf85dace85d6506d297e84296186151",
+  "file": "the released file bytes: the document with indent 2 and one trailing newline, as main served them before E190 s0",
+  "frozen_by": "E190 s0 C1: 1.1.0 minus an item's not_applying, the causes taken-out and put-back and their definitions, version set back, is these bytes"
+}

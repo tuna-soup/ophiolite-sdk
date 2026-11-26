@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.rule-evidence/1",
+ "asset_id": "pressure-a",
+ "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+ "kind": "las2/1",
+ "registry_version": "1.3.0",
+ "rule": "gr-range/1",
+ "parameters": {"maximum": 150.0, "minimum": 0.0},
+ "parameters_sha256": "77481116560d78cd3aacb94b443abece28fd382f603d8f8ff3fe0f8e38df4322",
+ "result": {"rule": "gr-range/1", "state": "failed", "count": 3,
+            "examples": [{"row": 41, "depth": 1210.5, "value": 162.0}, {"row": 42, "depth": 1211.0, "value": 180.0}, {"row": 57, "depth": 1218.5, "value": 151.5}],
+            "parameters": {"maximum": 150.0, "minimum": 0.0}, "reason": null, "context": null}
+}

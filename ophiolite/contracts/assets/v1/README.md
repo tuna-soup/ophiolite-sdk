@@ -225,3 +225,65 @@ exact well log a tops or trajectory upload was explicitly associated with, or
 `"restricted"` when the caller cannot read it. Readers before 1.5.0 refuse typed
 descriptors as contract-invalid; curve descriptors are unchanged. Fixtures:
 `fixtures/{tops,trajectory,grid}{.original,-data.json,.json}`.
+
+## Attachments (`ophiolite.attachment/1` 1.0.0, E191)
+
+An attachment is one figure, a PNG, a JPEG or a PDF, kept with the one item version
+it backs (`attachment-schema.json`). The record gives its label in words, its type,
+its byte count and SHA-256, who added it (a person, or an assistant for a person
+under an approved job), what the request said sent it (`ophiolite.sender/1`, with
+`accepted_as` always null), when, and, once withdrawn, who withdrew it, when and
+why. It is not a representation: `scientific-asset/1` is unchanged.
+
+- **Bound once.** An attachment never moves to another version and is never
+  replaced. A second file with the same label is a second record; the newest record
+  with a label, whatever its state, is the one a proof reads, so a withdrawn newest
+  figure reads as missing and an older one does not take its place.
+- **Type from the bytes.** The type is decided from the file's bytes, never from
+  its name; the name the sender gave is kept as text (`file_name`) and never placed
+  in a header.
+- **Rights and licence.** An attachment has no rights basis and no licence of its
+  own. It is read only under the access of its version, so the version's rights
+  basis governs it: a basis that ended refuses the version and every figure on it.
+  A figure that shows another party's data is attached under the rights of the
+  version it is attached to; a team that needs its own terms for a picture attaches
+  it to a version that carries them. Moving a project carries its figures as it
+  carries their versions.
+- **Withdrawal.** A person may withdraw a figure with a reason; the record stays and
+  its bytes are no longer served.
+
+The add, list, read and withdraw request bodies are in the schema's `$defs`.
+Fixtures: `fixtures/attachments/` holds seven synthetic files (invented numbers
+only, written by `build.py`, their lengths and digests counted by hand in
+`expected.json`), four valid records and the invalid cases.
+
+| File | Bytes | SHA-256 | Answer |
+|---|---|---|---|
+| `figure.png` | 40 090 | `159669b7fdf136e0e3e054a869fed0b99372f762999b32393adc5079cde14a04` | `image/png` |
+| `figure.jpg` | 3 179 | `443f54e682cc17da477672147e714cfece4f19b311bdff60bb7efbdcefde67ff` | `image/jpeg` |
+| `report.pdf` | 943 | `7d907549223f4b31a40fc25c140d37870f208597666da17da755cff0320a20b1` | `application/pdf` |
+| `drawing.svg` | 154 | `20f0a859fc009beceed66d9af92240e945882381edc6e95ef40f49d1925d487d` | `not-a-figure` |
+| `page-as-png.png` | 115 | `44ee7b37ff00cef1944c501aa8acb36257a7c48a1edab6eb2e26181a5f19d893` | `not-a-figure` |
+| `polyglot.png` | 200 | `04f11bd12a553ba7a01fa14333c59a11e0fde13a376106656039eb3fcaac9a08` | `two-types` |
+| `header-only.png` | 33 | `617529cb44208f4e73e24d5c7d82b56a5a42309d72c51182cc1c4456a58743d2` | `damaged` |
+
+The type check reads the first 1024 bytes, the parts that hold text (PNG `tEXt`, `iTXt` and `zTXt` chunks, JPEG
+comment and application segments) and a PDF's bytes outside its streams; it does not read compressed pixel or stream
+data. Serving never relies on it: a figure is served as the type it was kept as, with `nosniff`, a sandbox policy, and
+a PDF always as a download.
+
+Where the bytes are and what follows the version (E191 s1). A figure's bytes are kept once per project and digest:
+in the deployment's payload store under their SHA-256, or in the record itself on a deployment without one. A
+second project that attaches the same bytes keeps its own record of them, and neither project's answers change.
+A figure has no lifetime of its own:
+
+- **Access.** Every list and read checks the version's access again; an answer is never cacheable (`private,
+  no-store`, no validator), so a person whose access ends is refused on the next request.
+- **Deletion.** The two legacy wipes that delete versions delete the figures on them in the same transaction; a
+  file goes when no figure of its project names it, and the store's sweep then reclaims bytes no record names.
+- **Backup and restore.** The deployment backup carries the figure records with the journal and every stored figure
+  file; a restore gives the same bytes and SHA-256.
+- **Project move.** The package carries the moved versions' figures, their withdrawals and the files they name,
+  with the bytes under `payloads/`. Who added or withdrew a figure is mapped like every other person; an assistant
+  and its job keep the ids they had. A package missing a figure's file is refused before anything is written; a
+  package from before figures imports with none. Figure command replays stay behind.

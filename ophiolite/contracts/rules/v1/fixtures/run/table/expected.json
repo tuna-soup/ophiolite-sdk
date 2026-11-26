@@ -1,0 +1,9 @@
+{
+ "schema": "ophiolite.rule-results/1",
+ "kind": "table-csv/1",
+ "registry_version": "1.4.0",
+ "results": [
+  {"rule": "columns-present/1", "state": "failed", "count": 2, "examples": [{"row": null, "depth": null, "value": null, "column": "days"}, {"row": null, "depth": null, "value": "h", "column": "hours"}], "parameters": {"columns": [{"column": "cost", "unit": null}, {"column": "days", "unit": null}, {"column": "hours", "unit": "d"}]}, "reason": null, "context": null},
+  {"rule": "no-empty/1", "state": "failed", "count": 4, "examples": [{"row": 2, "depth": null, "value": -1, "column": "hours", "key": "Permits"}, {"row": 3, "depth": null, "value": null, "column": "cost", "key": "Equipment hire"}, {"row": 5, "depth": null, "value": null, "column": "cost", "key": "Labour"}, {"row": 5, "depth": null, "value": null, "column": "currency", "key": "Labour"}], "parameters": {"columns": ["cost", "currency", "hours"], "key": "item"}, "reason": null, "context": null}
+ ]
+}

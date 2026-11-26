@@ -1,0 +1,41 @@
+{
+  "schema": "ophiolite.attachment/1",
+  "attachment_id": "7e2a9c4d10b34f8e9a6b5c4d3e2f1a0b",
+  "project_id": "p-figures",
+  "version": {
+    "asset_id": "tops-residuals",
+    "revision": "2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3"
+  },
+  "label": "Residual report",
+  "media_type": "application/pdf",
+  "bytes": 943,
+  "sha256": "7d907549223f4b31a40fc25c140d37870f208597666da17da755cff0320a20b1",
+  "file_name": "report.pdf",
+  "added_by": {
+    "person": "a.person",
+    "agent": null,
+    "job": null
+  },
+  "sender": {
+    "schema": "ophiolite.sender/1",
+    "state": "reported",
+    "client": {
+      "product": "ophiolite-sdk",
+      "version": "0.41.0"
+    },
+    "host": null,
+    "transport": "sdk",
+    "accepted_as": null
+  },
+  "added_at": "2026-11-23T09:05:00Z",
+  "state": "withdrawn",
+  "withdrawal": {
+    "by": {
+      "person": "a.person",
+      "agent": null,
+      "job": null
+    },
+    "at": "2026-11-23T10:30:00Z",
+    "reason": "The report showed the previous tolerance; a corrected one follows."
+  }
+}

@@ -231,7 +231,7 @@ def test_the_readme_is_a_short_quick_start():
     text = README.read_text(encoding='utf-8')
     assert len(text.splitlines()) <= 60
     checked(text)
-    assert text.rstrip('\n').splitlines()[-1].endswith('(https://github.com/tuna-soup/ophiolite-sdk/blob/main/CONTRACTS.md).')
+    assert text.rstrip('\n').splitlines()[-1].endswith('(https://github.com/ophiolite-labs/ophiolite-sdk/blob/main/CONTRACTS.md).')
     assert all(t.startswith('https://') for t in re.findall(r'\]\(([^)]+)\)', text))  # PyPI renders it: absolute links only
 
 

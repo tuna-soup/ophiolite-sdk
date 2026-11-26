@@ -1,0 +1,29 @@
+{
+ "schema": "ophiolite.sample-index-words/1",
+ "id": "ophiolite.sample-index-words/1",
+ "description": "E211 s0. Why a sample of the sample index is not offered, one closed key each (samples/v1/samples.py CODES), one sentence each. `{sample}` is the sample's name as a person reads it; no sentence carries a code, a field name or a path.",
+ "reasons": {
+  "index-malformed": "The list of samples could not be read, so {sample} and every other sample are not offered.",
+  "entry-malformed": "The description of {sample} is not complete or not in the expected form, so it is not offered.",
+  "sample-repeated": "{sample} is listed more than once, so it is not offered until it is listed once.",
+  "manifest-missing": "The list of what {sample} holds could not be found, so it is not offered.",
+  "sample-not-approved": "{sample} is not one of the approved samples, so it is not offered.",
+  "source-refused": "{sample} is made from data we do not use for samples, so it is not offered.",
+  "acquisition-host": "Part of {sample} was fetched from a place its rights do not cover, so it is not offered.",
+  "licence-malformed": "The licence of a part of {sample} could not be read, so it is not offered.",
+  "not-redistributable": "Part of {sample} may not be shared by us, so it is not offered.",
+  "not-anonymous": "Part of {sample} cannot be fetched by anyone without an account, so it is not offered.",
+  "non-commercial": "Part of {sample} may not be used commercially, so it is not offered.",
+  "licence-not-listed": "The licence of a part of {sample} is not one we accept for samples, so it is not offered.",
+  "commercial-use-not-read": "Nobody has yet read whether {sample} may be used commercially, so it is not offered.",
+  "no-attribution-sentence": "Part of {sample} must be credited and has no credit sentence, so it is not offered.",
+  "credit-not-prescribed": "The credit of a part of {sample} is not the publisher's own sentence, so it is not offered.",
+  "credit-without-evidence": "The credit we wrote for a part of {sample} does not say where it comes from, so it is not offered.",
+  "unsupported-combination": "{sample} combines data under different licences, which a sample cannot carry, so it is not offered.",
+  "licence-block-differs": "The licence shown for {sample} is not the one its data carry, so it is not offered.",
+  "manifest-differs": "The list of what {sample} holds is not the one it was published with, so it is not offered.",
+  "manifest-invalid": "The list of what {sample} holds is not in the expected form, so it is not offered.",
+  "manifest-repeats-item": "The list of what {sample} holds names one item twice, so it is not offered.",
+  "contents-differ": "What {sample} says it holds is not what its data hold, so it is not offered."
+ }
+}

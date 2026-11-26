@@ -64,6 +64,15 @@ SENDER_SHAPE = 'A sender is not an ophiolite.sender/1 view.'
 _SENDER_TOKEN = re.compile(r'[A-Za-z0-9][A-Za-z0-9._+-]{0,39}')  # sender.json: a client's or host's name or version
 _SENDER_TRANSPORT = re.compile(r'[a-z][a-z0-9-]{0,15}')
 _SENDER_PROFILE = re.compile(r'[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+')  # the registry's id grammar, at most 128
+# E192 s1 (bundle 1.19 / 2.19): an entry may carry `stated_parents` and `stated_parent_visibility`, the exact revisions its
+# sender stated it was made for (made-for, class stated), copied from its served descriptor, beside and never among the
+# parents. The reader takes them only at 19 or above, and only when each one is a disclosed made-for entry of the
+# descriptor's revision manifest, so a stated parent cannot travel without the commitment that proves it was recorded.
+STATED_MINOR = 19
+STATED_FIELDS = ('stated_parents', 'stated_parent_visibility')
+STATED_NEEDS_MINOR = 'Stated parents need bundle version 1.19 or 2.19.'
+STATED_SHAPE = 'The stated parents are not distinct exact revisions beside the parents.'
+STATED_UNDISCLOSED = 'A stated parent is not a made-for entry of its revision manifest.'
 # E116 s1 (bundle 2.12): a project folder block (ophiolite.project-folder/1) lists the files ophiolite-mapper write adds
 # beside the assets; with it, and only with it, assets and selection may be empty, since a folder the box writes alone
 # holds no exact server revision. The block is checked by the contract's own validator, mapper/v1/mapper.py.
@@ -248,6 +257,7 @@ class BundleAsset:
         self.provenance, self.read_by = None, None  # 2.9 (E107a): the kept original a file read on a computer was read from, and that reading
         self.source_record = None  # 1.10/2.10 (E122 s5b): the version's source-provenance/1 record as served, or None
         self.sender = None  # 1.18/2.18 (E182 s2b): what the version's request said sent it (ophiolite.sender/1) as served, or None
+        self.stated_parents = None  # 1.19/2.19 (E192 s1): the revisions its sender stated it was made for that travelled ([] when all hidden), or None
 
 
 class WellTable:
@@ -666,6 +676,7 @@ def open_bundle(path):
     listed = seen | {'manifest.json'} | {row['path'] for row in folder} | {row['path'] for row in cited}
     unlisted = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and p.relative_to(root).as_posix() not in listed)
     for asset, record, sent in zip(loaded, records, senders): asset.source_record, asset.sender = record, sent  # one loaded asset per entry, in order
+    for asset, entry in zip(loaded, entries): asset.stated_parents = _stated_of(manifest, entry, _loaded_descriptor(asset))  # E192 s1
     bundle = Bundle(root, manifest, loaded, unlisted)
     bundle.entities, bundle.relationships = entities, relationships
     bundle.folder = folder
@@ -711,6 +722,54 @@ def _source_record_of(manifest, entry):
     if (held['asset_id'], held['revision']) != (entry.get('asset_id'), entry.get('revision')): raise VerificationFailed(SOURCE_OTHER)
     if not source_record_valid(held['record']): raise VerificationFailed(SOURCE_SHAPE)  # its lengths bound its size
     return held['record']
+
+
+def _stated_problem(stated, shown, parents, own):
+    """E192 s1: the sentence for the first shape problem of a pair (STATED, SHOWN) beside PARENTS on the revision OWN
+    (asset id, revision), or None. Both or neither; an empty list only when every one is hidden (restricted); each an
+    exact revision, once, never the revision itself and never also a parent."""
+    if stated is None and shown is None: return None
+    if not isinstance(stated, list) or len(stated) > 32 or shown not in ('complete', 'restricted') or (not stated and shown != 'restricted'): return STATED_SHAPE
+    named = []
+    for p in stated:
+        if not isinstance(p, dict) or set(p) != {'authority', 'key', 'revision', 'profile'} or not all(_text(p.get(k), 512) for k in ('authority', 'key', 'revision')):
+            return STATED_SHAPE
+        if p['profile'] is not None and not (isinstance(p['profile'], str) and len(p['profile']) <= 128 and _SENDER_PROFILE.fullmatch(p['profile'])):
+            return STATED_SHAPE
+        named.append((p['authority'], p['key'], p['revision']))
+    witnessed = {(p.get('authority'), p.get('key'), p.get('revision')) for p in parents or () if isinstance(p, dict)}
+    if len(set(named)) != len(named) or set(named) & witnessed or any((key, revision) == tuple(own) for _, key, revision in named): return STATED_SHAPE
+    return None
+
+
+def _descriptor_of(read):
+    """The served descriptor a bundle entry is written from (the first curve's for a well log), or None (a wells table)."""
+    if isinstance(read, tuple): return read[0]._wire_descriptor
+    if hasattr(read, '_wire_descriptors'): return read._wire_descriptors[0]
+    return getattr(read, '_wire_descriptor', None)
+
+
+def _loaded_descriptor(asset):
+    """The verified descriptor a read entry carries: its first curve's, else its typed data's (slices: the volume's)."""
+    if asset.curves: return next(iter(asset.curves.values())).wire_descriptor
+    return getattr(asset.data, '_wire_descriptor', None)
+
+
+def _stated_of(manifest, entry, descriptor):
+    """E192 s1: an entry's stated parents, checked: at 1.19/2.19 or above, well formed, the same pair its descriptor
+    carries, and each one a disclosed made-for entry of the descriptor's revision manifest; None when the entry names
+    none (a descriptor an older writer copied whole may carry them; the entry decides)."""
+    if not any(k in entry for k in STATED_FIELDS): return None
+    if int(manifest['bundle_version'].split('.')[1]) < STATED_MINOR: raise VerificationFailed(STATED_NEEDS_MINOR)
+    stated, shown = entry.get('stated_parents'), entry.get('stated_parent_visibility')
+    problem = _stated_problem(stated, shown, entry.get('parents'), (entry.get('asset_id'), entry.get('revision'))) or (STATED_SHAPE if stated is None else None)
+    if problem: raise VerificationFailed(problem)
+    if descriptor is None or any(descriptor.get(k) != entry.get(k) for k in STATED_FIELDS): raise VerificationFailed('The manifest disagrees with a descriptor (stated_parents).')
+    lineage = (descriptor.get('manifest') or {}).get('lineage') if isinstance(descriptor.get('manifest'), dict) else None
+    disclosed = {(e['reference'].get('authority'), e['reference'].get('key'), e['reference'].get('revision')) for e in lineage or ()
+                 if isinstance(e, dict) and e.get('predicate') == 'made-for' and isinstance(e.get('reference'), dict)}
+    if any((p['authority'], p['key'], p['revision']) not in disclosed for p in stated): raise VerificationFailed(STATED_UNDISCLOSED)
+    return stated
 
 
 def _sender_token(value, nullable=False):
@@ -956,6 +1015,10 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
     for _, read in items:  # E182 s2b: a sender the gateway served is checked before anything is written
         sent = getattr(_carried(read), 'sender', None)
         if sent is not None and not sender_valid(sent): raise VerificationFailed(SENDER_SHAPE)
+    for _, read in items:  # E192 s1: stated parents the gateway served are checked before anything is written
+        served = _descriptor_of(read) or {}
+        problem = _stated_problem(served.get('stated_parents'), served.get('stated_parent_visibility'), served.get('parents'), (served.get('asset_id'), served.get('revision')))
+        if problem: raise VerificationFailed(problem)
     parent = destination.parent; parent.mkdir(parents=True, exist_ok=True)
     for stale in parent.glob('.' + destination.name + '.staging-*'):  # abandoned interrupted exports only
         try: owner = int((stale / '.owner').read_text())
@@ -1045,6 +1108,8 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if held is not None: entry['source_record'] = held
             sent = getattr(_carried(read), 'sender', None)  # E182 s2b: from the same answer, its own entry field
             if sent is not None: entry['sender'] = sent
+            served = _descriptor_of(read) or {}  # E192 s1: the stated pair as served, beside the parents
+            if 'stated_parents' in served: entry.update({k: served[k] for k in STATED_FIELDS})
         observations = {**({'groups': groups} if groups else {}), **({'groups_omitted': groups_omitted} if groups_omitted else {}),
                         **({'entities_omitted': entities_omitted} if entities_omitted else {}),  # E22b: why no wells travel
                         **({'source_records_omitted': source_records_omitted} if source_records_omitted else {})}  # E122 s5b: why no records travel
@@ -1054,7 +1119,8 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                     + [PACKAGE_MINOR for a in assets if 'package' in a]  # E23c: 2.8 only for an asset with a package
                     + [PROVENANCE_MINOR for a in assets if 'read_by' in a]  # E107a: 2.9 only for an asset with a kept original
                     + [SOURCE_RECORD_MINOR for a in assets if 'source_record' in a]  # E122 s5b: 1.10/2.10 only when a record travels
-                    + [SENDER_MINOR for a in assets if 'sender' in a])  # E182 s2b: 1.18/2.18 only when a sender travels
+                    + [SENDER_MINOR for a in assets if 'sender' in a]  # E182 s2b: 1.18/2.18 only when a sender travels
+                    + [STATED_MINOR for a in assets if 'stated_parents' in a])  # E192 s1: 1.19/2.19 only when stated parents travel
         if citation is not None: minor = max(minor, _descriptors_contract().MINOR)  # E147 s2: 2.15, or the content's own minor above it
         if citation is not None and _descriptors_contract().bundle_tables(assets):  # E147 s2b: 2.16 when a typed table gets a record set
             minor = max(minor, _descriptors_contract().TABLES_MINOR)

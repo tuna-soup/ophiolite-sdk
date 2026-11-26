@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.135.0",
+  "version": "1.150.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.38.0",
+      "version": "1.39.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -78,7 +78,8 @@
     {
       "id": "ophiolite.point-columns/1",
       "version": "1.0.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "assets/v1/point-columns-header-schema.json",
       "title": "PointColumnsHeader",
       "description": "The JSON header of a point set stored as columns above 100,000 nodes: the normalized point set's fields without its points and attributes, which follow it as little-endian float64, one column per name."
@@ -86,7 +87,8 @@
     {
       "id": "ophiolite.asset-summary/1",
       "version": "1.5.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "assets/v1/summary-schema.json",
       "title": "AssetSummary",
       "description": "A discovery summary: identity, origin, profile, curve names and the operations allowed to the caller."
@@ -94,7 +96,8 @@
     {
       "id": "ophiolite.typed-context/1",
       "version": "1.14.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
       "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume in float or 8-bit form, wavelet, rock model section, seismic section, time-depth table, feature set, well path given as positions, well set, residual result, 2D seismic line) with its fidelity report."
@@ -102,15 +105,17 @@
     {
       "id": "ophiolite.well-tops/1",
       "version": "1.0.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "assets/v1/well-tops-schema.json",
       "title": "WellTops",
       "description": "Normalized well tops in source order with their source reference, digest, context and reader identity."
     },
     {
       "id": "ophiolite.trajectory/1",
-      "version": "1.1.0",
-      "lifecycle": "preview",
+      "version": "1.2.0",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "assets/v1/trajectory-schema.json",
       "title": "Trajectory",
       "description": "Normalized survey stations with their source reference, digest, context and reader identity."
@@ -118,7 +123,8 @@
     {
       "id": "ophiolite.regular-grid-surface/1",
       "version": "1.0.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "assets/v1/grid-surface-schema.json",
       "title": "GridSurface",
       "description": "A normalized regular-grid surface: every cell value in file order with its source reference, digest, context and reader identity."
@@ -134,7 +140,8 @@
     {
       "id": "ophiolite.point-set/1",
       "version": "1.0.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "assets/v1/point-set-schema.json",
       "title": "PointSet",
       "description": "A normalized point set: points and numeric attributes in file order with source reference, digest, context and reader identity."
@@ -181,19 +188,19 @@
     },
     {
       "id": "ophiolite.portable-bundle/1",
-      "version": "1.10.0",
+      "version": "1.19.0",
       "lifecycle": "preview",
       "path": "bundles/v1/manifest-schema.json",
       "title": "PortableBundleManifest",
-      "description": "The portable bundle manifest: exact selected revisions with files, digests, served context, permitted lineage, omissions and losses (E18)."
+      "description": "The portable bundle manifest: exact selected revisions with files, digests, served context, permitted lineage, omissions and losses (E18); 1.19 (E192 s0) carries the stated parents beside the parents."
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.16.0",
+      "version": "2.19.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it; 2.11 (E123 S1f-c) carries a packaged polyline set (Petrel fault sticks); 2.12 (E116 s1) carries a project folder block, and with it may list no assets (a folder ophiolite-mapper writes alone); 2.13 (E142 s0) carries surveys, their members by exact revision and the relations between them; 2.14 (E117 s1) carries a project folder block of its own format (ophiolite.project-folder/2), which any program may write; 2.15 (E147 s0) carries a citation block and the standard descriptors derived from it, and a media type on asset files; 2.16 (E147 s2b) describes a cited bundle's well tops, deviation surveys, time-depth tables and point sets as Croissant record sets read from their normalized data."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it; 2.11 (E123 S1f-c) carries a packaged polyline set (Petrel fault sticks); 2.12 (E116 s1) carries a project folder block, and with it may list no assets (a folder ophiolite-mapper writes alone); 2.13 (E142 s0) carries surveys, their members by exact revision and the relations between them; 2.14 (E117 s1) carries a project folder block of its own format (ophiolite.project-folder/2), which any program may write; 2.15 (E147 s0) carries a citation block and the standard descriptors derived from it, and a media type on asset files; 2.16 (E147 s2b) describes a cited bundle's well tops, deviation surveys, time-depth tables and point sets as Croissant record sets read from their normalized data; 2.19 (E192 s0) carries the stated parents beside the parents (the format minors 2.17 and 2.18 were taken by E162 s2a and E182 s2b without a schema change)."
     },
     {
       "id": "ophiolite.polyline-set/1",
@@ -214,7 +221,8 @@
     {
       "id": "ophiolite.well-location/1",
       "version": "1.0.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "assets/v1/well-location-schema.json",
       "title": "WellLocation",
       "description": "A well's location as read: the stored point and CRS, the exact revision (and row) it came from and the association tying it to the well (E29)."
@@ -325,7 +333,7 @@
     },
     {
       "id": "ophiolite.seismic-volume/3",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/seismic-volume-3-schema.json",
       "title": "SeismicVolumePublished",
@@ -365,7 +373,7 @@
     },
     {
       "id": "ophiolite.relationship-registry/1",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "lifecycle": "preview",
       "path": "relationships/v1/registry-schema.json",
       "title": "RelationshipRegistry",
@@ -390,22 +398,23 @@
     {
       "id": "ophiolite.entity/1",
       "version": "1.1.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "entities/v1/entity-schema.json",
       "title": "Entity",
       "description": "A well or wellbore with an external or explicitly provisional identity, its part-of link and identity history (E20)."
     },
     {
       "id": "ophiolite.entity-assets/1",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "lifecycle": "preview",
       "path": "entities/v1/entity-assets-schema.json",
       "title": "EntityAssets",
-      "description": "The exact revisions associated with an entity that the caller may read, with the evidence of each association (E20); 1.2.0: with include_parts, a well's and its readable wellbores' items, each naming its entity (E66)."
+      "description": "The exact revisions associated with an entity that the caller may read, with the evidence of each association (E20); 1.2.0: with include_parts, a well's and its readable wellbores' items, each naming its entity (E66); 1.4.0: each item's origin and, for a well log, each recorded curve with the quantity, status and OSDU LogCurveFamily catalog describe states for it (E210 s0)."
     },
     {
       "id": "ophiolite.lineage/1",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "relationships/v1/lineage-schema.json",
       "title": "Lineage",
@@ -422,7 +431,8 @@
     {
       "id": "ophiolite.source-provenance/1",
       "version": "1.0.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "scientific/v1/source-provenance.json",
       "title": "SourceProvenance",
       "description": "Where one version came from, in three parts kept apart: identity (source system from ophiolite.source-systems/1, instance, id scheme, source object id), content (the bytes' sha256, the source's version) and context (the comparison/1 digest of how the bytes were read); observation is joined from the run, never stored (E122)."
@@ -430,7 +440,8 @@
     {
       "id": "ophiolite.sender/1",
       "version": "1.0.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "scientific/v1/sender.json",
       "title": "Sender",
       "description": "What a version says sent it, as the request that made it reported it: reported (the client product and version, the host application and release, the transport, the profile the data is stored under), not reported (no header, or one the gateway dropped) or not recorded (made before senders were kept). A report, never a proof; no access, trust or verification decision reads it (E182)."
@@ -589,19 +600,19 @@
     },
     {
       "id": "ophiolite.data-rule/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "rules/v1/data-rule-schema.json",
       "title": "DataRule",
-      "description": "One released data rule: the kinds it applies to, whether it reads one file or the project, its severity, its parameters with their admissible range, comparison and source, the sentence a person reads and the registry version it first appeared in (E144)."
+      "description": "One released data rule: the kinds it applies to, whether it reads one file or the project, its severity, its parameters with their admissible range, comparison and source, the sentence a person reads and the registry version it first appeared in (E144). 1.1.0 (E192 s0): parameters that name a table's columns, whose null default makes the rule run only when a run names them."
     },
     {
       "id": "ophiolite.rule-results/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "rules/v1/rule-results-schema.json",
       "title": "RuleResults",
-      "description": "The data rules run on one version under one registry snapshot: one result per rule that applies to its kind, passed, failed with a count and up to five examples, or not applicable with a reason; no id, time or person (E144)."
+      "description": "The data rules run on one version under one registry snapshot: one result per rule that applies to its kind, passed, failed with a count and up to five examples, or not applicable with a reason; no id, time or person (E144). 1.1.0 (E192 s0): an example may name a table's column (and its row's key), and parameters as run may be columns."
     },
     {
       "id": "ophiolite.search-request/2",
@@ -654,7 +665,8 @@
     {
       "id": "ophiolite.held-copies/1",
       "version": "1.2.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "exchange/v1/held-copies-schema.json",
       "title": "HeldCopies",
       "description": "Who holds which version of an item, as one reader may see it: one row per connected copy and item with the client-declared application, the person as the reader may see them, the version last confirmed and since when, stays, follows or not said, and current, behind (by how many, and the head) or no longer readable, computed at read time; in $defs the request of exchange/holders, paged (E171 s0). Since 1.1.0 a row may carry reported: the holder's latest report of its connector's host-qualification record (connector, host, checked, rows), as reported (E185 s2c). Since 1.2.0 the version of a row whose holder sent it may carry sender: what the request that made that version said sent it, as reported (E182 s2c)."
@@ -662,7 +674,8 @@
     {
       "id": "ophiolite.transfer-receipt/1",
       "version": "1.0.0",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s2 C1: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 25 November 2026, lane image of main b6db3ce73; any new field is a new id",
       "path": "exchange/v1/transfer-receipt.json",
       "title": "TransferReceipt",
       "description": "What one get or send kept, changed and did not carry, computed by the connector that acts: its direction, capability route and contract, planned before the act or committed after it (with the version or opaque copy made, filled in by the project), the fingerprints of source, target and converter, the code document version, and three lists of at most 8 rows, each a code the route declares, its sentence, and the count or value measured on this transfer when one was; at most 2,048 bytes as compact JSON (E184 s0)."
@@ -677,19 +690,19 @@
     },
     {
       "id": "ophiolite.chain/1",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "chains/v1/chain-schema.json",
       "title": "ChainDeclaration",
-      "description": "A chain as declared: what starts it (a new version of an item kind, inside a well set when named, or a person's request) and up to sixteen steps in order, each a tool step checked against one outcome version, a question with two to eight fixed answers, or work done outside, following earlier steps and applying only when a measure of an earlier tool step's check meets its condition (E178 s0)."
+      "description": "A chain as declared: what starts it (a new version of an item kind, inside a well set when named, or a person's request) and up to sixteen steps in order, each a tool step checked against one outcome version, a question with two to eight fixed answers, or work done outside, following earlier steps and applying only when a measure of an earlier tool step's check meets its condition (E178 s0). 1.1.0 (E189 s0) adds the work step, a step's criteria each with one proof and its sign-off by a role, and the chain version's roles with their holders. 1.2.0 (E190 s0) adds the chain's kinds of work in the team's words and, on a step or a criterion, the kinds it applies to."
     },
     {
       "id": "ophiolite.chain-run/1",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "chains/v1/chain-run-schema.json",
       "title": "ChainRun",
-      "description": "One pass of one chain version over one trigger: the whole declaration and the tool versions frozen at start, each step's state, its condition as read, its latest result with that result's check, and every act on it with who did it (the person always; the assistant and the job only under an approval) and when, paged; the run's state computed at read (E178 s0)."
+      "description": "One pass of one chain version over one trigger: the whole declaration and the tool versions frozen at start, each step's state, its condition as read, its latest result with that result's check, and every act on it with who did it (the person always; the assistant and the job only under an approval) and when, paged; the run's state computed at read (E178 s0). 1.1.0 (E189 s0) adds the work step, the states of a step with criteria, each criterion's state with the records that decide it, the pinned sign-off and what changed since it, and the sign-off and exception acts. 1.2.0 (E190 s0) adds the run's kind of work, the counts of steps that apply and do not, the state does-not-apply with its cause on a step or a criterion, and the person acts that take a step or a criterion out of the run and put it back."
     },
     {
       "id": "ophiolite.chain-due/1",
@@ -698,6 +711,22 @@
       "path": "chains/v1/chain-due-schema.json",
       "title": "ChainDue",
       "description": "The item versions a chain should start for and has not: published after the chain version was enabled, with no run started and no dismissal for that chain, item and version, read from the kept item versions, paged in publication order (E178 s0)."
+    },
+    {
+      "id": "ophiolite.step-criteria/1",
+      "version": "1.1.0",
+      "lifecycle": "preview",
+      "path": "chains/v1/step-criteria-schema.json",
+      "title": "StepCriteria",
+      "description": "One revision of one run step's criteria: the attached version it is about, what made the revision, each criterion's state with the records that decide it (for a criterion that does not hold, how many and the first few) and, on the revision a sign-off wrote, the sign-off. Revisions count per run and step from 1 across every attached result, so run, step and revision name one record; never changed afterwards (E189 s0). 1.1.0 (E190 s0) adds why a criterion does not apply, and a revision written when a criterion is taken out or put back."
+    },
+    {
+      "id": "ophiolite.rule-evidence/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "rules/v1/rule-evidence-schema.json",
+      "title": "RuleEvidence",
+      "description": "One released data rule run on one version with a team's parameter values: every declared parameter with defaults filled in, their digest, and the rule-results/1 result of that run. Keyed by version, rule and parameter digest; no id, time or person, so the same inputs give the same bytes (E189 s0)."
     },
     {
       "id": "ophiolite.reference-cases/1",
@@ -717,7 +746,7 @@
     },
     {
       "id": "ophiolite.affected/1",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "lifecycle": "preview",
       "path": "changes/v1/affected-schema.json",
       "title": "Affected",
@@ -738,6 +767,30 @@
       "path": "connectors/v1/host-qualification.json",
       "title": "HostQualification",
       "description": "One host connector's checked installations (release, binding digests, Python, the fixture and the probe run on it) and what each direction can do on them, supported and proven or refused with its sentence and detail; a connector's host.versions is written from the distinct checked releases (E185 s0)."
+    },
+    {
+      "id": "ophiolite.attachment/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/attachment-schema.json",
+      "title": "Attachment",
+      "description": "One figure (a PNG, JPEG or PDF, its type decided from the bytes) bound once to one item version: its label, byte count and SHA-256, who sent it, through what and when, and its withdrawal with a reason; never moved or replaced, served as a file under that version's access only, with the add, list, read and withdraw request bodies in $defs (E191 s0)."
+    },
+    {
+      "id": "ophiolite.table-kind/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "kinds/v1/table-kind-schema.json",
+      "title": "TableKindVersion",
+      "description": "One immutable version of a project's own kind of table: its word, label and what one row is, its columns (type, present, may be empty, and for a number the unit registry's quantity class with the unit the team writes) and its key, with its digest over the declaration's canonical JSON; the reference a table published as the kind records, the list, and the declare, list and show request bodies in $defs (E203 s0)."
+    },
+    {
+      "id": "ophiolite.sample-index/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "samples/v1/sample-index-schema.json",
+      "title": "SampleIndex",
+      "description": "The list of sample projects the public store offers: per sample its id, title and card text, its bundle by a key relative to the store with the bundle's and its manifest's SHA-256 and the bundle's bytes, its sources (OSD record, retrieval day, catalogue origin, the address fetched, the licence object kept whole, the reading of the terms and the credit), the licence block computed from them, and its contents taken from the bundle manifest; never a count (E211 s0)."
     }
   ],
   "profiles": [
@@ -778,7 +831,8 @@
       "kind": "normalized",
       "display_name": "Point set read in sections",
       "description": "A point set of a points CSV above 100,000 nodes, stored as float64 columns (x, y, z when present, then each attribute) after a JSON header; missing values are NaN.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/point-columns.json"
     },
     {
@@ -810,7 +864,8 @@
       "kind": "source",
       "display_name": "Well locations from a SQL table",
       "description": "Well records read through a reviewed customer mapping from a SQL table; current values only.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/sql-wells.json"
     },
     {
@@ -866,7 +921,8 @@
       "kind": "source",
       "display_name": "Well tops (CSV)",
       "description": "A CSV of formation tops by name and measured depth, kept byte for byte as the uploader provided it.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/well-tops-csv.json"
     },
     {
@@ -874,7 +930,8 @@
       "kind": "source",
       "display_name": "Deviation survey (CSV)",
       "description": "A CSV of survey stations (measured depth, inclination, azimuth), kept byte for byte as the uploader provided it.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/deviation-csv.json"
     },
     {
@@ -882,7 +939,8 @@
       "kind": "source",
       "display_name": "Horizon grid (ESRI ASCII)",
       "description": "A regular grid of surface values in the ESRI ASCII grid format, kept byte for byte as the uploader provided it.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/esri-ascii-grid.json"
     },
     {
@@ -890,7 +948,8 @@
       "kind": "normalized",
       "display_name": "Normalized well tops",
       "description": "Tops in source order with names, measured depths and any provided vertical depths, the declared depth unit and basis, and the reader identity.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/well-tops.json"
     },
     {
@@ -898,7 +957,8 @@
       "kind": "normalized",
       "display_name": "Normalized trajectory",
       "description": "Survey stations in increasing measured depth with inclination and azimuth as provided (missing angles null), the declared azimuth reference and datum.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/trajectory.json"
     },
     {
@@ -906,7 +966,8 @@
       "kind": "normalized",
       "display_name": "Normalized regular-grid surface",
       "description": "Every grid cell value in file order (first row north) with missing cells null, origin, cell size, registration and the declared CRS, units and vertical meaning.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/grid-surface.json"
     },
     {
@@ -922,7 +983,8 @@
       "kind": "source",
       "display_name": "Point set (CSV)",
       "description": "A CSV of points (x, y, optional z and numeric attributes), kept byte for byte as the uploader provided it.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/points-csv.json"
     },
     {
@@ -938,7 +1000,8 @@
       "kind": "normalized",
       "display_name": "Normalized point set",
       "description": "Every point in file order (missing z null) with numeric attributes, extent and the declared CRS, units and vertical meaning.",
-      "lifecycle": "preview",
+      "lifecycle": "supported",
+      "qualified_by": "E187 s1 C2: measured in one whole run of the MVP journey (mvp_whole --self-test, 43 of 43 checks) on 24 November 2026, server release 2026.11.25",
       "path": "profiles/v1/point-set.json"
     },
     {
@@ -1428,6 +1491,12 @@
       "title": "The released scientific asset 1.37.0, as its digests, frozen; never regenerated (E182 s2a)"
     },
     {
+      "id": "ophiolite.fixture/frozen/scientific-asset-1.38.0.digest.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/scientific-asset-1.38.0.digest.json",
+      "title": "The released scientific asset 1.38.0, as its digests, frozen; never regenerated (E192 s0)"
+    },
+    {
       "id": "ophiolite.fixture/pre-e1/source.json/1",
       "kind": "fixture",
       "path": "assets/v1/fixtures/frozen/pre-e1/source.json",
@@ -1467,6 +1536,20 @@
       "kind": "fixture",
       "path": "assets/v1/fixtures/frozen/pre-e1/expected.json",
       "title": "Pre-E1 fixture bytes, frozen; never regenerated"
+    },
+    {
+      "id": "ophiolite.fixture/entities/entity-assets-wellbore-logs.json/1",
+      "kind": "fixture",
+      "path": "entities/v1/fixtures/valid/entity-assets-wellbore-logs.json",
+      "title": "A synthetic wellbore's entity-assets page at 1.4.0: uploaded and derived logs with their curves, a tops item without (E210 s0)",
+      "schema": "ophiolite.entity-assets/1"
+    },
+    {
+      "id": "ophiolite.fixture/frozen/entity-assets-1.3.0.json/1",
+      "kind": "fixture",
+      "path": "entities/v1/fixtures/frozen/entity-assets-1.3.0.json",
+      "title": "An entity-assets 1.3.0 answer copied from the gateway before E210 s0, frozen; never regenerated",
+      "schema": "ophiolite.entity-assets/1"
     },
     {
       "id": "ophiolite.fixture/pre-e1/original.las/1",
@@ -2768,10 +2851,46 @@
       "title": "Receipts the schema refuses at their paths, receipts only the model's cross-field rules and ceiling refuse, and receipts the code document refuses with their sentence and reason (E184 s0)"
     },
     {
+      "id": "ophiolite.fixture/exchange/made-for/table.csv/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/made-for/table.csv",
+      "title": "A synthetic six-row table with one empty cell, sent as made for design.json's exact version (E192 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/made-for/design.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/made-for/design.json",
+      "title": "The synthetic exact version table.csv states it was made for (E192 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/made-for/expected-reads.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/made-for/expected-reads.json",
+      "title": "What each read that lists parents gives for the made-for table, beside and never among its parents (E192 s0)"
+    },
+    {
       "id": "ophiolite.chain-reasons/1",
       "kind": "vocabulary",
       "path": "vocabulary/v1/chain-reasons.json",
       "title": "Chain refusals, the job-step admission sentence, step state words and comparison words, one sentence each, no codes (E178 s0)"
+    },
+    {
+      "id": "ophiolite.criteria-words/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/criteria-words.json",
+      "title": "Criteria, proof and sign-off on a chain step: refusals, criterion and step state words, proof words, what changed since sign-off and the not-yet sentence, one sentence each, no codes (E189 s0)"
+    },
+    {
+      "id": "ophiolite.applies-words/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/applies-words.json",
+      "title": "Kinds of work, what applies to which, and taking a step out of one run: refusals, the causes of does-not-apply, the state word, the counts and the not-yet sentence, one sentence each, no codes (E190 s0)"
+    },
+    {
+      "id": "ophiolite.attachment-reasons/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/attachment-reasons.json",
+      "title": "Why a figure was not attached, served or withdrawn, one sentence each, no codes; the bound named as a person reads it (E191 s0)"
     },
     {
       "id": "ophiolite.reference-reasons/1",
@@ -2890,6 +3009,265 @@
       "title": "Chain runs the schema refuses at their paths, and schema-valid ones the structural rules refuse with their reasons (E178 s0)"
     },
     {
+      "id": "ophiolite.fixture/chains/chain-p.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/chain-p.json",
+      "title": "Pressure study after new velocities: a work step with five criteria signed off by the geoscientist role (E189 s0)",
+      "schema": "ophiolite.chain/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-one-well.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-one-well.json",
+      "title": "The pressure study made from one well and without its chart: a check failed (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-two-versions-one-well.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-two-versions-one-well.json",
+      "title": "Two versions of one well's item count once: a check failed (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-no-parents.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-no-parents.json",
+      "title": "A result with no recorded parents: its parent criteria are missing, never inferred (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-waits.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-waits.json",
+      "title": "Every criterion holds: the step waits for sign-off (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-signed.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-signed.json",
+      "title": "Signed off by the geoscientist, the verdict pinned: done (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-exception.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-exception.json",
+      "title": "An exception on the chart by a member, then the sign-off: done with an exception (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-changed.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-changed.json",
+      "title": "After the sign-off a newer velocities version and a withdrawn chart, shown as changed since sign-off (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-rejected.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-rejected.json",
+      "title": "The geoscientist rejects the attached study: the run stops (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-p-two-results.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-p-two-results.json",
+      "title": "A second result attached: the criteria read the newest, revisions counted across both (E189 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/criteria-cases.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/invalid/criteria-cases.json",
+      "title": "Declarations and runs with criteria the schema refuses at their paths, and schema-valid ones the rules refuse with their reasons (E189 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/chains/p-exception-1.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/criteria/p-exception-1.json",
+      "title": "The pressure step's criteria at revision 1, as the attach wrote them: the rule and the chart not shown yet (E189 s0)",
+      "schema": "ophiolite.step-criteria/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/p-exception-2.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/criteria/p-exception-2.json",
+      "title": "Revision 2: the rule evidence with the team's maximum of 200 arrived and the rule holds (E189 s0)",
+      "schema": "ophiolite.step-criteria/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/p-exception-3.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/criteria/p-exception-3.json",
+      "title": "Revision 3: an exception on the chart by a member, with the reason (E189 s0)",
+      "schema": "ophiolite.step-criteria/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/p-exception-4.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/criteria/p-exception-4.json",
+      "title": "Revision 4: the sign-off by the geoscientist, its verdict pinned (E189 s0)",
+      "schema": "ophiolite.step-criteria/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/chain-k.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/chain-k.json",
+      "title": "Before drilling a well: three kinds of work, a review for exploration only, a chart criterion for exploration only, counted by hand (E190 s0)",
+      "schema": "ophiolite.chain/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/chain-k-b.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/chain-k-b.json",
+      "title": "A branched declaration with no kinds of work: a tool step, a step made from it and a step beside it (E190 s0)",
+      "schema": "ophiolite.chain/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-infill.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-infill.json",
+      "title": "An infill well: the regional review and the chart do not apply, and the sign-off does not wait for the chart (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-exploration.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-exploration.json",
+      "title": "An exploration well with the same results: the regional review is open and the chart is missing (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-taken-out.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-taken-out.json",
+      "title": "The cost estimate taken out of an infill run by a member, with a reason: the approval opens (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-put-back.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-put-back.json",
+      "title": "The cost estimate taken out, then put back by another member: open again (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-condition.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-condition.json",
+      "title": "Tops residuals of 3.2 m: the design review did not apply, beside a step that does not apply to the kind (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-criterion-out.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-criterion-out.json",
+      "title": "The chart taken out of the pressure step, then the sign-off: done with an exception (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-kb-taken-out-both.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-kb-taken-out-both.json",
+      "title": "A step and the step made from it both taken out, the step beside them open (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-review-out.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-review-out.json",
+      "title": "The design review taken out before its condition was read: it does not apply and has no condition (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-waiting-out.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-waiting-out.json",
+      "title": "The cost estimate taken out before it opened, while earlier steps still wait (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/run-k-criterion-exception.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/valid/run-k-criterion-exception.json",
+      "title": "An exception on the offsets and the chart taken out, before the sign-off (E190 s0)",
+      "schema": "ophiolite.chain-run/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/applies-cases.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/invalid/applies-cases.json",
+      "title": "Declarations and runs with kinds of work the schema refuses at their paths, and schema-valid ones the rules refuse with their reasons (E190 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/chains/k-criterion-exception-1.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/criteria/k-criterion-exception-1.json",
+      "title": "The pressure step's criteria at revision 1, as the attach wrote them: one offset well, no chart (E190 s0)",
+      "schema": "ophiolite.step-criteria/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/k-criterion-exception-2.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/criteria/k-criterion-exception-2.json",
+      "title": "Revision 2: an exception on the offsets by a member, with the reason (E190 s0)",
+      "schema": "ophiolite.step-criteria/1"
+    },
+    {
+      "id": "ophiolite.fixture/chains/k-criterion-exception-3.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/criteria/k-criterion-exception-3.json",
+      "title": "Revision 3: the chart taken out by a member, with the reason (E190 s0)",
+      "schema": "ophiolite.step-criteria/1"
+    },
+    {
+      "id": "ophiolite.fixture/rules/evidence-gr-200.json/1",
+      "kind": "fixture",
+      "path": "rules/v1/fixtures/evidence-gr-200.json",
+      "title": "Gamma ray within range run with the team's maximum of 200 on a version whose samples reach 180: passed (E189 s0)",
+      "schema": "ophiolite.rule-evidence/1"
+    },
+    {
+      "id": "ophiolite.fixture/rules/evidence-gr-150.json/1",
+      "kind": "fixture",
+      "path": "rules/v1/fixtures/evidence-gr-150.json",
+      "title": "The same version with a maximum of 150: three rows fail, the first three listed (E189 s0)",
+      "schema": "ophiolite.rule-evidence/1"
+    },
+    {
+      "id": "ophiolite.fixture/frozen/chain-schema-1.0.0.digest.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/frozen/chain-schema-1.0.0.digest.json",
+      "title": "The released chain declaration 1.0.0, as its digest, frozen; never regenerated (E189 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/frozen/chain-run-schema-1.0.0.digest.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/frozen/chain-run-schema-1.0.0.digest.json",
+      "title": "The released chain run 1.0.0, as its digest, frozen; never regenerated (E189 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/frozen/chain-schema-1.1.0.digest.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/frozen/chain-schema-1.1.0.digest.json",
+      "title": "The released chain declaration 1.1.0, as its digest, frozen; never regenerated (E190 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/frozen/chain-run-schema-1.1.0.digest.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/frozen/chain-run-schema-1.1.0.digest.json",
+      "title": "The released chain run 1.1.0, as its digest, frozen; never regenerated (E190 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/frozen/step-criteria-schema-1.0.0.digest.json/1",
+      "kind": "fixture",
+      "path": "chains/v1/fixtures/frozen/step-criteria-schema-1.0.0.digest.json",
+      "title": "The released step criteria 1.0.0, as its digest, frozen; never regenerated (E190 s0)"
+    },
+    {
       "id": "ophiolite.fixture/changes/affected-after-tops-v2.json/1",
       "kind": "fixture",
       "path": "changes/v1/fixtures/valid/affected-after-tops-v2.json",
@@ -2953,6 +3331,13 @@
       "schema": "ophiolite.affected/1"
     },
     {
+      "id": "ophiolite.fixture/changes/affected-stated-tie.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/valid/affected-stated-tie.json",
+      "title": "A stated-only row and a diamond whose witnessed path ties a stated one: only the first is stated (E192 s0)",
+      "schema": "ophiolite.affected/1"
+    },
+    {
       "id": "ophiolite.fixture/changes/affected-cases.json/1",
       "kind": "fixture",
       "path": "changes/v1/fixtures/invalid/affected-cases.json",
@@ -2977,6 +3362,12 @@
       "title": "The released affected 1.1.0 file, as its digest, frozen; never regenerated (E182 s2c)"
     },
     {
+      "id": "ophiolite.fixture/changes/affected-schema-1.2.0.digest.json/1",
+      "kind": "fixture",
+      "path": "changes/v1/fixtures/frozen/affected-schema-1.2.0.digest.json",
+      "title": "The released affected 1.2.0 file, as its digest, frozen; never regenerated (E192 s0)"
+    },
+    {
       "id": "ophiolite.mapping/application-curve-to-well-log-curve/1",
       "kind": "mapping",
       "path": "mappings/v1/application-curve-to-well-log-curve.json",
@@ -2994,6 +3385,166 @@
       "path": "scientific/v1/fixtures/well-log-curve.json",
       "title": "A synthetic well log curve with its header entries as received (E183 s0)",
       "schema": "ophiolite.well-log-curve/1"
+    },
+    {
+      "id": "ophiolite.fixture/attachments/current.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/attachments/valid/current.json",
+      "title": "A person's synthetic 40 kB chart kept with version 2 of a residuals item, its sender reported (E191 s0)",
+      "schema": "ophiolite.attachment/1"
+    },
+    {
+      "id": "ophiolite.fixture/attachments/withdrawn.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/attachments/valid/withdrawn.json",
+      "title": "A two-page synthetic report on the same version, withdrawn by a person with a reason; the record stays (E191 s0)",
+      "schema": "ophiolite.attachment/1"
+    },
+    {
+      "id": "ophiolite.fixture/attachments/by-assistant.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/attachments/valid/by-assistant.json",
+      "title": "A JPEG chart an assistant added to version 3 under an approved job, with the same label (E191 s0)",
+      "schema": "ophiolite.attachment/1"
+    },
+    {
+      "id": "ophiolite.fixture/attachments/list.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/attachments/valid/list.json",
+      "title": "Version 2's figures, newest first: the withdrawn report, then the chart (E191 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/attachments/cases.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/attachments/invalid/cases.json",
+      "title": "Attachment records and request bodies the schema refuses at their paths, and those only the model refuses (Unicode normal form C) (E191 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/attachments/expected.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/attachments/expected.json",
+      "title": "The seven synthetic figure files' lengths and SHA-256 digests counted by hand, and the answer each gets (E191 s0)"
+    },
+    {
+      "id": "ophiolite.table-kind-words/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/table-kind-words.json",
+      "title": "A team's own kind of table: why a declaration or a table was refused, the label a person reads for each quantity class, and the not-yet sentence, one sentence each, no codes (E203 s0)"
+    },
+    {
+      "id": "ophiolite.data-label-words/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/data-label-words.json",
+      "title": "What a volume's samples are and whether a trajectory is planned or drilled: why a statement was refused, the word a person reads for each value, and the not-yet sentence, one sentence each, no codes (E205 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/table-kinds/casing-design-1.json/1",
+      "kind": "fixture",
+      "path": "kinds/v1/fixtures/valid/casing-design-1.json",
+      "title": "Casing strings, version 1: five columns, three of them needed, depths in metres, the string as the key (E203 s0)",
+      "schema": "ophiolite.table-kind/1"
+    },
+    {
+      "id": "ophiolite.fixture/table-kinds/casing-design-2.json/1",
+      "kind": "fixture",
+      "path": "kinds/v1/fixtures/valid/casing-design-2.json",
+      "title": "Casing strings, version 2: the same with a needed burst pressure in bar (E203 s0)",
+      "schema": "ophiolite.table-kind/1"
+    },
+    {
+      "id": "ophiolite.fixture/table-kinds/string-tally-1.json/1",
+      "kind": "fixture",
+      "path": "kinds/v1/fixtures/valid/string-tally-1.json",
+      "title": "Strings per well: a key of two columns and a yes-or-no column (E203 s0)",
+      "schema": "ophiolite.table-kind/1"
+    },
+    {
+      "id": "ophiolite.fixture/table-kinds/digests.json/1",
+      "kind": "fixture",
+      "path": "kinds/v1/fixtures/digests.json",
+      "title": "The digest of each fixture declaration, computed once over its canonical bytes and written by hand (E203 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/table-kinds/tables.json/1",
+      "kind": "fixture",
+      "path": "kinds/v1/fixtures/tables.json",
+      "title": "Synthetic kept tables (columns, declarations, rows): complete, without a needed column, in feet, in bar, and one per reason (E203 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/table-kinds/expected.json/1",
+      "kind": "fixture",
+      "path": "kinds/v1/fixtures/expected.json",
+      "title": "What each synthetic table lacks to be a table of each kind, written by hand (E203 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/table-kinds/labels.json/1",
+      "kind": "fixture",
+      "path": "kinds/v1/fixtures/labels.json",
+      "title": "A quantity as a person writes it (pressure) and as it is stored (energy per volume), and the sentence a refusal reads (E203 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/table-kinds/declaration-cases.json/1",
+      "kind": "fixture",
+      "path": "kinds/v1/fixtures/invalid/declaration-cases.json",
+      "title": "Declarations the schema refuses at their paths, and schema-valid ones that break a rule of a kind (E203 s0)"
+    },
+    {
+      "id": "ophiolite.sample-index-words/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/sample-index-words.json",
+      "title": "Why a sample of the sample index is not offered, one sentence per code with the sample's name, no codes, field names or paths (E211 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/samples/index-four.json/1",
+      "kind": "fixture",
+      "path": "samples/v1/fixtures/valid/index-four.json",
+      "title": "Four synthetic sample entries, one per approved sample id, with synthetic keys, sources, credits and contents (E211 s0)",
+      "schema": "ophiolite.sample-index/1"
+    },
+    {
+      "id": "ophiolite.fixture/samples/index-capital-file-name.json/1",
+      "kind": "fixture",
+      "path": "samples/v1/fixtures/valid/index-capital-file-name.json",
+      "title": "One synthetic sample entry whose bundle key's file name keeps its capitals (E211 s0, supervisor ruling 26 Nov 2026)",
+      "schema": "ophiolite.sample-index/1"
+    },
+    {
+      "id": "ophiolite.fixture/samples/synthetic-a.manifest.json/1",
+      "kind": "fixture",
+      "path": "samples/v1/fixtures/manifests/synthetic-a.manifest.json",
+      "title": "Synthetic bundle manifest A: a log and tops, a well and a wellbore (E211 s0)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/samples/synthetic-b.manifest.json/1",
+      "kind": "fixture",
+      "path": "samples/v1/fixtures/manifests/synthetic-b.manifest.json",
+      "title": "Synthetic bundle manifest B: one path, no entities (E211 s0)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/samples/digests.json/1",
+      "kind": "fixture",
+      "path": "samples/v1/fixtures/digests.json",
+      "title": "Each synthetic manifest's SHA-256 by sha256sum, and the manifest each fixture bundle key stands for (E211 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/samples/cases.json/1",
+      "kind": "fixture",
+      "path": "samples/v1/fixtures/invalid/cases.json",
+      "title": "Sample index changes the schema refuses, each at its one path (E211 s0)"
+    },
+    {
+      "id": "ophiolite.sample-source-rules/1",
+      "kind": "policy",
+      "path": "samples/v1/source-rules.json",
+      "title": "Which sources may make a sample: the approved sample ids, the refused samples and OSD records, the hosts an input of a named record may be fetched from, and the accepted SPDX identifiers; anything else fails closed (E211 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/samples/licence-cases.json/1",
+      "kind": "fixture",
+      "path": "samples/v1/fixtures/invalid/licence-cases.json",
+      "title": "One change each to a well-formed sample entry and exactly the licence, credit and policy problems it gives (E211 s0)"
     }
   ]
 }

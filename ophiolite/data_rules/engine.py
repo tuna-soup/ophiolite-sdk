@@ -24,6 +24,7 @@ RULE_ID = re.compile(r'^[a-z][a-z0-9]*(-[a-z0-9]+)*/[1-9][0-9]*$')
 RULE_PATH = re.compile(r'^rules/[a-z][a-z0-9]*(-[a-z0-9]+)*\.json$')
 HEX = re.compile(r'^[0-9a-f]{64}$')
 NUMERIC = ('quantity', 'number', 'integer')
+COLUMNS = ('column-units', 'columns', 'column')  # E192 s0 (D6): named by the run, never defaulted
 RESERVED = ('count', 'first')
 NOT_A_RULE_KIND = ('well-residual/1',)  # read with ophiolite.residuals, never by a data rule
 CONTEXT_ONLY = ('offline', 'no-context')  # not-applicable reasons only a project-context rule may give
@@ -69,6 +70,9 @@ SENTENCES = {
     'failed-without-example': 'A failed rule shows at least one example.',
     'examples-above-count': 'There are more examples than failures.',
     'rows-not-increasing': 'Examples are in the file\'s order, each on a later row.',
+    'columns-out-of-order': 'Examples on one row are in the order the rule was given its columns.',
+    'row-missing': 'Only an example for a whole column has no row.',
+    'column-unknown': 'An example names a column the rule was not run on.',
     'not-applicable-with-count': 'A rule that did not apply counts nothing.',
     'not-applicable-with-examples': 'A rule that did not apply has no examples.',
     'reason-missing': 'A rule that did not apply says why.',
@@ -160,6 +164,12 @@ def rules_for(kind, rules):
     return sorted((r for r in rules if kind in r['kinds']), key=lambda r: r['id'])
 
 
+def default_rules(kind, rules):
+    """E192 s0 (D6): the rules a default run applies to `kind`, in id order. A rule with a null default is
+    parameterised-only: it runs only when a run names its parameters, so a default-run block never names it."""
+    return [r for r in rules_for(kind, rules) if all(p['default'] is not None for p in r['parameters'])]
+
+
 # --- consistent: a rule document --------------------------------------------------------------------------------------
 
 def template_refusal(template, names, examples, field='words.template'):
@@ -193,7 +203,8 @@ def _parameter_refusal(p, at, units):
         if p['unit'] not in units: return refusal('consistent', 'unit-unknown', at + '.unit')
     elif p['unit'] is not None: return refusal('consistent', 'unit-not-quantity', at + '.unit')
     d = p['default']
-    if numeric and not _is_number(d) or kind == 'choice' and not isinstance(d, str) or kind == 'boolean' and not isinstance(d, bool):
+    if numeric and not _is_number(d) or kind == 'choice' and not isinstance(d, str) or kind == 'boolean' and not isinstance(d, bool) \
+            or kind in COLUMNS and d is not None:
         return refusal('consistent', 'default-type', at + '.default')
     if kind == 'integer' and not float(d).is_integer(): return refusal('consistent', 'integer-default-fractional', at + '.default')
     low, high = p['minimum'], p['maximum']
@@ -245,11 +256,55 @@ def _value_refusal(p, value, at):
     elif kind == 'choice':
         if not isinstance(value, str): return refusal('consistent', 'parameter-type', at)
         if value not in p['choices']: return refusal('consistent', 'parameter-out-of-bounds', at)
+    elif kind == 'columns':
+        if not _names(value): return refusal('consistent', 'parameter-type', at)
+    elif kind == 'column-units':
+        if not isinstance(value, list) or not all(isinstance(c, dict) and set(c) == {'column', 'unit'}
+                                                  and (c['unit'] is None or _name(c['unit'])) for c in value) \
+                or not _names([c['column'] for c in value]):
+            return refusal('consistent', 'parameter-type', at)
+    elif kind == 'column':
+        if value is not None and not _name(value): return refusal('consistent', 'parameter-type', at)
     elif not isinstance(value, bool): return refusal('consistent', 'parameter-type', at)
     return None
 
 
-def _state_refusal(result, at):
+def _name(value):
+    return isinstance(value, str) and value != ''
+
+
+def _names(value):
+    """E192 s0 (D6): 1 to 32 column names, each once."""
+    return isinstance(value, list) and 1 <= len(value) <= 32 and all(_name(v) for v in value) and len(set(value)) == len(value)
+
+
+def _columns(rule, parameters):
+    """The columns a result was run on, in the order the rule was given them (its `columns` and `column-units` values)."""
+    out = []
+    for p in rule['parameters']:
+        value = parameters.get(p['name'])
+        if p['type'] == 'columns' and isinstance(value, list): out += [c for c in value if isinstance(c, str)]
+        if p['type'] == 'column-units' and isinstance(value, list): out += [c.get('column') for c in value if isinstance(c, dict)]
+    return out
+
+
+def _order_refusal(examples, columns, at):
+    """Examples in the file's order, each on a later row. E192 s0 (D6): a column-level example (row null) names its
+    column and comes before any row; examples on one row, or for whole columns, follow the order of `columns`."""
+    keys = []
+    for j, e in enumerate(examples):
+        column = e.get('column')
+        if column is not None and column not in columns: return refusal('consistent', 'column-unknown', '%s.examples[%d].column' % (at, j))
+        if e['row'] is None and column is None: return refusal('consistent', 'row-missing', '%s.examples[%d].row' % (at, j))
+        keys.append((0 if e['row'] is None else e['row'], None if column is None else columns.index(column)))
+    for (row, column), (later_row, later_column) in zip(keys, keys[1:]):
+        if later_row < row or later_row == row and (column is None or later_column is None):
+            return refusal('consistent', 'rows-not-increasing', at + '.examples')
+        if later_row == row and later_column <= column: return refusal('consistent', 'columns-out-of-order', at + '.examples')
+    return None
+
+
+def _state_refusal(result, at, columns=()):
     state, count, examples, reason = result['state'], result['count'], result['examples'], result['reason']
     if state == 'passed':
         if count != 0: return refusal('consistent', 'passed-with-count', at + '.count')
@@ -259,8 +314,8 @@ def _state_refusal(result, at):
         if count is None or count < 1: return refusal('consistent', 'failed-without-count', at + '.count')
         if not examples: return refusal('consistent', 'failed-without-example', at + '.examples')
         if len(examples) > min(5, count): return refusal('consistent', 'examples-above-count', at + '.examples')
-        rows = [e['row'] for e in examples]
-        if any(b <= a for a, b in zip(rows, rows[1:])): return refusal('consistent', 'rows-not-increasing', at + '.examples')
+        found = _order_refusal(examples, columns, at)
+        if found: return found
         if reason is not None: return refusal('consistent', 'reason-on-result', at + '.reason')
     else:
         if count is not None: return refusal('consistent', 'not-applicable-with-count', at + '.count')
@@ -292,20 +347,21 @@ def _context_refusal(rule, result, at):
 def consistent_results(block, rules, profiles):
     """What a schema-valid block must also be against the rules of the snapshot it names: one result per rule that
     applies to its kind, in rule order, each state with its count, examples and reason, the parameters as run within
-    the rule's, and context exactly where a project-context rule read some."""
+    the rule's, and context exactly where a project-context rule read some. E192 s0 (D6): a parameterised-only rule
+    may have a result but is never missing (`default_rules`)."""
     if block['kind'] not in profiles: return refusal('consistent', 'kind-unknown', 'kind')
     expected = [r['id'] for r in rules_for(block['kind'], rules)]
     ids = [r['rule'] for r in block['results']]
     for i, rule in enumerate(ids):
         if rule in ids[:i]: return refusal('consistent', 'duplicate-rule', 'results[%d].rule' % i)
         if rule not in expected: return refusal('consistent', 'unexpected-rule', 'results[%d].rule' % i)
-    for rule in expected:
-        if rule not in ids: return refusal('consistent', 'missing-rule', 'results')
+    for rule in default_rules(block['kind'], rules):
+        if rule['id'] not in ids: return refusal('consistent', 'missing-rule', 'results')
     if ids != sorted(ids): return refusal('consistent', 'out-of-order', 'results')
     by_id = {r['id']: r for r in rules}
     for i, result in enumerate(block['results']):
         at, rule = 'results[%d]' % i, by_id[result['rule']]
-        found = _state_refusal(result, at)
+        found = _state_refusal(result, at, _columns(rule, result['parameters']))
         if found: return found
         names = [p['name'] for p in rule['parameters']]
         for name in names:
@@ -408,13 +464,13 @@ def _result(rule, parameters, found, context=None):
 
 
 def context_results(rules, kind, data, *, quantities, context):
-    """E144 s1b: the results of the project-context rules among `rules_for(kind, rules)`, in id order. `context` None is
+    """E144 s1b: the results of the project-context rules among `default_rules(kind, rules)`, in id order. `context` None is
     an offline run (`offline`); `{'path': None}` is a project with no usable path (`no-context`); otherwise
     `{'version': {asset_id, revision, kind}, 'path': {depth_unit, datum, first, last}}`, named by a passed or failed
     result only (a `no-context` from the evaluator keeps context null)."""
     from . import tops
     results = []
-    for rule in rules_for(kind, rules):
+    for rule in default_rules(kind, rules):
         if rule['class'] != 'project-context': continue
         parameters = {p['name']: p['default'] for p in rule['parameters']}
         if context is None: found = 'offline'
@@ -426,14 +482,15 @@ def context_results(rules, kind, data, *, quantities, context):
 
 def run(rules, kind, data, *, registry_version, quantities, context=None):
     """The block for one file: the rules of `rules` (one snapshot's documents) whose kinds include `kind`, in id order,
-    each run with its defaults over `data`, the neutral input (strategy §2). `quantities` is the parsed
+    each run with its defaults over `data`, the neutral input (strategy §2); a parameterised-only rule is never run
+    here (E192 s0, `default_rules`). `quantities` is the parsed
     `ophiolite.quantities/1` document. An evaluator answers Failures, or the reason the rule does not apply. A
     project-context rule runs over `context` (see `context_results`; None offline)."""
     from . import logs, spatial, tops, trajectories
     evaluators = dict(logs.EVALUATORS, **spatial.EVALUATORS, **tops.EVALUATORS, **trajectories.EVALUATORS)
     contextual = {r['rule']: r for r in context_results(rules, kind, data, quantities=quantities, context=context)}
     results = []
-    for rule in rules_for(kind, rules):
+    for rule in default_rules(kind, rules):
         if rule['id'] in contextual:
             results.append(contextual[rule['id']])
             continue

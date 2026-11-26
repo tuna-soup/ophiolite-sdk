@@ -1,0 +1,396 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/kinds/v1/table-kind-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.table-kind/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "TableKindColumn": {
+      "additionalProperties": false,
+      "description": "One column a table of the kind has: its type, whether it must be present (and read), whether a cell may be\nempty, and for a number its quantity class with the unit the team writes (both or neither; never converted).",
+      "else": {
+        "properties": {
+          "unit": {
+            "type": "null"
+          }
+        }
+      },
+      "if": {
+        "required": [
+          "quantity"
+        ]
+      },
+      "properties": {
+        "name": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "text",
+            "number",
+            "whole-number",
+            "date",
+            "yes-no"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "required": {
+          "description": "The column must be present and read",
+          "title": "Required",
+          "type": "boolean"
+        },
+        "empty": {
+          "description": "A cell may be empty: null, blank, or the table's missing marker",
+          "title": "Empty",
+          "type": "boolean"
+        },
+        "quantity": {
+          "description": "A quantity class name of the unit registry",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Quantity",
+          "type": "string"
+        },
+        "unit": {
+          "description": "A unit symbol of that class, as the team writes it",
+          "maxLength": 32,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "required",
+        "empty"
+      ],
+      "then": {
+        "required": [
+          "unit"
+        ]
+      },
+      "title": "TableKindColumn",
+      "type": "object"
+    },
+    "TableKindDeclaration": {
+      "additionalProperties": false,
+      "description": "What a project's members mean by one word for a table, as declared (one version).",
+      "properties": {
+        "word": {
+          "description": "The project's word for the kind; what a publication names",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$",
+          "title": "Word",
+          "type": "string"
+        },
+        "label": {
+          "description": "What a person reads; never matched",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "row": {
+          "description": "What one row is",
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Row",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/TableKindColumn"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Columns",
+          "type": "array"
+        },
+        "key": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Key",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "made_for": {
+          "description": "The kinds of item a table of this kind is made for (E192)",
+          "items": {
+            "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Made For",
+          "type": "array"
+        },
+        "standard": {
+          "description": "The standard kind it corresponds to, as a name only",
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Standard",
+          "type": "string"
+        }
+      },
+      "required": [
+        "word",
+        "label",
+        "row",
+        "columns",
+        "key"
+      ],
+      "title": "TableKindDeclaration",
+      "type": "object"
+    },
+    "TableKindRef": {
+      "additionalProperties": false,
+      "description": "What a table published as a kind records (slice 1): which kind, which version, and its digest.",
+      "properties": {
+        "id": {
+          "description": "Minted by the server at random; the same for every version of a kind",
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "word": {
+          "description": "The project's word for the kind; what a publication names",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$",
+          "title": "Word",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "word",
+        "version",
+        "digest"
+      ],
+      "title": "TableKindRef",
+      "type": "object"
+    },
+    "TableKindVersion": {
+      "additionalProperties": false,
+      "description": "One immutable version of a project's kind of table, as served (slice 1).",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.table-kind/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "id": {
+          "description": "Minted by the server at random; the same for every version of a kind",
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "digest": {
+          "description": "SHA-256 of the declaration's canonical JSON: sorted keys, no spaces, UTF-8",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "declaration": {
+          "$ref": "#/$defs/TableKindDeclaration"
+        },
+        "declared_by": {
+          "description": "The person who declared this version; never an assistant",
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Declared By",
+          "type": "string"
+        },
+        "declared_at": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "title": "Declared At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema",
+        "id",
+        "version",
+        "digest",
+        "declaration",
+        "declared_by",
+        "declared_at"
+      ],
+      "title": "TableKindVersion",
+      "type": "object"
+    },
+    "TableKindList": {
+      "additionalProperties": false,
+      "description": "A project's kinds of table, the current version of each, in word order.",
+      "properties": {
+        "kinds": {
+          "items": {
+            "$ref": "#/$defs/TableKindVersion"
+          },
+          "maxItems": 200,
+          "title": "Kinds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kinds"
+      ],
+      "title": "TableKindList",
+      "type": "object"
+    },
+    "TableKindDeclareRequest": {
+      "additionalProperties": false,
+      "description": "`table-kinds/declare`: a new kind, or a new version of one (`expected_version`, the version it replaces).",
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "command_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "declaration": {
+          "$ref": "#/$defs/TableKindDeclaration"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id",
+        "command_id",
+        "declaration"
+      ],
+      "title": "TableKindDeclareRequest",
+      "type": "object"
+    },
+    "TableKindListRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "title": "TableKindListRequest",
+      "type": "object"
+    },
+    "TableKindShowRequest": {
+      "additionalProperties": false,
+      "description": "`table-kinds/show`: a kind by its word, at its current version or at the version named.",
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "word": {
+          "description": "The project's word for the kind; what a publication names",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$",
+          "title": "Word",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project_id",
+        "word"
+      ],
+      "title": "TableKindShowRequest",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One immutable version of a project's kind of table, as served (slice 1).",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.table-kind/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "id": {
+      "description": "Minted by the server at random; the same for every version of a kind",
+      "pattern": "^[0-9a-f]{32}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "version": {
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "digest": {
+      "description": "SHA-256 of the declaration's canonical JSON: sorted keys, no spaces, UTF-8",
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Digest",
+      "type": "string"
+    },
+    "declaration": {
+      "$ref": "#/$defs/TableKindDeclaration"
+    },
+    "declared_by": {
+      "description": "The person who declared this version; never an assistant",
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Declared By",
+      "type": "string"
+    },
+    "declared_at": {
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+      "title": "Declared At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "id",
+    "version",
+    "digest",
+    "declaration",
+    "declared_by",
+    "declared_at"
+  ],
+  "title": "TableKindVersion",
+  "type": "object"
+}

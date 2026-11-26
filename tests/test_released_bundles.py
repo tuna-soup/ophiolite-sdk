@@ -29,6 +29,7 @@ KEPT = 'b8fbf98bcd8695cec9128f1943bc365379bd5e3f5a00bf162abeaf344f4c2da4'
 # E182 s2b: the 1.18 / 2.18 descriptor and manifest digests are pinned in a file beside the bundles (no new literal in
 # code); their other files are the LAS and tops files above, byte for byte.
 SENDER_DIGESTS = json.loads((RELEASED_DIR / 'sender-digests.json').read_text())
+STATED_DIGESTS = json.loads((RELEASED_DIR / 'stated-digests.json').read_text())  # E192 s1: 1.19 / 2.19, as for 1.18 / 2.18
 LAS_DATA = {name: digest for name, digest in LAS.items() if 'descriptor' not in name}
 TOPS_DATA = {name: digest for name, digest in TOPS.items() if 'descriptor' not in name}
 
@@ -104,6 +105,9 @@ RELEASED_BUNDLES = {
              '2.17.0', 1, 'well-table', 'wells table', (['S-1', 'S-2'], ['id', 'name', 'x', 'y'])),
     '1.18': ('ophiolite/bundle.py', {**LAS_DATA, **SENDER_DIGESTS['1.18']}, '1.18.0', 1, 'well-log', 'sender', ('reported', 'qgis-plugin', 'qgis')),
     '2.18': ('ophiolite/bundle.py', {**TOPS_DATA, **SENDER_DIGESTS['2.18']}, '2.18.0', 1, 'well-tops', 'sender', ('not reported', None, None)),
+    '1.19': ('ophiolite/bundle.py', {**LAS_DATA, **STATED_DIGESTS['1.19']}, '1.19.0', 1, 'well-log', 'stated parents', [('synthetic-design', 'r-design-1')]),
+    '2.19': ('ophiolite/bundle.py', {**TOPS_DATA, **STATED_DIGESTS['2.19']}, '2.19.0', 1, 'well-tops', 'stated parents',
+             [('synthetic-design', 'r-design-1'), ('synthetic-model', 'r-model-2')]),
 }
 
 
@@ -128,6 +132,7 @@ FEATURES = {  # feature key -> the one read of the opened bundle that yields its
     'packaged sticks': lambda b: (_members(b), b.assets[0].data.sticks[0]),
     'wells table': lambda b: ([w['well_id'] for w in b.assets[0].data.wells], [c['name'] for c in b.assets[0].data.source_schema]),
     'sender': lambda b: (b.assets[0].sender['state'], (b.assets[0].sender['client'] or {}).get('product'), (b.assets[0].sender['host'] or {}).get('name')),
+    'stated parents': lambda b: [(p['key'], p['revision']) for p in b.assets[0].stated_parents],
 }
 
 
@@ -160,11 +165,11 @@ def reachable_versions():
     assert "typed_bundle or any(getattr(read, 'provenance', None) is not None" in source
     assert "minor = max([1 if observations else 0, 4 if graph else 0]" in source
     two = ({0, 1, 4} | set(bundle.NEWER_TYPES.values()) | set(bundle.NEWER_PROFILES.values())
-           | {bundle.PACKAGE_MINOR, bundle.PROVENANCE_MINOR, bundle.SOURCE_RECORD_MINOR, bundle.SENDER_MINOR})
-    one = {0, 1, bundle.SOURCE_RECORD_MINOR, bundle.SENDER_MINOR}  # no typed asset, no graph, no kept original, no package (typed only)
+           | {bundle.PACKAGE_MINOR, bundle.PROVENANCE_MINOR, bundle.SOURCE_RECORD_MINOR, bundle.SENDER_MINOR, bundle.STATED_MINOR})
+    one = {0, 1, bundle.SOURCE_RECORD_MINOR, bundle.SENDER_MINOR, bundle.STATED_MINOR}  # no typed asset, no graph, no kept original, no package (typed only)
     return {'1.%d' % m for m in one} | {'2.%d' % m for m in two}
 
 
 def test_the_bundle_list_is_every_version_the_writer_emits():
     assert reachable_versions() == set(RELEASED_BUNDLES)
-    assert set(RELEASED_BUNDLES) == {'1.0', '1.1', '1.10', '1.18'} | {'2.%d' % m for m in range(12)} | {'2.17', '2.18'}  # R2: 15 versions; E162 s2a: 2.17; E182 s2b: 1.18, 2.18
+    assert set(RELEASED_BUNDLES) == {'1.0', '1.1', '1.10', '1.18', '1.19'} | {'2.%d' % m for m in range(12)} | {'2.17', '2.18', '2.19'}  # R2: 15 versions; E162 s2a: 2.17; E182 s2b: 1.18, 2.18; E192 s1: 1.19, 2.19

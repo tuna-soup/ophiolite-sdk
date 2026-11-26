@@ -14,8 +14,8 @@ dependencies = ["anyio>=4.2,<5", "httpx>=0.28,<1", "pydantic>=2.11,<3"]
 [project.urls]  # E164: Source and Changelog are written by tools/render-sdk-address.py from destinations.json (sdk_git.live)
 Homepage = "https://ophiolite.dev/"
 Documentation = "https://ophiolite.dev/docs/"
-Source = "https://github.com/tuna-soup/ophiolite-sdk"
-Changelog = "https://github.com/tuna-soup/ophiolite-sdk/blob/main/CHANGELOG.md"
+Source = "https://github.com/ophiolite-labs/ophiolite-sdk"
+Changelog = "https://github.com/ophiolite-labs/ophiolite-sdk/blob/main/CHANGELOG.md"
 
 [project.scripts]
 ophiolite = "ophiolite.cli:entrypoint"
@@ -44,7 +44,7 @@ version = {attr = "ophiolite._version.__version__"}
 include = ["ophiolite*"]
 
 [tool.setuptools.package-data]
-ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md", "templates/*", "templates/**/*", "reference/*", "reference/**/*", "procedure_templates/*", "procedure_templates/**/*", "schemas/*"]  # E31: ophiolite init copies the packaged templates; E119b: the reference procedures
+ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md", "templates/*", "templates/**/*", "reference/*", "reference/**/*", "procedure_templates/*", "procedure_templates/**/*", "schemas/*", "table_kind_units.json"]  # E203 s1: the offline check's unit table; E31: ophiolite init copies the packaged templates; E119b: the reference procedures
 
 [tool.setuptools.exclude-package-data]
 ophiolite = ["templates/*/node_modules/**/*", "templates/*/node_modules/*", "templates/*/dist/**/*", "templates/**/__pycache__/*", "reference/**/__pycache__/*"]

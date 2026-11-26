@@ -1,0 +1,33 @@
+{
+  "schema": "ophiolite.attachment/1",
+  "attachment_id": "9b8a7c6d5e4f40312a1b0c9d8e7f6a5b",
+  "project_id": "p-figures",
+  "version": {
+    "asset_id": "tops-residuals",
+    "revision": "a3f390d88e4c41f2747bfa2f1b5f87db2b7e1d2fbc1f1c3a8f5c0c6e0ad0b7e9"
+  },
+  "label": "Residuals by well",
+  "media_type": "image/jpeg",
+  "bytes": 3179,
+  "sha256": "443f54e682cc17da477672147e714cfece4f19b311bdff60bb7efbdcefde67ff",
+  "file_name": null,
+  "added_by": {
+    "person": "a.person",
+    "agent": "assistant-1",
+    "job": "job-0042"
+  },
+  "sender": {
+    "schema": "ophiolite.sender/1",
+    "state": "reported",
+    "client": {
+      "product": "an-assistant",
+      "version": "2.1"
+    },
+    "host": null,
+    "transport": "mcp",
+    "accepted_as": null
+  },
+  "added_at": "2026-11-23T11:00:00Z",
+  "state": "current",
+  "withdrawal": null
+}

@@ -1,0 +1,19 @@
+{
+ "schema": "ophiolite.chain/1",
+ "label": "Pressure study after new velocities",
+ "trigger": {"on": "version", "kind": "las2/1", "selection": null},
+ "steps": [
+  {"key": "velocities", "label": "Velocities", "kind": "tool", "follows": [],
+   "tool": {"procedure": "velocity-model", "outcome": {"id": "outcome-velocities", "version": 1}, "made_from": []}},
+  {"key": "pressure", "label": "Pressure study", "kind": "work", "follows": ["velocities"],
+   "work": {"kind": "las2/1", "made_from": ["velocities"]},
+   "done": {"criteria": [
+     {"key": "wells", "label": "Two wells of pressure points", "proof": {"kind": "made-from", "item_kind": "las2/1", "at_least": 2, "per": "well", "selection": null, "stated": "ignore"}},
+     {"key": "inputs-current", "label": "Made from the current velocities", "proof": {"kind": "current-input", "step": "velocities", "stated": "ignore"}},
+     {"key": "gr", "label": "Gamma ray within range", "proof": {"kind": "rule", "rule": "gr-range/1", "parameters": {"maximum": 200}}},
+     {"key": "check", "label": "Pressure check accepted", "proof": {"kind": "outcome", "outcome": {"id": "pp-check", "version": 1}}},
+     {"key": "chart", "label": "Chart attached", "proof": {"kind": "attachment", "label": "chart"}}],
+    "sign_off": {"role": "geoscientist"}}}
+ ],
+ "roles": [{"key": "geoscientist", "label": "Geoscientist", "members": ["ana"]}]
+}

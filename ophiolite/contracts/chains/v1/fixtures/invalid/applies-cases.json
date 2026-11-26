@@ -1,0 +1,63 @@
+{
+ "description": "E190 s0 (strategy §7 c, d, a2): declarations and runs with kinds of work, each changed from a valid K fixture by one patch. A schema case is refused by the published schema at `at` with the keyword `keyword`, and by the model; a semantic case is schema-valid and gives exactly its reasons from chains.chain_problems or chains.run_problems.",
+ "base": "valid/chain-k.json",
+ "cases": [
+  {"name": "nine-job-kinds", "oracle": "schema", "at": "/job_kinds", "keyword": "maxItems", "patch": [{"op": "fill", "path": "/job_kinds", "count": 9}]},
+  {"name": "no-job-kinds", "oracle": "schema", "at": "/job_kinds", "keyword": "minItems", "patch": [{"op": "replace", "path": "/job_kinds", "value": []}]},
+  {"name": "applies-empty", "oracle": "schema", "at": "/steps/2/applies", "keyword": "minItems", "patch": [{"op": "replace", "path": "/steps/2/applies", "value": []}]},
+  {"name": "applies-nine", "oracle": "schema", "at": "/steps/2/applies", "keyword": "maxItems", "patch": [{"op": "replace", "path": "/steps/2/applies", "value": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9"]}]},
+  {"name": "applies-twice", "oracle": "schema", "at": "/steps/2/applies", "keyword": "uniqueItems", "patch": [{"op": "replace", "path": "/steps/2/applies", "value": ["exploration", "exploration"]}]},
+  {"name": "job-kind-key-capital", "oracle": "schema", "at": "/job_kinds/0/key", "keyword": "pattern", "patch": [{"op": "replace", "path": "/job_kinds/0/key", "value": "Exploration"}]},
+  {"name": "job-kind-label-empty", "oracle": "schema", "at": "/job_kinds/0/label", "keyword": "minLength", "patch": [{"op": "replace", "path": "/job_kinds/0/label", "value": ""}]},
+  {"name": "not-applying-cause-other", "oracle": "schema", "base": "valid/run-k-infill.json", "at": "/steps/2/not_applying/cause", "keyword": "const", "patch": [{"op": "replace", "path": "/steps/2/not_applying", "value": {"cause": "not-needed"}}]},
+  {"name": "taken-out-reason-501", "oracle": "schema", "base": "valid/run-k-taken-out.json", "at": "/steps/6/acts/0/reason", "keyword": "maxLength", "patch": [{"op": "replace", "path": "/steps/6/acts/0/reason", "value": "The partner pays for this well and keeps its own estimate, so no estimate is attached here. The partner pays for this well and keeps its own estimate, so no estimate is attached here. The partner pays for this well and keeps its own estimate, so no estimate is attached here. The partner pays for this well and keeps its own estimate, so no estimate is attached here. The partner pays for this well and keeps its own estimate, so no estimate is attached here. The partner keeps its own estimate there."}]},
+  {"name": "put-back-without-reason", "oracle": "schema", "base": "valid/run-k-put-back.json", "at": "/steps/6/acts/1", "keyword": "required", "patch": [{"op": "remove", "path": "/steps/6/acts/1/reason"}]},
+
+  {"name": "duplicate-job-kind", "oracle": "problems", "reasons": ["duplicate-job-kind"], "patch": [{"op": "replace", "path": "/job_kinds/1/key", "value": "exploration"}]},
+  {"name": "applies-unknown-key", "oracle": "problems", "reasons": ["applies-unknown-kind"], "patch": [{"op": "replace", "path": "/steps/3/done/criteria/1/applies", "value": ["drilling"]}]},
+  {"name": "applies-without-job-kinds", "oracle": "problems", "reasons": ["applies-unknown-kind"], "patch": [{"op": "remove", "path": "/job_kinds"}]},
+  {"name": "applies-not-sorted", "oracle": "problems", "reasons": ["not-sorted"], "patch": [{"op": "replace", "path": "/steps/3/done/criteria/1/applies", "value": ["infill", "exploration"]}]},
+  {"name": "map-wider-than-regional", "oracle": "problems", "reasons": ["applies-wider-than-step"], "patch": [{"op": "add", "path": "/steps/2/done/criteria/0/applies", "value": ["appraisal"]}]},
+  {"name": "k-b-prime", "oracle": "problems", "base": "valid/chain-k-b.json", "reasons": ["applies-data-successor"], "patch": [
+   {"op": "add", "path": "/job_kinds", "value": [{"key": "exploration", "label": "Exploration well"}, {"key": "appraisal", "label": "Appraisal well"}, {"key": "infill", "label": "Infill well"}]},
+   {"op": "add", "path": "/steps/0/applies", "value": ["exploration"]}]},
+  {"name": "review-reads-limited-tops", "oracle": "problems", "reasons": ["applies-reads-limited"], "patch": [{"op": "add", "path": "/steps/0/applies", "value": ["exploration"]}]},
+  {"name": "inputs-reads-limited-pressure", "oracle": "problems", "reasons": ["applies-reads-limited"], "patch": [
+   {"op": "add", "path": "/steps/3/applies", "value": ["infill"]}, {"op": "remove", "path": "/steps/3/done/criteria/1/applies"},
+   {"op": "replace", "path": "/steps/5/work/made_from", "value": []}]},
+
+  {"name": "run-without-job-kind", "oracle": "problems", "base": "valid/run-k-infill.json", "reasons": ["job-kind-mismatch"], "patch": [{"op": "remove", "path": "/job_kind"}]},
+  {"name": "run-job-kind-drilling", "oracle": "problems", "base": "valid/run-k-infill.json", "reasons": ["job-kind-mismatch"], "patch": [{"op": "replace", "path": "/job_kind", "value": "drilling"}]},
+  {"name": "regional-without-cause", "oracle": "problems", "base": "valid/run-k-infill.json", "reasons": ["not-applying-mismatch"], "patch": [{"op": "remove", "path": "/steps/2/not_applying"}]},
+  {"name": "job-kind-cause-on-exploration", "oracle": "problems", "base": "valid/run-k-exploration.json", "reasons": ["not-applying-mismatch"], "patch": [
+   {"op": "replace", "path": "/steps/2/state", "value": "does-not-apply"}, {"op": "add", "path": "/steps/2/not_applying", "value": {"cause": "job-kind"}},
+   {"op": "replace", "path": "/steps/2/condition", "value": null}, {"op": "replace", "path": "/steps/2/criteria/items/0/state", "value": "does-not-apply"},
+   {"op": "add", "path": "/steps/2/criteria/items/0/not_applying", "value": {"cause": "job-kind"}},
+   {"op": "replace", "path": "/counts", "value": {"applying": 7, "not_applying": 1}}]},
+  {"name": "regional-open-in-infill", "oracle": "problems", "base": "valid/run-k-infill.json", "reasons": ["state-disagrees"], "patch": [
+   {"op": "replace", "path": "/steps/2/state", "value": "open"}, {"op": "remove", "path": "/steps/2/not_applying"},
+   {"op": "replace", "path": "/steps/2/condition", "value": {"step": "tops", "measure": "largest_residual", "comparison": "above", "value": 2.0, "unit": "m", "read": 6.1, "outcome": "applies"}},
+   {"op": "replace", "path": "/counts", "value": {"applying": 8, "not_applying": 0}}]},
+  {"name": "taken-out-without-act", "oracle": "problems", "base": "valid/run-k-taken-out.json", "reasons": ["not-applying-mismatch"], "patch": [
+   {"op": "replace", "path": "/steps/6/acts", "value": []}, {"op": "replace", "path": "/steps/6/acts_count", "value": 0}]},
+  {"name": "taken-out-act-on-an-older-page", "oracle": "problems", "base": "valid/run-k-taken-out.json", "reasons": [], "patch": [
+   {"op": "replace", "path": "/steps/6/acts", "value": []}, {"op": "replace", "path": "/steps/6/acts_next", "value": "older-acts"}]},
+  {"name": "taken-out-reason-differs", "oracle": "problems", "base": "valid/run-k-taken-out.json", "reasons": ["not-applying-mismatch"], "patch": [
+   {"op": "replace", "path": "/steps/6/not_applying/reason", "value": "No estimate is needed"}]},
+  {"name": "velocities-out-while-pressure-applies", "oracle": "problems", "base": "valid/run-k-infill.json", "reasons": ["made-from-taken-out"], "patch": [
+   {"op": "replace", "path": "/steps/1/state", "value": "does-not-apply"},
+   {"op": "add", "path": "/steps/1/acts/-", "value": {"act": "taken-out", "by": {"person": "ben", "agent": null, "job": null}, "at": 1795800250.0, "criterion": null, "reason": "The partner's velocity model is used"}},
+   {"op": "replace", "path": "/steps/1/acts_count", "value": 2},
+   {"op": "add", "path": "/steps/1/not_applying", "value": {"cause": "taken-out", "by": {"person": "ben", "agent": null, "job": null}, "at": 1795800250.0, "reason": "The partner's velocity model is used"}},
+   {"op": "replace", "path": "/counts", "value": {"applying": 6, "not_applying": 2}}]},
+  {"name": "counts-8-0-where-6-2", "oracle": "problems", "base": "valid/run-k-taken-out.json", "reasons": ["counts-mismatch"], "patch": [{"op": "replace", "path": "/counts", "value": {"applying": 8, "not_applying": 0}}]},
+  {"name": "condition-on-a-taken-out-step", "oracle": "problems", "base": "valid/run-k-review-out.json", "reasons": ["condition-mismatch"], "patch": [
+   {"op": "replace", "path": "/steps/4/condition", "value": {"step": "tops", "measure": "largest_residual", "comparison": "above", "value": 5.0, "unit": "m", "read": 3.2, "outcome": "did-not-apply"}}]},
+  {"name": "signed-off-with-chart-taken-out", "oracle": "problems", "base": "valid/run-k-criterion-out.json", "reasons": ["state-disagrees"], "patch": [{"op": "replace", "path": "/steps/3/state", "value": "signed-off"}]},
+  {"name": "done-with-exception-without-either", "oracle": "problems", "base": "valid/run-k-taken-out.json", "reasons": ["state-disagrees"], "patch": [{"op": "replace", "path": "/steps/3/state", "value": "done-with-exception"}]},
+  {"name": "agent-takes-a-step-out", "oracle": "problems", "base": "valid/run-k-taken-out.json", "reasons": ["agent-on-person-act"], "patch": [
+   {"op": "replace", "path": "/steps/6/acts/0/by", "value": {"person": "ben", "agent": "agent-ben", "job": "job-1"}},
+   {"op": "replace", "path": "/steps/6/not_applying/by", "value": {"person": "ben", "agent": "agent-ben", "job": "job-1"}},
+   {"op": "replace", "path": "/steps/6/criteria/items/0/not_applying/by", "value": {"person": "ben", "agent": "agent-ben", "job": "job-1"}}]}
+ ]
+}

@@ -1,0 +1,43 @@
+{
+ "schema": "ophiolite.table-kind-words/1",
+ "id": "ophiolite.table-kind-words/1",
+ "description": "E203. The words of a team's own kind of table. `reasons`: why a declaration was refused, or why a table is not a table of the kind, one closed key each, one sentence each. `quantities`: for each quantity class of the unit registry a kind may name, the label a person reads; the class is what is stored, the label is what every sentence, the command line and the Workspace show, and a declaration may be written with either. `unavailable`: the sentence every kind-of-table request answers until it is served. `refusals` (slice 1): why a request about a kind of table was refused as a whole, one closed key each, one sentence each; a refusal over a table's or a declaration's problems is followed by each problem's sentence. `offline` (slice 1): what the offline check of an exported file says when the table fits, and why it could not check one. Placeholders are in braces; no sentence carries a code.",
+ "reasons": {
+  "column-repeated": "Each column of a kind of table is listed once.",
+  "key-not-a-column": "Every column of the key must be one of the kind's columns.",
+  "key-may-be-empty": "A column of the key must be present in every table and may not be empty.",
+  "quantity-unknown": "That quantity is not one the units table knows.",
+  "unit-not-of-quantity": "A column's unit must measure the column's quantity.",
+  "quantity-on-text": "Only a number column has a quantity and a unit.",
+  "column-missing": "The column {column} is needed and is not in this table.",
+  "wrong-type": "The column {column} does not hold the kind of value the kind of table asks for.",
+  "empty": "The column {column} may not be empty, and row {row} is.",
+  "unit-missing": "The column {column} measures {quantity} and this table states no unit for it.",
+  "unit-wrong-dimension": "The column {column} is in {unit}, which does not measure {quantity}.",
+  "key-empty": "The column {column} is part of the key and row {row} leaves it empty.",
+  "key-repeated": "Rows {first} and {second} have the same key; each row needs its own."
+ },
+ "quantities": {
+  "energy per volume": "pressure",
+  "length": "length",
+  "mass per length": "weight per length"
+ },
+ "unavailable": "Kinds of table are not available on this deployment yet.",
+ "refusals": {
+  "kind-unknown": "This project has no kind of table called {word}, or not at that version.",
+  "kind-refused": "This table is not a {word} table.",
+  "kind-differs": "This table is already kept as another kind of table, or as none, so it is not kept again as {word}.",
+  "kind-not-a-table": "Only a table kept as a file or a database table linked as a table can be a kind of table.",
+  "kind-moved": "The kind of table {word} changed since you read it; it is at version {version} now.",
+  "declaration-refused": "This kind of table cannot be declared as written.",
+  "digest-differs": "The kind of table written beside this file was changed after it was exported, so the file cannot be checked against it.",
+  "command-reused": "That command was already used for another request.",
+  "too-many-kinds": "A project has at most 200 kinds of table, and this one has that many already."
+ },
+ "offline": {
+  "fits": "This table is a {word} table, as version {version} of the kind declares it.",
+  "no-kind": "This file carries no kind of table, so it cannot be checked against one.",
+  "unreadable": "The kind of table written with this file cannot be read, so the file cannot be checked against it.",
+  "no-parquet": "This computer cannot read Parquet files yet; install the library's folder extra to check one."
+ }
+}

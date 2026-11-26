@@ -70,6 +70,7 @@ class AgentTransport(ClientTransport):
     credential. Who sends is the agent's id from capabilities/describe (asked once per object); nothing is reported."""
     report = None  # activity/report is a person's operation: a receipt's `reported` stays None and nothing is sent
     release = None  # E171 s1: exchange/release is a person's operation too; `release_copy` answers None and sends nothing
+    takes_made_for = False  # E192 s2: what a file was made for is a person's statement; an assistant's send names none
 
     def __init__(self, agent):
         ClientTransport.__init__(self, agent.reads)

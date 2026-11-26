@@ -1,0 +1,12 @@
+{
+  "counted": "by hand on 23 Nov 2026 with wc -c and sha256sum over files/, never by build.py or the gateway",
+  "files": {
+    "figure.png": {"bytes": 40090, "sha256": "159669b7fdf136e0e3e054a869fed0b99372f762999b32393adc5079cde14a04", "answer": "image/png"},
+    "figure.jpg": {"bytes": 3179, "sha256": "443f54e682cc17da477672147e714cfece4f19b311bdff60bb7efbdcefde67ff", "answer": "image/jpeg"},
+    "report.pdf": {"bytes": 943, "sha256": "7d907549223f4b31a40fc25c140d37870f208597666da17da755cff0320a20b1", "answer": "application/pdf"},
+    "drawing.svg": {"bytes": 154, "sha256": "20f0a859fc009beceed66d9af92240e945882381edc6e95ef40f49d1925d487d", "answer": "not-a-figure"},
+    "page-as-png.png": {"bytes": 115, "sha256": "44ee7b37ff00cef1944c501aa8acb36257a7c48a1edab6eb2e26181a5f19d893", "answer": "not-a-figure"},
+    "polyglot.png": {"bytes": 200, "sha256": "04f11bd12a553ba7a01fa14333c59a11e0fde13a376106656039eb3fcaac9a08", "answer": "two-types"},
+    "header-only.png": {"bytes": 33, "sha256": "617529cb44208f4e73e24d5c7d82b56a5a42309d72c51182cc1c4456a58743d2", "answer": "damaged"}
+  }
+}

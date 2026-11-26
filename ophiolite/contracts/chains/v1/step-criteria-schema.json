@@ -1,0 +1,674 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/chains/v1/step-criteria-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.step-criteria/1",
+    "version": "1.1.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ChainActor": {
+      "additionalProperties": false,
+      "properties": {
+        "person": {
+          "description": "The person who acted, always",
+          "minLength": 1,
+          "title": "Person",
+          "type": "string"
+        },
+        "agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The assistant that acted for the person under an approval; null for the person's own act",
+          "title": "Agent"
+        },
+        "job": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The approved job plan the assistant acted under; null exactly when agent is",
+          "title": "Job"
+        }
+      },
+      "required": [
+        "person",
+        "agent",
+        "job"
+      ],
+      "title": "ChainActor",
+      "type": "object"
+    },
+    "ChainItemVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision"
+      ],
+      "title": "ChainItemVersion",
+      "type": "object"
+    },
+    "ColumnExample": {
+      "additionalProperties": false,
+      "description": "One failing row or column, in the file's order (rule-results/1 1.1.0, E192 s0): `column` names a table's\ncolumn, with `row` null only when the whole column fails; `key` is the failing row's key cell as text (\"\" when\nempty). Both are absent, never null, on an example that names no column, which is then the 1.0.0 example.",
+      "properties": {
+        "row": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Row"
+        },
+        "depth": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Depth"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "column": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 200,
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "row",
+        "depth",
+        "value"
+      ],
+      "title": "ColumnExample",
+      "type": "object"
+    },
+    "CriterionException": {
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "$ref": "#/$defs/ChainActor"
+        },
+        "at": {
+          "description": "Epoch seconds",
+          "minimum": 0,
+          "title": "At",
+          "type": "number"
+        },
+        "reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "by",
+        "at",
+        "reason"
+      ],
+      "title": "CriterionException",
+      "type": "object"
+    },
+    "FailingRow": {
+      "additionalProperties": false,
+      "properties": {
+        "wellbore": {
+          "title": "Wellbore",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        },
+        "residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The residual in metres, with its sign; null for a row not computed",
+          "title": "Residual"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The row's reason when it was not computed",
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "wellbore",
+        "occurrence",
+        "residual",
+        "reason"
+      ],
+      "title": "FailingRow",
+      "type": "object"
+    },
+    "NotApplyingJobKind": {
+      "additionalProperties": false,
+      "description": "E190: does not apply because the run's kind of work is not one it applies to.",
+      "properties": {
+        "cause": {
+          "const": "job-kind",
+          "title": "Cause",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cause"
+      ],
+      "title": "NotApplyingJobKind",
+      "type": "object"
+    },
+    "NotApplyingTakenOut": {
+      "additionalProperties": false,
+      "description": "E190: taken out of this run by a person, copied from the newest `taken-out` act no `put-back` follows.",
+      "properties": {
+        "cause": {
+          "const": "taken-out",
+          "title": "Cause",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/ChainActor"
+        },
+        "at": {
+          "description": "Epoch seconds",
+          "minimum": 0,
+          "title": "At",
+          "type": "number"
+        },
+        "reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cause",
+        "by",
+        "at",
+        "reason"
+      ],
+      "title": "NotApplyingTakenOut",
+      "type": "object"
+    },
+    "ProofRefException": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "exception",
+          "title": "Kind",
+          "type": "string"
+        },
+        "act": {
+          "description": "The `excepted` act's place among the step's acts, oldest first, from 1",
+          "minimum": 1,
+          "title": "Act",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "act"
+      ],
+      "title": "ProofRefException",
+      "type": "object"
+    },
+    "ProofRefRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "check-record",
+            "attachment"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "description": "A check record's id, or an attachment's (E191)",
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "ProofRefRecord",
+      "type": "object"
+    },
+    "ProofRefRuleEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "rule-evidence",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "rule": {
+          "description": "A data rule and its version (ophiolite.data-rule/1 `id`)",
+          "pattern": "^[a-z][a-z0-9-]{0,62}/[1-9][0-9]{0,3}$",
+          "title": "Rule",
+          "type": "string"
+        },
+        "parameters_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Parameters Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "asset_id",
+        "revision",
+        "rule",
+        "parameters_sha256"
+      ],
+      "title": "ProofRefRuleEvidence",
+      "type": "object"
+    },
+    "ProofRefVerdict": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "verdict",
+          "title": "Kind",
+          "type": "string"
+        },
+        "verdict_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Verdict Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "verdict_id"
+      ],
+      "title": "ProofRefVerdict",
+      "type": "object"
+    },
+    "ProofRefVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "version",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "asset_id",
+        "revision"
+      ],
+      "title": "ProofRefVersion",
+      "type": "object"
+    },
+    "StepCriteriaItem": {
+      "additionalProperties": false,
+      "description": "One criterion at this revision: its state and the records that decide it; for `fails`, how many and the first few.",
+      "properties": {
+        "key": {
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "description": "As people name it; it must read as words (the server's check)",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "proof_kind": {
+          "enum": [
+            "made-from",
+            "current-input",
+            "rule",
+            "outcome",
+            "attachment"
+          ],
+          "title": "Proof Kind",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "holds",
+            "fails",
+            "missing",
+            "exception",
+            "does-not-apply"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "proofs": {
+          "description": "The records that decide the state; for made-from, the counted versions",
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "attachment": "#/$defs/ProofRefRecord",
+                "check-record": "#/$defs/ProofRefRecord",
+                "exception": "#/$defs/ProofRefException",
+                "rule-evidence": "#/$defs/ProofRefRuleEvidence",
+                "verdict": "#/$defs/ProofRefVerdict",
+                "version": "#/$defs/ProofRefVersion"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ProofRefVersion"
+              },
+              {
+                "$ref": "#/$defs/ProofRefRuleEvidence"
+              },
+              {
+                "$ref": "#/$defs/ProofRefRecord"
+              },
+              {
+                "$ref": "#/$defs/ProofRefException"
+              },
+              {
+                "$ref": "#/$defs/ProofRefVerdict"
+              }
+            ]
+          },
+          "maxItems": 64,
+          "title": "Proofs",
+          "type": "array"
+        },
+        "exception": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CriterionException"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present exactly when the state is `exception`"
+        },
+        "count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "For `fails`: how many rows or items fail, when the record says; null otherwise",
+          "title": "Count"
+        },
+        "examples": {
+          "description": "For `fails`: the first failing rows as the rule result or check record lists them; empty otherwise",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ColumnExample"
+              },
+              {
+                "$ref": "#/$defs/FailingRow"
+              }
+            ]
+          },
+          "maxItems": 5,
+          "title": "Examples",
+          "type": "array"
+        },
+        "not_applying": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "job-kind": "#/$defs/NotApplyingJobKind",
+                  "taken-out": "#/$defs/NotApplyingTakenOut"
+                },
+                "propertyName": "cause"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/NotApplyingJobKind"
+                },
+                {
+                  "$ref": "#/$defs/NotApplyingTakenOut"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E190: why it does not apply; present exactly when the state is `does-not-apply`",
+          "title": "Not Applying"
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "proof_kind",
+        "state",
+        "proofs",
+        "exception",
+        "count",
+        "examples"
+      ],
+      "title": "StepCriteriaItem",
+      "type": "object"
+    },
+    "StepCriteriaSigned": {
+      "additionalProperties": false,
+      "properties": {
+        "verdict_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Verdict Id",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/ChainActor"
+        },
+        "at": {
+          "description": "Epoch seconds",
+          "minimum": 0,
+          "title": "At",
+          "type": "number"
+        }
+      },
+      "required": [
+        "verdict_id",
+        "by",
+        "at"
+      ],
+      "title": "StepCriteriaSigned",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One revision of a run step's criteria (E189 design 6). Written on an attach and on the arrival of a record a\ncriterion names; never changed afterwards.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.step-criteria/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "project": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Project",
+      "type": "string"
+    },
+    "run": {
+      "pattern": "^[0-9a-f]{32}$",
+      "title": "Run",
+      "type": "string"
+    },
+    "step": {
+      "maxLength": 32,
+      "pattern": "^[a-z][a-z0-9-]{0,31}$",
+      "title": "Step",
+      "type": "string"
+    },
+    "result": {
+      "$ref": "#/$defs/ChainItemVersion",
+      "description": "The attached version this revision is about"
+    },
+    "revision": {
+      "description": "+1 per write for the same run and step, across every attached result",
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "cause": {
+      "enum": [
+        "attached",
+        "rule-evidence",
+        "check-record",
+        "attachment",
+        "exception",
+        "exception-withdrawn",
+        "signed",
+        "taken-out",
+        "put-back"
+      ],
+      "title": "Cause",
+      "type": "string"
+    },
+    "items": {
+      "description": "One per declared criterion, in declared order",
+      "items": {
+        "$ref": "#/$defs/StepCriteriaItem"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Items",
+      "type": "array"
+    },
+    "signed": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StepCriteriaSigned"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Only on the revision a `signed` act wrote"
+    },
+    "at": {
+      "description": "Epoch seconds",
+      "minimum": 0,
+      "title": "At",
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema",
+    "project",
+    "run",
+    "step",
+    "result",
+    "revision",
+    "cause",
+    "items",
+    "signed",
+    "at"
+  ],
+  "title": "StepCriteria",
+  "type": "object"
+}

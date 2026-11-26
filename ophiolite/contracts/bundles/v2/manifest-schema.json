@@ -3,11 +3,11 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.16.0",
+    "version": "2.19.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
-  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Bundle 2 adds typed assets (well tops, trajectories, regular-grid surfaces) beside curves. Readers accept the majors they know and refuse others; 1.x readers refuse 2.0. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept. 2.9 (E107a): a file read on a computer may carry the original it was read from (one provenance file) beside the recorded reading (read_by). 2.12 (E116 s1): a project folder block (folder); with it, assets and selection may be empty. 2.13 (E142 s0): surveys, their members and relations (surveys). 2.14 (E117 s1): the folder block may be ophiolite.project-folder/2, which any program may write. 2.15 (E147 s0): a citation block (citation) the standard descriptors beside the manifest are derived from, and a media type on asset files (media_type). 2.16 (E147 s2b): with a citation, the Croissant descriptor holds a record set per typed table (well tops, deviation survey, time-depth, point set) read from the asset's data.json.",
+  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Bundle 2 adds typed assets (well tops, trajectories, regular-grid surfaces) beside curves. Readers accept the majors they know and refuse others; 1.x readers refuse 2.0. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept. 2.9 (E107a): a file read on a computer may carry the original it was read from (one provenance file) beside the recorded reading (read_by). 2.12 (E116 s1): a project folder block (folder); with it, assets and selection may be empty. 2.13 (E142 s0): surveys, their members and relations (surveys). 2.14 (E117 s1): the folder block may be ophiolite.project-folder/2, which any program may write. 2.15 (E147 s0): a citation block (citation) the standard descriptors beside the manifest are derived from, and a media type on asset files (media_type). 2.16 (E147 s2b): with a citation, the Croissant descriptor holds a record set per typed table (well tops, deviation survey, time-depth, point set) read from the asset's data.json. 2.19 (E192 s0): the revisions a sender stated an asset was made for (stated_parents, with stated_parent_visibility; both or neither), beside and never among the parents; 2.17 and 2.18 changed no schema.",
   "type": "object",
   "required": [
     "schema",
@@ -598,6 +598,21 @@
             "complete",
             "restricted"
           ]
+        },
+        "stated_parents": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/BundleParent"
+          },
+          "description": "2.19.0 (E192): the exact revisions the sender stated this one was made for (made-for, class stated) that the exporter may disclose, as permitted lineage lists parents; never among the parents and never a derivation. Absent when the revision names none; empty only when every one is withheld (restricted)."
+        },
+        "stated_parent_visibility": {
+          "enum": [
+            "complete",
+            "restricted"
+          ],
+          "description": "2.19.0 (E192): as parent_visibility, for stated_parents; present exactly when the revision names a stated parent."
         },
         "omissions": {
           "type": "array",

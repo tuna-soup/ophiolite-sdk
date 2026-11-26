@@ -2,7 +2,7 @@
   "schema": "ophiolite.contract-profile/1",
   "id": "deviation-csv/1",
   "kind": "source",
-  "lifecycle": "preview",
+  "lifecycle": "supported",
   "display_name": "Deviation survey (CSV)",
   "description": "A CSV of survey stations (measured depth, inclination, azimuth), kept byte for byte as the uploader provided it.",
   "serves": [

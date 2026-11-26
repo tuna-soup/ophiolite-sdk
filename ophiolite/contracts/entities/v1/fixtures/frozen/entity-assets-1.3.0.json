@@ -1,0 +1,126 @@
+{
+  "schema": "ophiolite.entity-assets/1",
+  "entity": {
+    "entity_id": "wellbore-22241c1b1d0a4df6a74611ecab20ae8a",
+    "kind": "wellbore",
+    "name": "Synthetic-A"
+  },
+  "items": [
+    {
+      "asset_id": "tops",
+      "revision": "0ddac636ba75ded13866f74431c5ad6efa0244810bd24d147779a00155f049c2",
+      "row": null,
+      "profile": "well-tops-csv/1",
+      "name": "Tops",
+      "association": {
+        "assertion_id": "assertion-2ee1d5ee3f044356aff9ba3f2cc82bbf",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "tops",
+            "revision": "0ddac636ba75ded13866f74431c5ad6efa0244810bd24d147779a00155f049c2"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:55:32Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellboreMarkerSet:1.5.1",
+      "osdu_kind_reason": null
+    },
+    {
+      "asset_id": "bare",
+      "revision": "f3e13ab2852826daae10293258e1e1056cda619f5d4546d91305ed67f1edd4ab",
+      "row": null,
+      "profile": "las2/1",
+      "name": "Result bare",
+      "association": {
+        "assertion_id": "assertion-476e74d85ff544d5ac7d75e9a12b48f1",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "bare",
+            "revision": "f3e13ab2852826daae10293258e1e1056cda619f5d4546d91305ed67f1edd4ab"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:55:32Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "osdu_kind_reason": null
+    },
+    {
+      "asset_id": "30272cf11de7d0478a337dc37ef728419bfe539b47e080c4464bce0aa94e8ec3",
+      "revision": "dca578e4d9a3c3d887104752f894e74c1e29a83005d2f1d34f20d3a5ee3bc373",
+      "row": null,
+      "profile": "las2/1",
+      "name": "well",
+      "association": {
+        "assertion_id": "assertion-7cb06fb300b24dd9924154d8a6217bf3",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "30272cf11de7d0478a337dc37ef728419bfe539b47e080c4464bce0aa94e8ec3",
+            "revision": "dca578e4d9a3c3d887104752f894e74c1e29a83005d2f1d34f20d3a5ee3bc373"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:55:32Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "osdu_kind_reason": null
+    },
+    {
+      "asset_id": "vsh",
+      "revision": "f3e13ab2852826daae10293258e1e1056cda619f5d4546d91305ed67f1edd4ab",
+      "row": null,
+      "profile": "las2/1",
+      "name": "Result vsh",
+      "association": {
+        "assertion_id": "assertion-b93404481dc94e1085d3e6f18e0fae87",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "vsh",
+            "revision": "f3e13ab2852826daae10293258e1e1056cda619f5d4546d91305ed67f1edd4ab"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:55:32Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "osdu_kind_reason": null
+    },
+    {
+      "asset_id": "53f542dcfa2e406ec4e9d7352d30b3ccff79228184dc48cf51d60d969d00c753",
+      "revision": "f356d766bb4f9ed432fb341cb32a23537b51c57f5fe8dbb7b61ebff861274c87",
+      "row": null,
+      "profile": "las2/1",
+      "name": "repeated",
+      "association": {
+        "assertion_id": "assertion-df17412257144a808649fb43b8f9dfe5",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "53f542dcfa2e406ec4e9d7352d30b3ccff79228184dc48cf51d60d969d00c753",
+            "revision": "f356d766bb4f9ed432fb341cb32a23537b51c57f5fe8dbb7b61ebff861274c87"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:55:32Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "osdu_kind_reason": null
+    }
+  ],
+  "next_cursor": null
+}

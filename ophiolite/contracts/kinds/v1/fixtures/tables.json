@@ -1,0 +1,322 @@
+{
+ "description": "E203 s0: synthetic kept tables, each the columns, declarations and rows of an ophiolite.table-file/1 document, three rows unless a case needs more. T1 to T4 are the charter's tables; every other entry is one case of one reason (strategy §3.5). Rows hold the read columns only. The outcome of each against each kind is expected.json, written by hand.",
+ "tables": {
+  "t1-complete": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true},
+    {"name": "weight", "db_type": "numeric", "logical": "decimal", "nullable": true, "comment": null, "read": true},
+    {"name": "grade", "db_type": "text", "logical": "text", "nullable": true, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null},
+    "weight": {"description": null, "unit": "lbm/ft", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5, "309.700", "X-56"],
+    ["Surface", "20.000", 850.0, "133.000", "K-55"],
+    ["Production", "9.625", 2950.25, null, null]
+   ]
+  },
+  "t2-no-shoe-depth": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "weight", "db_type": "numeric", "logical": "decimal", "nullable": true, "comment": null, "read": true},
+    {"name": "grade", "db_type": "text", "logical": "text", "nullable": true, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "weight": {"description": null, "unit": "lbm/ft", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", "309.700", "X-56"],
+    ["Surface", "20.000", "133.000", "K-55"],
+    ["Production", "9.625", null, null]
+   ]
+  },
+  "t3-feet": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "ft", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 395.3],
+    ["Surface", "20.000", 2788.7],
+    ["Production", "9.625", 9679.3]
+   ]
+  },
+  "t4-bar": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "bar", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 12.0],
+    ["Surface", "20.000", 85.0],
+    ["Production", "9.625", 295.0]
+   ]
+  },
+  "required-cell-empty": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": true, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5],
+    ["Surface", "20.000", null],
+    ["Production", "9.625", 2950.25]
+   ]
+  },
+  "number-read-as-text": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30 in", 120.5],
+    ["Surface", "20 in", 850.0],
+    ["Production", "9 5/8 in", 2950.25]
+   ]
+  },
+  "required-unread": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "interval", "logical": null, "nullable": false, "comment": null, "read": false}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000"],
+    ["Surface", "20.000"],
+    ["Production", "9.625"]
+   ]
+  },
+  "unread-before-key": {
+   "columns": [
+    {"name": "remarks", "db_type": "bytea", "logical": null, "nullable": true, "comment": null, "read": false},
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5],
+    ["Surface", "20.000", 850.0],
+    ["Production", "9.625", 2950.25]
+   ]
+  },
+  "key-blank": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": true, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5],
+    ["Surface", "20.000", 850.0],
+    ["  ", "9.625", 2950.25]
+   ]
+  },
+  "key-repeated": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5],
+    ["Surface", "20.000", 850.0],
+    ["Surface", "9.625", 2950.25]
+   ]
+  },
+  "key-decimal-scale": {
+   "columns": [
+    {"name": "string", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["1.0", "30.000", 120.5],
+    ["1.00", "20.000", 850.0],
+    ["2", "9.625", 2950.25]
+   ]
+  },
+  "text-marker": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "string": {"description": null, "unit": null, "missing": "n/a"},
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5],
+    ["n/a", "20.000", 850.0],
+    ["Production", "9.625", 2950.25]
+   ]
+  },
+  "numeric-marker": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": "-999.25"}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", -999.25],
+    ["Surface", "20.000", 850.0],
+    ["Production", "9.625", 2950.25]
+   ]
+  },
+  "boolean-marker": {
+   "columns": [
+    {"name": "well", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "cemented", "db_type": "boolean", "logical": "boolean", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "cemented": {"description": null, "unit": null, "missing": "false"}
+   }, "coordinates": null},
+   "rows": [
+    ["A-1", "Conductor", true],
+    ["A-1", "Surface", false],
+    ["A-1", "Production", true]
+   ]
+  },
+  "unit-not-stated": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5],
+    ["Surface", "20.000", 850.0],
+    ["Production", "9.625", 2950.25]
+   ]
+  },
+  "optional-unread": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true},
+    {"name": "weight", "db_type": "money", "logical": null, "nullable": true, "comment": null, "read": false}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5],
+    ["Surface", "20.000", 850.0],
+    ["Production", "9.625", 2950.25]
+   ]
+  },
+  "optional-wrong": {
+   "columns": [
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "od", "db_type": "numeric", "logical": "decimal", "nullable": false, "comment": null, "read": true},
+    {"name": "shoe_depth", "db_type": "double precision", "logical": "float", "nullable": false, "comment": null, "read": true},
+    {"name": "weight", "db_type": "text", "logical": "text", "nullable": true, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "od": {"description": null, "unit": "in", "missing": null},
+    "shoe_depth": {"description": null, "unit": "m", "missing": null},
+    "weight": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["Conductor", "30.000", 120.5, "heavy"],
+    ["Surface", "20.000", 850.0, null],
+    ["Production", "9.625", 2950.25, "light"]
+   ]
+  },
+  "optional-empty": {
+   "columns": [
+    {"name": "well", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "length", "db_type": "double precision", "logical": "float", "nullable": true, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {
+    "length": {"description": null, "unit": "m", "missing": null}
+   }, "coordinates": null},
+   "rows": [
+    ["A-1", "Conductor", 120.5],
+    ["A-1", "Surface", null],
+    ["A-1", "Production", 2950.25]
+   ]
+  },
+  "pair-repeated": {
+   "columns": [
+    {"name": "well", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {}, "coordinates": null},
+   "rows": [
+    ["A-1", "Surface"],
+    ["A-1", "Production"],
+    ["A-1", "Surface"]
+   ]
+  },
+  "pair-sharing-one-part": {
+   "columns": [
+    {"name": "well", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true},
+    {"name": "string", "db_type": "text", "logical": "text", "nullable": false, "comment": null, "read": true}
+   ],
+   "declarations": {"columns": {}, "coordinates": null},
+   "rows": [
+    ["A-1", "Surface"],
+    ["B-2", "Surface"],
+    ["A-1", "Production"]
+   ]
+  }
+ }
+}

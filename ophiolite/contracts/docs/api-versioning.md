@@ -85,6 +85,73 @@ first released (`services/project_gateway/tests/test_released_profiles.py`), and
 bundle of every released bundle version (`tests/test_released_bundles.py`); a change that stops reading
 one fails the build. Decodable is not permission: who may read a retained item does not change.
 
+## Supported contracts
+
+Every schema and profile in the registry carries a lifecycle. Most are `preview`: served and tested, but
+replaceable by a new id inside the program without a transition. The contracts the MVP journey moves are
+`supported`. The list was measured on 24 November 2026: every schema and profile id that travelled in a request
+or an answer of one whole run of the journey, from the sources to QGIS. The transfer receipt was added after a
+second whole run on 25 November 2026, once the receipt work (E184) had closed. Each entry's `qualified_by`
+names the run that measured it:
+
+| Contract | Schema | Profile |
+|---|---|---|
+| `deviation-csv/1` | | yes |
+| `esri-ascii-grid/1` | | yes |
+| `ophiolite.asset-summary/1` | yes | |
+| `ophiolite.entity/1` | yes | |
+| `ophiolite.held-copies/1` | yes | |
+| `ophiolite.point-columns/1` | yes | yes |
+| `ophiolite.point-set/1` | yes | yes |
+| `ophiolite.regular-grid-surface/1` | yes | yes |
+| `ophiolite.sender/1` | yes | |
+| `ophiolite.source-provenance/1` | yes | |
+| `ophiolite.trajectory/1` | yes | yes |
+| `ophiolite.transfer-receipt/1` | yes | |
+| `ophiolite.typed-context/1` | yes | |
+| `ophiolite.well-location/1` | yes | |
+| `ophiolite.well-tops/1` | yes | yes |
+| `points-csv/1` | | yes |
+| `sql-wells/1` | | yes |
+| `well-tops-csv/1` | | yes |
+
+What `supported` promises:
+
+- **Only additive change.** A supported schema may gain an optional field, and only in a minor version
+  of its entry. A validator should therefore use the version it reads, not the version it was written
+  against. Nothing is removed, made required, narrowed or renamed. A field that is not optional, a new
+  enumeration value, or a changed type is a new id (`/2`), served beside the old one.
+- **Readable by the SDK you have.** The promise covers the Python SDK from release 2026.11.25. That is the
+  first published release that ignores answer fields it does not know. The build reads the current
+  answer of every supported schema with that release, as published. A new field reaches a supported schema
+  only when that release still reads it.
+- **A reader you write yourself should ignore fields it does not know.** Supported answers change only by
+  adding optional fields, so a reader that ignores unknown fields keeps working.
+- **Some contracts change only by a new id.** A profile is a document that no SDK parses: it changes only by
+  a new id. The same holds for a supported schema that no SDK entry point reads (`ophiolite.typed-context/1`),
+  because nothing can show that an added field is read. It holds as well for the transfer receipt
+  (`ophiolite.transfer-receipt/1`): the exchange check in the SDK and in the QGIS plug-in refuses a receipt
+  it does not fully know before anything is done, so any new field is a new id.
+- **A deprecation needs a transition release and an announced cutoff**, as for routes above.
+- **At least 12 months' notice.** When a supported contract is replaced by a new id, the old id keeps being
+  served for at least 12 months after its deprecation is announced.
+- **The build enforces it.** Each supported contract, and the documents it names, is kept as a frozen copy
+  (`supported-1`; the transfer receipt and its code document `ophiolite.transfer-codes/1`, version 1.0.0, in
+  `supported-2`). A change the gate does not recognise as additive fails the build. A changed description,
+  title or interpretation passes only with a reviewed release-note row.
+
+Not marked, and why:
+
+- `ophiolite.scientific-asset/1`: the envelope every stored item shares. It still changes too often to promise.
+- `ophiolite.transfer-receipts/1`, the page of receipts: no journey step reads it yet.
+- The `/1` curve shapes (`las2/1`, `ophiolite.application-curve/1`, `ophiolite/well-curve/1`): the journey still
+  serves LAS curves in the `/1` shape, and its successor `ophiolite.well-log-curve/1` is not yet what the
+  journey reads.
+
+How long a release stays supported is ADR 0015's rule, as above; this section does not add a release support
+window. The 12 months above is how long an old contract id keeps being served after its deprecation is
+announced, not how long a release is supported.
+
 ## Errors
 
 Every refusal is `{error, code, message, remedy, docs, request_id}`. `code` is stable; `error` equals

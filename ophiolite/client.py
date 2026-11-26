@@ -175,6 +175,7 @@ from .tools import ToolClient  # noqa: E402  (E131 s1: the tool_* twins)
 from .access_history import AccessHistoryClient  # noqa: E402  (E67b)
 from .outcomes import OutcomeClient  # noqa: E402  (E120)
 from .chains import ChainClient  # noqa: E402  (E178 s2c)
+from .figures import FigureClient  # noqa: E402  (E191 s1)
 from .verdicts import VerdictClient  # noqa: E402  (E132)
 from .trajectories import TrajectoryClient  # noqa: E402  (E134)
 from .rule_results import RuleResultsClient  # noqa: E402  (E144 s3)
@@ -327,6 +328,18 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         dismiss and run_start, run_attach, run_choose, run_acknowledge, run_decide, run_continue, run_get, run_list
         (ophiolite.chains.ChainClient)."""
         return ChainClient(self)
+
+    @property
+    def figures(self):
+        """E191 s1: the figures kept with item versions: attach, list, read, withdraw (ophiolite.figures.FigureClient)."""
+        return FigureClient(self)
+
+    @property
+    def table_kinds(self):
+        """E203 s1: the project's kinds of table: declare, list, show (ophiolite.table_kinds.TableKindClient). A file
+        exported from a version published as one is checked without the server by ophiolite.table_kinds.check."""
+        from .table_kinds import TableKindClient
+        return TableKindClient(self)
 
     def import_storage(self,connection,prefix=None,*,keep_copy=False,attribution,rights_confirmed,audience=(),well_notes='',declare=None,skip_decisions=False,
                        link_wellbore=False,new=False,progress=None):
@@ -556,7 +569,10 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         server from what it stored for that revision: a kept table, well tops, a trajectory, a point set or a LAS log
         (`curves` chooses curves; omitted, every stored curve). The body is checked against its stated SHA-256 and must
         say it was written from `revision`; otherwise nothing is saved. The file's own `ophiolite.export` metadata names
-        the revision, the units and the missing-value markers. No pyarrow is needed to download."""
+        the revision, the units and the missing-value markers. No pyarrow is needed to download.
+        E203 s1: a version published as a kind of table carries the kind's declaration and digest in a Parquet file's
+        record; a CSV file gets it beside it, as `<file>.table-kind.json` with the columns as exported, read before the
+        file is saved. `ophiolite data table-kinds check FILE` checks either without the server."""
         if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
         if format not in FILE_FORMATS:raise Refused('Download as one of %s.' % ', '.join(FILE_FORMATS))
         if curves is not None and (isinstance(curves,str) or not all(isinstance(c,str) and c for c in curves)):raise Refused('Give curves as a list of curve names.')
@@ -565,7 +581,28 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         raw=self._get(self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')+'/export?'+query,FILE_BYTES,answer=answer)
         if answer.get('x-ophiolite-revision')!=revision:
             raise VerificationFailed('The server wrote the file from another revision than the one asked for; nothing was saved.')
-        return save_verified(destination,written(raw,answer.get('x-content-sha256')))
+        kind=self._exported_kind(asset,revision) if format=='csv' else None
+        saved=save_verified(destination,written(raw,answer.get('x-content-sha256')))
+        if kind is not None:Path(str(saved)+'.table-kind.json').write_text(json.dumps(kind,indent=1,ensure_ascii=False)+'\n',encoding='utf-8')
+        return saved
+
+    def _exported_kind(self,asset,revision):
+        """E203 s1 (D5): the `<file>.table-kind.json` of a CSV export of a version published as a kind of table: the
+        reference its story node records, that version of the kind (checked against its digest) and the columns as the
+        file is written; None for any other version."""
+        from . import table_kinds
+        nodes=self.story(asset,revision).get('nodes') or []
+        ref=next((n.get('table_kind') for n in nodes if (n.get('asset_id'),n.get('revision'))==(asset,revision)),None)
+        if not ref:return None
+        shown=self._post('table-kinds','show',{'word':ref['word'],'version':ref['version']},retry=True)
+        try:block=table_kinds.block_of({**{k:ref[k] for k in table_kinds.REF},'declaration':shown.get('declaration')})
+        except table_kinds.Unreadable:raise VerificationFailed('The kind of table this version was published as answered another declaration; nothing was saved.') from None
+        if shown.get('id')!=block['id']:raise VerificationFailed('The kind of table this version was published as answered another declaration; nothing was saved.')
+        table=self.read_data(asset,revision)
+        notes=table.declarations.get('columns') or {}
+        columns=[{'name':c['name'],'logical':c['logical'],**{k:v for k,v in (notes.get(c['name']) or {}).items() if k in ('unit','missing') and v is not None}}
+                 for c in table.columns if c['read']]
+        return table_kinds.sidecar(block,columns)
 
     def read_window(self,asset,revision,*,inline=None,crossline=None,trace=None,sample=None,by=None,description=None):
         """E141: part of a seismic volume (inline, crossline, sample) or of a 2D line (trace, sample) at an exact
@@ -890,9 +927,9 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                 policy.disconnected(operation)
 
     def _post(self,area,operation,body,**options):
-        from .publish import json_bytes,MAX_REQUEST_BYTES,CHECK_REQUEST_BYTES
+        from .publish import json_bytes,MAX_REQUEST_BYTES,CHECK_REQUEST_BYTES,FIGURE_REQUEST_BYTES
         if 'project_id' in body and body['project_id']!=self.project:raise Refused('The request belongs to another project.')
-        limit=CHECK_REQUEST_BYTES if (area,operation) in (('checks','publish'),('checks','compare')) else MAX_REQUEST_BYTES
+        limit=CHECK_REQUEST_BYTES if (area,operation) in (('checks','publish'),('checks','compare')) else FIGURE_REQUEST_BYTES if (area,operation)==('attachments','add') else MAX_REQUEST_BYTES
         return self._post_bytes(area,operation,json_bytes({'project_id':self.project,**body},limit),**options)
 
     def configure(self,asset=None,revision=None,*,curve,name,command_id=None,publication_profile='las-derived-curves/1',release_id=None,asset_index=0,runners=None):
@@ -1303,7 +1340,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
 
     def upload_data(self,source,*,profile,name,attribution,audience,rights_confirmed,declared=None,filename=None,well_log=None,well_notes='',command_id=None,origin=None,
                     append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None,receipt=None,
-                    curve_declaration=None):
+                    curve_declaration=None,made_for=None):
         """E11/E18: upload an original of any supported type with the context you declare (units, CRS,
         meanings; nothing is inferred). Starts private. A repeated command id returns the same asset.
         E53: `append_to` (your uploaded wavelet, model or section) with `expected_parent` (its current revision)
@@ -1316,15 +1353,20 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         the folder holds the version this upload adds; neither changes what a retry with the same command id matches.
         E184 s0: `receipt` (an `ophiolite.transfer-receipt/1`) is kept with the version by a project whose capabilities
         list its codes version (`transfer_codes_kept`); send it only to such a project.
-        E183 s2b: `curve_declaration`, as `upload_las` takes it, with profile 'las2/1' only."""
+        E183 s2b: `curve_declaration`, as `upload_las` takes it, with profile 'las2/1' only.
+        E192 s2: `made_for` names 1-32 exact versions ({asset_id, revision} or (asset_id, revision)) the file was made
+        for, each one you may read; recorded as stated by you, never as what it was made from. Such a file goes in one
+        request; a project whose release does not record it refuses the whole upload."""
         import uuid
         from . import publish as planning
         filename=filename or (Path(source).name if not isinstance(source,bytes) else 'upload')
         body,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,
                                             rights_confirmed=rights_confirmed,well_notes=well_notes,profile=profile,declared=declared,well_log=well_log,origin=origin,
                                             append_to=append_to,expected_parent=expected_parent,provenance=provenance,application_source=application_source,
-                                            represents=represents,holder=holder,application=application,receipt=receipt,curve_declaration=curve_declaration)
-        return self._send(source,body,extra)
+                                            represents=represents,holder=holder,application=application,receipt=receipt,curve_declaration=curve_declaration,
+                                            made_for=made_for)
+        try:return self._send(source,body,extra)
+        except Refused as error:raise planning.made_for_refused(error,body) from None
 
     def _described(self):
         """The deployment's capabilities answer, read once (its limits and what a folder upload may declare)."""
@@ -1363,6 +1405,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             raw=planning.upload_bytes(source);digest=hashlib.sha256(raw).hexdigest()
             result=planning.parse(UploadResult,self._post_bytes('las-uploads','upload',raw,extra_headers=extra))
         else:
+            if 'made_for' in body:raise Refused(planning.MADE_FOR_ONE_REQUEST%(max(planning.SINGLE,self.served_limits()['upload_bytes'])//(1024*1024)))  # E192 s2: sessions take no made_for
             if 'provenance' in body:raise Refused('This file is too large to send in one request with the original kept beside it; this deployment does not take one in parts.')
             file=planning.FileSource(source);digest=file.sha256()
             result=planning.parse(UploadResult,self._upload_parts(file,digest,body))
@@ -1414,7 +1457,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         return save_verified(destination,fill,mismatch='The downloaded original does not match the file the deployment holds; nothing was saved.')
 
     def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None,
-                        holder=None,application=None,receipt=None):
+                        holder=None,application=None,receipt=None,made_for=None,figures=None):
         """E30b: publish a file you derived (a `WrittenOriginal` from ophiolite.writers) from exact revisions you
         may reuse, with the method you declare. `command_id` is required: a network retry with the same id is
         safe (the same receipt comes back); a fresh id on retry can create a second asset. Use
@@ -1429,16 +1472,27 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from; the version keeps it, and without `new_version_of` or `as_new` the server compares the send with what that
         object sent before (receipt `source_change`: new, changed, or unchanged with nothing published). E171 s1: `holder`
         and `application` record that a work folder holds the version published (a person's send only: an assistant
-        naming a holder is refused). E184 s0: `receipt` as `upload_data` takes it."""
+        naming a holder is refused). E184 s0: `receipt` as `upload_data` takes it. E192 s2: `made_for` as `upload_data`
+        takes it, none also in `from_`. E191 s1: `figures`, a list of
+        {label, file, file_name?} (a path or bytes), is attached to the published version after its answer, one request
+        each with a command id made from `command_id`, so a retry adds none; the receipt then carries `figures` (each a
+        record, or {label, refused}) and, when one was refused, `figures_line` naming it by its label: the version stands."""
         from . import publish as planning
         from .models.api import PublicationReceipt
         body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,
                                            new_version_of=new_version_of,expected_parent=expected_parent,procedure=procedure,source=source,
-                                           holder=holder,application=application,receipt=receipt)
+                                           holder=holder,application=application,receipt=receipt,made_for=made_for)
         from .presentation import PresentedReceipt,publication_recipe
-        recipe=publication_recipe(name=name,from_=from_,method=method,of_entity=of_entity)  # E104: "Send again", at call time
+        recipe=publication_recipe(name=name,from_=from_,method=method,of_entity=of_entity,made_for=body.get('made_for'))  # E104: "Send again", at call time
         verify=planning.verify_derived if procedure is None else planning.verify_run_output
-        receipt=verify(body,planning.parse(PublicationReceipt,self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)))
+        try:answer=self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)
+        except Refused as error:raise planning.made_for_refused(error,body) from None
+        receipt=verify(body,planning.parse(PublicationReceipt,answer))
+        if figures:  # E191 s1 (Q2): after the version's answer; a refused figure never undoes the version
+            from .figures import refused_line
+            attached=self.figures.attach_each({'asset_id':receipt.asset_id,'revision':receipt.revision},figures,command_id)
+            receipt=PublicationReceipt.model_construct(receipt.model_fields_set,**dict(receipt),figures=attached,
+                                                       **({'figures_line':refused_line(attached)} if refused_line(attached) else {}))
         return PresentedReceipt.present(receipt,{'origin':self.url,'project':self.project,'family':'m','recipe':recipe})
 
     def preview_change(self,asset_id,revision,change):

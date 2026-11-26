@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/chains/v1/chain-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.chain/1",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -174,6 +174,107 @@
       "title": "ChainConditionLimit",
       "type": "object"
     },
+    "ChainCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "description": "As people name it; it must read as words (the server's check)",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "proof": {
+          "discriminator": {
+            "mapping": {
+              "attachment": "#/$defs/ProofAttachment",
+              "current-input": "#/$defs/ProofCurrentInput",
+              "made-from": "#/$defs/ProofMadeFrom",
+              "outcome": "#/$defs/ProofOutcome",
+              "rule": "#/$defs/ProofRule"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ProofMadeFrom"
+            },
+            {
+              "$ref": "#/$defs/ProofCurrentInput"
+            },
+            {
+              "$ref": "#/$defs/ProofRule"
+            },
+            {
+              "$ref": "#/$defs/ProofOutcome"
+            },
+            {
+              "$ref": "#/$defs/ProofAttachment"
+            }
+          ],
+          "title": "Proof"
+        },
+        "applies": {
+          "anyOf": [
+            {
+              "description": "E190: the kinds of work (`job_kinds` keys) this applies to, sorted, once each",
+              "items": {
+                "maxLength": 32,
+                "pattern": "^[a-z][a-z0-9-]{0,31}$",
+                "type": "string"
+              },
+              "maxItems": 8,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E190: the kinds of work this criterion applies to, each one its step applies to; absent for every kind its step applies to",
+          "title": "Applies"
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "proof"
+      ],
+      "title": "ChainCriterion",
+      "type": "object"
+    },
+    "ChainDone": {
+      "additionalProperties": false,
+      "description": "E189 s0: what the step's result must show, in order, and who signs it off (charter designs 1, 3, 4).",
+      "properties": {
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/ChainCriterion"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Criteria",
+          "type": "array"
+        },
+        "sign_off": {
+          "$ref": "#/$defs/ChainSignOff"
+        }
+      },
+      "required": [
+        "criteria",
+        "sign_off"
+      ],
+      "title": "ChainDone",
+      "type": "object"
+    },
     "ChainOutcomeRef": {
       "additionalProperties": false,
       "properties": {
@@ -203,6 +304,60 @@
       "title": "ChainOutside",
       "type": "object"
     },
+    "ChainRole": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "description": "As people name it; it must read as words (the server's check)",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "members": {
+          "description": "The people who hold the role for this chain version, sorted, once each",
+          "items": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Members",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "members"
+      ],
+      "title": "ChainRole",
+      "type": "object"
+    },
+    "ChainSignOff": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "description": "The role of `roles` whose holders may sign the step off",
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "title": "ChainSignOff",
+      "type": "object"
+    },
     "ChainStep": {
       "additionalProperties": false,
       "properties": {
@@ -223,7 +378,8 @@
           "enum": [
             "tool",
             "choice",
-            "outside"
+            "outside",
+            "work"
           ],
           "title": "Kind",
           "type": "string"
@@ -275,6 +431,30 @@
           "default": null,
           "description": "Present exactly on an outside step"
         },
+        "work": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChainWork"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Present exactly on a work step (E189)"
+        },
+        "done": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChainDone"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The criteria and the sign-off; always on a work step, optional on a tool step, never on another (E189)"
+        },
         "applies_when": {
           "anyOf": [
             {
@@ -304,6 +484,28 @@
           "default": null,
           "description": "The step applies only when this holds",
           "title": "Applies When"
+        },
+        "applies": {
+          "anyOf": [
+            {
+              "description": "E190: the kinds of work (`job_kinds` keys) this applies to, sorted, once each",
+              "items": {
+                "maxLength": 32,
+                "pattern": "^[a-z][a-z0-9-]{0,31}$",
+                "type": "string"
+              },
+              "maxItems": 8,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E190: the kinds of work this step applies to; absent for every kind. The kind is read before `applies_when`",
+          "title": "Applies"
         }
       },
       "required": [
@@ -399,6 +601,301 @@
       ],
       "title": "ChainTriggerOnVersion",
       "type": "object"
+    },
+    "ChainWork": {
+      "additionalProperties": false,
+      "description": "E189 s0: work nobody's tool is named for, closed by its criteria (charter design 2).",
+      "properties": {
+        "kind": {
+          "description": "The item kind of the step's result, published or sent by any member or an assistant under a job approval",
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "made_from": {
+          "description": "Earlier unconditional tool or work steps whose results this result must be made from, sorted, once each",
+          "items": {
+            "maxLength": 32,
+            "pattern": "^[a-z][a-z0-9-]{0,31}$",
+            "type": "string"
+          },
+          "maxItems": 15,
+          "title": "Made From",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "made_from"
+      ],
+      "title": "ChainWork",
+      "type": "object"
+    },
+    "ColumnUnit": {
+      "additionalProperties": false,
+      "description": "E192 s0 (D6): a column a rule is run on, and the unit it is declared in (null: any unit).",
+      "properties": {
+        "column": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "column",
+        "unit"
+      ],
+      "title": "ColumnUnit",
+      "type": "object"
+    },
+    "JobKind": {
+      "additionalProperties": false,
+      "description": "E190: one kind of work the team repeats, in its own words; a run's starter names its key.",
+      "properties": {
+        "key": {
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "description": "As people name it; it must read as words (the server's check)",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ],
+      "title": "JobKind",
+      "type": "object"
+    },
+    "ProofAttachment": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "attachment",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "description": "The newest attachment with exactly this label on the result is the proof",
+          "maxLength": 80,
+          "minLength": 1,
+          "pattern": "^[^\\x00-\\x1f\\x7f ]([^\\x00-\\x1f\\x7f]*[^\\x00-\\x1f\\x7f ])?$",
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "label"
+      ],
+      "title": "ProofAttachment",
+      "type": "object"
+    },
+    "ProofCurrentInput": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "current-input",
+          "title": "Kind",
+          "type": "string"
+        },
+        "step": {
+          "description": "An earlier tool or work step reached through follows: the result's parents include the present head of the item that closed it",
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9-]{0,31}$",
+          "title": "Step",
+          "type": "string"
+        },
+        "stated": {
+          "description": "Whether parents stated by the sender (not witnessed) count",
+          "enum": [
+            "count",
+            "ignore"
+          ],
+          "title": "Stated",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "step",
+        "stated"
+      ],
+      "title": "ProofCurrentInput",
+      "type": "object"
+    },
+    "ProofMadeFrom": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "made-from",
+          "title": "Kind",
+          "type": "string"
+        },
+        "item_kind": {
+          "description": "The kind of the parent versions counted",
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+          "title": "Item Kind",
+          "type": "string"
+        },
+        "at_least": {
+          "maximum": 64,
+          "minimum": 1,
+          "title": "At Least",
+          "type": "integer"
+        },
+        "per": {
+          "description": "Count distinct items, or distinct wells (only for a kind that records its well)",
+          "enum": [
+            "item",
+            "well"
+          ],
+          "title": "Per",
+          "type": "string"
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A well set the counted items must belong to; null for any",
+          "title": "Selection"
+        },
+        "stated": {
+          "description": "Whether parents stated by the sender (not witnessed) count",
+          "enum": [
+            "count",
+            "ignore"
+          ],
+          "title": "Stated",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "item_kind",
+        "at_least",
+        "per",
+        "selection",
+        "stated"
+      ],
+      "title": "ProofMadeFrom",
+      "type": "object"
+    },
+    "ProofOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "outcome",
+          "title": "Kind",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/ChainOutcomeRef",
+          "description": "An outcome version, built-in or a team's check, accepted on the result"
+        }
+      },
+      "required": [
+        "kind",
+        "outcome"
+      ],
+      "title": "ProofOutcome",
+      "type": "object"
+    },
+    "ProofRule": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "rule",
+          "title": "Kind",
+          "type": "string"
+        },
+        "rule": {
+          "description": "A data rule and its version (ophiolite.data-rule/1 `id`)",
+          "pattern": "^[a-z][a-z0-9-]{0,62}/[1-9][0-9]{0,3}$",
+          "title": "Rule",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "items": {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 32,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              {
+                "items": {
+                  "$ref": "#/$defs/ColumnUnit"
+                },
+                "maxItems": 32,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A value of the rule's parameter of that name: a number in the parameter's unit, a choice, a boolean, a column name or null, or a list of column names or of columns with units"
+          },
+          "description": "The team's values by parameter name, each a parameter the rule declares (the server's check); a name left out takes the rule's default",
+          "maxProperties": 16,
+          "title": "Parameters",
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind",
+        "rule",
+        "parameters"
+      ],
+      "title": "ProofRule",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -442,6 +939,41 @@
       "minItems": 1,
       "title": "Steps",
       "type": "array"
+    },
+    "roles": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/ChainRole"
+          },
+          "maxItems": 8,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The role words of this chain version and their holders (E189); absent when none",
+      "title": "Roles"
+    },
+    "job_kinds": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/JobKind"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "E190: the kinds of work a run of this chain is started as, in the declarer's order, keys once each; absent when none",
+      "title": "Job Kinds"
     }
   },
   "required": [

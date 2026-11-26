@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.38.0",
+    "version": "1.39.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -2026,7 +2026,7 @@
     },
     "LineageEntry": {
       "additionalProperties": false,
-      "description": "1.8.0: one lineage assertion as a commitment sha256(salt + canonical([predicate, reference])).\nDisclosed (predicate, reference, salt) only when the caller may see the other revision.",
+      "description": "1.8.0: one lineage assertion as a commitment sha256(salt + canonical([predicate, reference])).\nDisclosed (predicate, reference, salt) only when the caller may see the other revision. 1.39.0 (E192 s0):\n`made-for`, a stated parent; a released strict client (up to STRICT_SDK) gets it undisclosed, the commitment only.",
       "properties": {
         "commitment": {
           "pattern": "^[0-9a-f]{64}$",
@@ -2038,7 +2038,8 @@
             {
               "enum": [
                 "derived-from",
-                "supersedes"
+                "supersedes",
+                "made-for"
               ],
               "type": "string"
             },
@@ -7854,6 +7855,22 @@
     },
     "sender": {
       "$ref": "#/$defs/Sender"
+    },
+    "stated_parents": {
+      "items": {
+        "$ref": "#/$defs/Reference"
+      },
+      "maxItems": 32,
+      "title": "Stated Parents",
+      "type": "array"
+    },
+    "stated_parent_visibility": {
+      "enum": [
+        "complete",
+        "restricted"
+      ],
+      "title": "Stated Parent Visibility",
+      "type": "string"
     }
   },
   "required": [

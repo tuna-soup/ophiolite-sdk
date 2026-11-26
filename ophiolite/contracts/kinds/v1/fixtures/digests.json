@@ -1,0 +1,8 @@
+{
+ "description": "E203 s0: the SHA-256 of each fixture declaration's canonical JSON (sorted keys, no spaces, UTF-8), computed once with sha256sum over the canonical bytes and written here by hand.",
+ "digests": {
+  "casing-design-1": "0f7e4f5c48c9b9f035619396f2722a65a7d70613c2bdb6494bfefa3e58445f85",
+  "casing-design-2": "5c75f7e9210ad5a100d86eaaec20fbb32e90e95247f0b322f7d4dfc5ec8ea4ea",
+  "string-tally-1": "eaf8b95810942eca41e4ce6677de1ad469d9b5f785801632f264b1c54fd36fb0"
+ }
+}

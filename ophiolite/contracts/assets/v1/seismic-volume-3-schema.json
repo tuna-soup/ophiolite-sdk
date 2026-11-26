@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/seismic-volume-3-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.seismic-volume/3",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -408,6 +408,42 @@
       "title": "TypedInterpretation",
       "type": "object"
     },
+    "VolumeHolds": {
+      "additionalProperties": false,
+      "description": "E205 s0: what the samples of a volume are, as stated; for velocities, their kind and unit.",
+      "properties": {
+        "samples": {
+          "enum": [
+            "amplitude",
+            "velocity",
+            "other"
+          ],
+          "title": "Samples",
+          "type": "string"
+        },
+        "velocity_type": {
+          "enum": [
+            "interval",
+            "average",
+            "rms"
+          ],
+          "title": "Velocity Type",
+          "type": "string"
+        },
+        "velocity_unit": {
+          "description": "A symbol of the unit registry of class L/T (length per time), as written there",
+          "maxLength": 32,
+          "minLength": 1,
+          "title": "Velocity Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "samples"
+      ],
+      "title": "VolumeHolds",
+      "type": "object"
+    },
     "XY": {
       "additionalProperties": false,
       "properties": {
@@ -477,6 +513,10 @@
       "minItems": 1,
       "title": "Chunks",
       "type": "array"
+    },
+    "holds": {
+      "$ref": "#/$defs/VolumeHolds",
+      "description": "E205: what the samples are, as stated; omitted when not said"
     }
   },
   "required": [

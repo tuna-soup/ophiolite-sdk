@@ -900,6 +900,30 @@
     }
   },
   {
+    "operation": "POST /api/v1/projects/{project}/attachments/add",
+    "function": "postProjectsProjectAttachmentsAdd",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/attachments/list",
+    "function": "postProjectsProjectAttachmentsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/attachments/read",
+    "function": "postProjectsProjectAttachmentsRead",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/attachments/withdraw",
+    "function": "postProjectsProjectAttachmentsWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/calculations/shale-volume",
     "function": "postProjectsProjectCalculationsShaleVolume",
     "request": "schema",
@@ -984,8 +1008,20 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/criteria",
+    "function": "postProjectsProjectChainRunsCriteria",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/chain-runs/decide",
     "function": "postProjectsProjectChainRunsDecide",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/except",
+    "function": "postProjectsProjectChainRunsExcept",
     "request": "schema",
     "response": "schema"
   },
@@ -1002,8 +1038,32 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/put-back",
+    "function": "postProjectsProjectChainRunsPutBack",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/sign-off",
+    "function": "postProjectsProjectChainRunsSignOff",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/chain-runs/start",
     "function": "postProjectsProjectChainRunsStart",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/take-out",
+    "function": "postProjectsProjectChainRunsTakeOut",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/chain-runs/withdraw-exception",
+    "function": "postProjectsProjectChainRunsWithdrawException",
     "request": "schema",
     "response": "schema"
   },
@@ -2316,6 +2376,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/rule-results/with-parameters",
+    "function": "postProjectsProjectRuleResultsWithParameters",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/runners/cancel",
     "function": "postProjectsProjectRunnersCancel",
     "request": "schema",
@@ -2930,6 +2996,24 @@
   {
     "operation": "POST /api/v1/projects/{project}/table-imports/step",
     "function": "postProjectsProjectTableImportsStep",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-kinds/declare",
+    "function": "postProjectsProjectTableKindsDeclare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-kinds/list",
+    "function": "postProjectsProjectTableKindsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-kinds/show",
+    "function": "postProjectsProjectTableKindsShow",
     "request": "schema",
     "response": "schema"
   },

@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/entities/v1/entity-assets-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.entity-assets/1",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -89,6 +89,39 @@
           ],
           "default": null,
           "title": "Osdu Kind Reason"
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "enum": [
+                "source-reference",
+                "retained-capture",
+                "managed-derived"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Origin"
+        },
+        "curves": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ItemCurve"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Curves"
         },
         "entity": {
           "$ref": "#/$defs/EntityRef"
@@ -196,6 +229,39 @@
           ],
           "default": null,
           "title": "Osdu Kind Reason"
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "enum": [
+                "source-reference",
+                "retained-capture",
+                "managed-derived"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Origin"
+        },
+        "curves": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ItemCurve"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Curves"
         }
       },
       "required": [
@@ -331,6 +397,114 @@
         }
       },
       "title": "Evidence",
+      "type": "object"
+    },
+    "ItemCurve": {
+      "additionalProperties": false,
+      "description": "E210 s0: one recorded curve of a well-log item: its address (its key when its name repeats, else its mnemonic) and\nthe quantity `catalog describe` states for it, with that quantity's OSDU LogCurveFamily; null when nothing is stated.",
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "quantity": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "quantity"
+            ]
+          },
+          {
+            "properties": {
+              "quantity_status": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "quantity_status"
+            ]
+          },
+          {
+            "properties": {
+              "family": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "family"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "name": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "quantity": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Quantity"
+        },
+        "quantity_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "suggested",
+                "declared"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Quantity Status"
+        },
+        "family": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Family"
+        }
+      },
+      "required": [
+        "name",
+        "quantity",
+        "quantity_status",
+        "family"
+      ],
+      "then": {
+        "properties": {
+          "quantity": {
+            "type": "string"
+          },
+          "quantity_status": {
+            "type": "string"
+          },
+          "family": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "ItemCurve",
       "type": "object"
     },
     "SourceRevision": {

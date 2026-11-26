@@ -1,0 +1,10 @@
+{
+ "about": "E192 s0 (D6): the two parameterised-only table rules run on table.csv (synthetic) as kept with these declarations, with the parameters a run names. s0 runs nothing: expected.json is checked by hand and by the consistent stage; s3 runs the evaluators against it.",
+ "table": "table.csv",
+ "kind": "table-csv/1",
+ "declarations": {"columns": {"cost": {"description": null, "unit": "EUR", "missing": null}, "hours": {"description": null, "unit": "h", "missing": "-1"}}},
+ "parameters": {
+  "columns-present/1": {"columns": [{"column": "cost", "unit": null}, {"column": "days", "unit": null}, {"column": "hours", "unit": "d"}]},
+  "no-empty/1": {"columns": ["cost", "currency", "hours"], "key": "item"}
+ }
+}

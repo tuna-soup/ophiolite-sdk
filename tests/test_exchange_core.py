@@ -256,7 +256,7 @@ def test_expected_equal_to_the_held_version_sends_on_that_parent(project, tmp_pa
     sent = send(e, V3, expected=sha(V2))
     assert sent.outcome == 'sent-version' and sent.sentence == 'Sent Porosity as version 3. Version 2 is kept.'
     assert [c[2] for c in project.calls if c[0] == 'publish'] == [sha(V2)]   # the transmitted parent
-    assert e.held()['poro']['revision'] == sha(V3) and 'expected' not in json.dumps(e._load())
+    assert e.held()['poro']['revision'] == sha(V3) and '"expected"' not in json.dumps(e._load())  # E188: a kept applied_to (this test's folder) names it
     assert refused('nothing-changed', lambda: send(e, V3, expected=sha(V3))).sentence == 'This is the same as version 3; nothing was sent.'
 
 
@@ -517,7 +517,7 @@ def test_outcomes_are_the_closed_list():
     assert set(exchange.OUTCOMES) == {'nothing-new', 'updates', 'access-changed', 'got', 'already-latest', 'not-visible', 'cannot-read-here', 'damaged',
                                       'map-unavailable', 'sent-new', 'sent-version', 'newer-version-exists', 'nothing-changed', 'earlier-version', 'access-refused', 'not-valid',
                                       'not-held', 'too-large', 'outcome-unknown', 'abandoned', 'folder-busy', 'rate-limited', 'sign-in-needed', 'could-not-reach',
-                                      'stays', 'name-unclear', 'name-not-found'}
+                                      'stays', 'name-unclear', 'name-not-found', 'made-for'}  # E192 s2: made-for
     assert isinstance(Outcome('got', 's'), Outcome)
 
 

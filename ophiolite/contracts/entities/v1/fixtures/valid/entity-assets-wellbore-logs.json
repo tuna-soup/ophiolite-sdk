@@ -1,0 +1,194 @@
+{
+  "schema": "ophiolite.entity-assets/1",
+  "entity": {
+    "entity_id": "wellbore-f5a77bc53b2b4008a6067250088f6ceb",
+    "kind": "wellbore",
+    "name": "Synthetic-A"
+  },
+  "items": [
+    {
+      "asset_id": "30272cf11de7d0478a337dc37ef728419bfe539b47e080c4464bce0aa94e8ec3",
+      "revision": "dca578e4d9a3c3d887104752f894e74c1e29a83005d2f1d34f20d3a5ee3bc373",
+      "row": null,
+      "profile": "las2/1",
+      "name": "well",
+      "association": {
+        "assertion_id": "assertion-303ab0ba9c204d5aa46424ed67d80409",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "30272cf11de7d0478a337dc37ef728419bfe539b47e080c4464bce0aa94e8ec3",
+            "revision": "dca578e4d9a3c3d887104752f894e74c1e29a83005d2f1d34f20d3a5ee3bc373"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:56:16Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "osdu_kind_reason": null,
+      "origin": "retained-capture",
+      "curves": [
+        {
+          "name": "GR",
+          "quantity": "Gamma Ray",
+          "quantity_status": "suggested",
+          "family": "Gamma Ray"
+        },
+        {
+          "name": "GRC",
+          "quantity": null,
+          "quantity_status": null,
+          "family": null
+        },
+        {
+          "name": "DT",
+          "quantity": null,
+          "quantity_status": null,
+          "family": null
+        }
+      ]
+    },
+    {
+      "asset_id": "bare",
+      "revision": "f3e13ab2852826daae10293258e1e1056cda619f5d4546d91305ed67f1edd4ab",
+      "row": null,
+      "profile": "las2/1",
+      "name": "Result bare",
+      "association": {
+        "assertion_id": "assertion-41fa36582a4f4c9bb12b5eabda8b71cd",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "bare",
+            "revision": "f3e13ab2852826daae10293258e1e1056cda619f5d4546d91305ed67f1edd4ab"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:56:16Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "osdu_kind_reason": null,
+      "origin": "managed-derived",
+      "curves": [
+        {
+          "name": "GR",
+          "quantity": null,
+          "quantity_status": null,
+          "family": null
+        },
+        {
+          "name": "VSH",
+          "quantity": null,
+          "quantity_status": null,
+          "family": null
+        }
+      ]
+    },
+    {
+      "asset_id": "vsh",
+      "revision": "f3e13ab2852826daae10293258e1e1056cda619f5d4546d91305ed67f1edd4ab",
+      "row": null,
+      "profile": "las2/1",
+      "name": "Result vsh",
+      "association": {
+        "assertion_id": "assertion-88f94724a96748ac92944fb2dc6c9620",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "vsh",
+            "revision": "f3e13ab2852826daae10293258e1e1056cda619f5d4546d91305ed67f1edd4ab"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:56:16Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "osdu_kind_reason": null,
+      "origin": "managed-derived",
+      "curves": [
+        {
+          "name": "GR",
+          "quantity": null,
+          "quantity_status": null,
+          "family": null
+        },
+        {
+          "name": "VSH",
+          "quantity": "Shale Volume Fraction",
+          "quantity_status": "declared",
+          "family": "Shale Volume Fraction"
+        }
+      ]
+    },
+    {
+      "asset_id": "tops",
+      "revision": "0ddac636ba75ded13866f74431c5ad6efa0244810bd24d147779a00155f049c2",
+      "row": null,
+      "profile": "well-tops-csv/1",
+      "name": "Tops",
+      "association": {
+        "assertion_id": "assertion-9adedf93a9934447bac9753e11f10761",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "tops",
+            "revision": "0ddac636ba75ded13866f74431c5ad6efa0244810bd24d147779a00155f049c2"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:56:16Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellboreMarkerSet:1.5.1",
+      "osdu_kind_reason": null,
+      "origin": "managed-derived",
+      "curves": null
+    },
+    {
+      "asset_id": "53f542dcfa2e406ec4e9d7352d30b3ccff79228184dc48cf51d60d969d00c753",
+      "revision": "f356d766bb4f9ed432fb341cb32a23537b51c57f5fe8dbb7b61ebff861274c87",
+      "row": null,
+      "profile": "las2/1",
+      "name": "repeated",
+      "association": {
+        "assertion_id": "assertion-d94f3e4fd5d040e48eaaddfaf6c5d8c9",
+        "predicate": "of-entity",
+        "row": null,
+        "evidence": {
+          "source": {
+            "asset_id": "53f542dcfa2e406ec4e9d7352d30b3ccff79228184dc48cf51d60d969d00c753",
+            "revision": "f356d766bb4f9ed432fb341cb32a23537b51c57f5fe8dbb7b61ebff861274c87"
+          },
+          "statement": "Synthetic header"
+        },
+        "asserted_by": "alice",
+        "asserted_at": "2026-11-25T03:56:16Z"
+      },
+      "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "osdu_kind_reason": null,
+      "origin": "retained-capture",
+      "curves": [
+        {
+          "name": "GR (column 2)",
+          "quantity": null,
+          "quantity_status": null,
+          "family": null
+        },
+        {
+          "name": "GR (column 3)",
+          "quantity": null,
+          "quantity_status": null,
+          "family": null
+        }
+      ]
+    }
+  ],
+  "next_cursor": null
+}

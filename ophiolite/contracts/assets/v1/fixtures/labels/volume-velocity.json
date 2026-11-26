@@ -1,0 +1,103 @@
+{
+  "schema": "ophiolite.seismic-volume/3",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-seismic",
+    "revision": "b42095c0c9aab74a659cfd8e70375a80994b2d24dd7c3b5ed6f10def06bb468e",
+    "profile": "segy/3"
+  },
+  "source_sha256": "b42095c0c9aab74a659cfd8e70375a80994b2d24dd7c3b5ed6f10def06bb468e",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "seismic-volume/3",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "seismic-volume",
+    "format": "2-byte two's complement integer",
+    "format_code": 3,
+    "segy_revision": "1.0",
+    "traces": 5,
+    "samples": 4,
+    "trace_bytes": 248,
+    "inline": {
+      "first": 10,
+      "last": 12,
+      "step": 2,
+      "count": 2
+    },
+    "crossline": {
+      "first": 100,
+      "last": 102,
+      "step": 1,
+      "count": 3
+    },
+    "sample_interval": 4.0,
+    "sample_unit": "ms",
+    "z_domain": "time",
+    "crs": "EPSG:23031",
+    "datum": "unknown",
+    "first_cdp": {
+      "x": 500000.0,
+      "y": 5800000.0
+    },
+    "last_cdp": {
+      "x": 500025.0,
+      "y": 5800050.0
+    },
+    "first_sample": 0,
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every trace header and sample byte for byte (the exact original is the stored representation)"
+      ],
+      "losses": [
+        "Slices convert samples to float64 exactly; nothing is resampled"
+      ],
+      "unknown_context": [
+        "datum"
+      ],
+      "decisions": [
+        "Binary header bytes 3225\u20133226: data format 3 (2-byte two's complement integer), big-endian; a code is its own value, no scale.",
+        "Trace header bytes 189\u2013192: inline number.",
+        "Trace header bytes 193\u2013196: crossline number.",
+        "5 traces on a grid of 2 inlines \u00d7 3 crosslines; 1 position has no trace and is stated, never filled."
+      ]
+    },
+    "cells": 6,
+    "absent": 1
+  },
+  "decisions": [
+    "Binary header bytes 3225\u20133226: data format 3 (2-byte two's complement integer), big-endian; a code is its own value, no scale.",
+    "Trace header bytes 189\u2013192: inline number.",
+    "Trace header bytes 193\u2013196: crossline number.",
+    "5 traces on a grid of 2 inlines \u00d7 3 crosslines; 1 position has no trace and is stated, never filled."
+  ],
+  "chunks": [
+    {
+      "inline": 10,
+      "traces": 3,
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "bytes": 24
+    },
+    {
+      "inline": 12,
+      "traces": 2,
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "bytes": 16
+    }
+  ],
+  "positions": {
+    "inline_byte": 189,
+    "crossline_byte": 193,
+    "cdp_x_byte": 181,
+    "cdp_y_byte": 185
+  },
+  "holds": {
+    "samples": "velocity",
+    "velocity_type": "interval",
+    "velocity_unit": "m/s"
+  }
+}

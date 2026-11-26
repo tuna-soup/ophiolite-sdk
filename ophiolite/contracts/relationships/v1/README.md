@@ -14,6 +14,12 @@ many objects of one kind a subject may have, whether it binds exact revisions, w
   asserted on this route: `in-survey` (an exact revision is a member of a survey; the membership itself) and the
   relations between two members of one survey, `horizon-of`, `fault-in`, `well-in`, `line-of` and `time-depth-of`.
   Only survey commands write them; the roles each joins are in `surveys/v1/roles.json`.
+- 1.3.0 (E192 s0) adds the class `stated` and its one predicate `made-for`: an exact revision was made for another
+  exact revision, as the person who sent it stated (a sent table that says which design version it was made for). It
+  is a declaration by people, never a derivation: no witnessed run stands behind it, and no rights, root, retention or
+  reuse reader reads it (ADR 0016 addendum). It is written only with the version it describes (send and upload,
+  E192 slice 1), never on this route, whose objects are entities. Reads list it beside the parents, as
+  `stated_parents`, never among them.
 
 Associations point from data to entities. No asset payload or metadata carries an entity, with one exception: a
 corrected well position (E74b). A derived `well-location/1` item whose first version names a well and derives from a

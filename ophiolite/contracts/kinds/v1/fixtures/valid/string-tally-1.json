@@ -1,0 +1,20 @@
+{
+ "schema": "ophiolite.table-kind/1",
+ "id": "8c1e5b2a7f904d3eb6a1c07d9e2f4b58",
+ "version": 1,
+ "digest": "eaf8b95810942eca41e4ce6677de1ad469d9b5f785801632f264b1c54fd36fb0",
+ "declaration": {
+  "word": "string-tally",
+  "label": "Strings per well",
+  "row": "One casing string in one well",
+  "columns": [
+   {"name": "well", "type": "text", "required": true, "empty": false},
+   {"name": "string", "type": "text", "required": true, "empty": false},
+   {"name": "length", "type": "number", "required": false, "empty": false, "quantity": "length", "unit": "m"},
+   {"name": "cemented", "type": "yes-no", "required": false, "empty": false}
+  ],
+  "key": ["well", "string"]
+ },
+ "declared_by": "person-drilling-1",
+ "declared_at": "2026-11-24T09:15:00Z"
+}

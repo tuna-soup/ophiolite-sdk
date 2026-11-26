@@ -1,0 +1,489 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/samples/v1/sample-index-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.sample-index/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "SampleAcquisition": {
+      "additionalProperties": false,
+      "description": "The input actually fetched to make the bundle (an input address of the OSD record), apart from its origin.",
+      "properties": {
+        "url": {
+          "maxLength": 2048,
+          "pattern": "^[a-z][a-z0-9+.-]*://\\S+$",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "SampleAcquisition",
+      "type": "object"
+    },
+    "SampleAsset": {
+      "additionalProperties": false,
+      "description": "One asset of the bundle manifest, by name: its type, id, revision and name (null when the manifest has none).",
+      "properties": {
+        "type": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Type",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "required": [
+        "type",
+        "asset_id",
+        "revision",
+        "name"
+      ],
+      "title": "SampleAsset",
+      "type": "object"
+    },
+    "SampleBundle": {
+      "additionalProperties": false,
+      "description": "The bundle in the public store: its relative key, its digest and bytes, and the digest of its manifest.",
+      "properties": {
+        "key": {
+          "description": "Relative to the public store; resolved against its address in slice 1",
+          "maxLength": 512,
+          "pattern": "^([a-z0-9][a-z0-9_-]*(\\.[a-z0-9_-]+)*/)*[A-Za-z0-9][A-Za-z0-9_-]*(\\.[A-Za-z0-9_-]+)*$",
+          "title": "Key",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 1,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "sha256",
+        "bytes",
+        "manifest_sha256"
+      ],
+      "title": "SampleBundle",
+      "type": "object"
+    },
+    "SampleCard": {
+      "additionalProperties": false,
+      "description": "What the card shows before the press: its title, the place and what the sample holds, in words.",
+      "properties": {
+        "title": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "place": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Place",
+          "type": "string"
+        },
+        "holds": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Holds",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "place",
+        "holds"
+      ],
+      "title": "SampleCard",
+      "type": "object"
+    },
+    "SampleContents": {
+      "additionalProperties": false,
+      "description": "What the bundle holds, taken from its manifest: names and lists, never a count (R5).",
+      "properties": {
+        "assets": {
+          "items": {
+            "$ref": "#/$defs/SampleAsset"
+          },
+          "maxItems": 128,
+          "title": "Assets",
+          "type": "array"
+        },
+        "entities": {
+          "items": {
+            "$ref": "#/$defs/SampleEntity"
+          },
+          "maxItems": 256,
+          "title": "Entities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "assets",
+        "entities"
+      ],
+      "title": "SampleContents",
+      "type": "object"
+    },
+    "SampleCredit": {
+      "additionalProperties": false,
+      "description": "The sentence a person sees for an input: the publisher's own (prescribed) or written by us from the terms.",
+      "properties": {
+        "text": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "prescribed",
+            "authored"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/SampleCreditEvidence"
+        }
+      },
+      "required": [
+        "text",
+        "kind"
+      ],
+      "title": "SampleCredit",
+      "type": "object"
+    },
+    "SampleCreditEvidence": {
+      "additionalProperties": false,
+      "description": "Where an authored credit comes from: the day the terms were read and the rights row or page read.",
+      "properties": {
+        "read_on": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+          "title": "Read On",
+          "type": "string"
+        },
+        "where": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Where",
+          "type": "string"
+        }
+      },
+      "required": [
+        "read_on",
+        "where"
+      ],
+      "title": "SampleCreditEvidence",
+      "type": "object"
+    },
+    "SampleEntity": {
+      "additionalProperties": false,
+      "description": "One entity of the bundle manifest (a well or a wellbore), by name.",
+      "properties": {
+        "kind": {
+          "maxLength": 32,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "entity_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "entity_id",
+        "name"
+      ],
+      "title": "SampleEntity",
+      "type": "object"
+    },
+    "SampleEntry": {
+      "additionalProperties": false,
+      "description": "One sample: what the card offers and where its bundle is, what it was made from and under which licence.",
+      "properties": {
+        "id": {
+          "description": "URL-safe and never reused; the address a card and a public page name",
+          "maxLength": 40,
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "card": {
+          "$ref": "#/$defs/SampleCard"
+        },
+        "bundle": {
+          "$ref": "#/$defs/SampleBundle"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SampleSource"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "licence": {
+          "$ref": "#/$defs/SampleLicence"
+        },
+        "contents": {
+          "$ref": "#/$defs/SampleContents"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "card",
+        "bundle",
+        "sources",
+        "licence",
+        "contents"
+      ],
+      "title": "SampleEntry",
+      "type": "object"
+    },
+    "SampleLicence": {
+      "additionalProperties": false,
+      "description": "The licence block computed from the sources (OSD E40 design 4(d)); an entry states it and samples.py compares.",
+      "properties": {
+        "spdx": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spdx"
+        },
+        "redistribution": {
+          "const": "allowed",
+          "title": "Redistribution",
+          "type": "string"
+        },
+        "attribution": {
+          "enum": [
+            "required",
+            "not-required"
+          ],
+          "title": "Attribution",
+          "type": "string"
+        },
+        "share_alike": {
+          "title": "Share Alike",
+          "type": "boolean"
+        },
+        "statements": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Statements",
+          "type": "array"
+        }
+      },
+      "required": [
+        "spdx",
+        "redistribution",
+        "attribution",
+        "share_alike",
+        "statements"
+      ],
+      "title": "SampleLicence",
+      "type": "object"
+    },
+    "SampleOrigin": {
+      "additionalProperties": false,
+      "description": "The catalogue origin of an input as its OSD record states it (the page a person opens), kept verbatim.",
+      "properties": {
+        "url": {
+          "maxLength": 2048,
+          "pattern": "^[a-z][a-z0-9+.-]*://\\S+$",
+          "title": "Url",
+          "type": "string"
+        },
+        "access": {
+          "enum": [
+            "anonymous",
+            "registration",
+            "api",
+            "request",
+            "purchase"
+          ],
+          "title": "Access",
+          "type": "string"
+        },
+        "manifest_url": {
+          "maxLength": 2048,
+          "pattern": "^[a-z][a-z0-9+.-]*://\\S+$",
+          "title": "Manifest Url",
+          "type": "string"
+        },
+        "notes": {
+          "maxLength": 400,
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "access"
+      ],
+      "title": "SampleOrigin",
+      "type": "object"
+    },
+    "SampleReading": {
+      "additionalProperties": false,
+      "description": "The reading of the terms by the person who read them: when, and whether commercial use is allowed.",
+      "properties": {
+        "date": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+          "title": "Date",
+          "type": "string"
+        },
+        "commercial_use": {
+          "enum": [
+            "allowed",
+            "not-allowed",
+            "unknown"
+          ],
+          "title": "Commercial Use",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "commercial_use"
+      ],
+      "title": "SampleReading",
+      "type": "object"
+    },
+    "SampleSource": {
+      "additionalProperties": false,
+      "description": "One input of the sample: its OSD record, the day it was fetched, its origin and acquisition, its licence object\nkept whole (free: its fields are read in samples.py), the reading of the terms and the credit.",
+      "properties": {
+        "osd_record": {
+          "description": "The Open Subsurface Data record id of the input",
+          "maxLength": 160,
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Osd Record",
+          "type": "string"
+        },
+        "retrieved": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+          "title": "Retrieved",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/SampleOrigin"
+        },
+        "acquired_from": {
+          "$ref": "#/$defs/SampleAcquisition"
+        },
+        "licence": {
+          "additionalProperties": true,
+          "description": "The OSD record's licence object, whole and unchanged",
+          "title": "Licence",
+          "type": "object"
+        },
+        "reading": {
+          "$ref": "#/$defs/SampleReading"
+        },
+        "credit": {
+          "$ref": "#/$defs/SampleCredit"
+        }
+      },
+      "required": [
+        "osd_record",
+        "retrieved",
+        "origin",
+        "acquired_from",
+        "licence",
+        "reading"
+      ],
+      "title": "SampleSource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The list of samples the public store offers (it lives in the store, never in the repository: R2).",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.sample-index/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "samples": {
+      "items": {
+        "$ref": "#/$defs/SampleEntry"
+      },
+      "maxItems": 64,
+      "title": "Samples",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "samples"
+  ],
+  "title": "SampleIndex",
+  "type": "object"
+}

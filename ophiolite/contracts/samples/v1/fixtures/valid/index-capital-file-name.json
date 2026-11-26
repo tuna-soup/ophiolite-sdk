@@ -1,0 +1,73 @@
+{
+ "schema": "ophiolite.sample-index/1",
+ "samples": [
+  {
+   "id": "penobscot",
+   "title": "Synthetic sample B",
+   "card": {
+    "title": "Synthetic sample B",
+    "place": "A synthetic place",
+    "holds": "One synthetic input under a share-alike licence, in a bundle whose file name keeps its capitals"
+   },
+   "bundle": {
+    "key": "synthetic/penobscot/Synthetic-Bundle_B.v2.zip",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bytes": 1024,
+    "manifest_sha256": "556582b6e328491782c9083abdc621ad53bd077057b710ed2239484f60fd28a6"
+   },
+   "sources": [
+    {
+     "osd_record": "synthetic/source-b",
+     "retrieved": "2026-11-25",
+     "origin": {
+      "url": "https://example.org/synthetic/source-b",
+      "access": "anonymous"
+     },
+     "acquired_from": {
+      "url": "https://example.org/synthetic/source-b/input"
+     },
+     "licence": {
+      "name": "Synthetic share-alike terms B",
+      "spdx": "CC-BY-SA-3.0",
+      "url": "https://example.org/synthetic/terms-b",
+      "redistribution": "allowed",
+      "attribution": "required",
+      "share_alike": true
+     },
+     "reading": {
+      "date": "2026-11-25",
+      "commercial_use": "allowed"
+     },
+     "credit": {
+      "text": "Contains synthetic data B, shared alike under synthetic terms B.",
+      "kind": "authored",
+      "evidence": {
+       "read_on": "2026-11-25",
+       "where": "The synthetic rights row B, read for the fixtures."
+      }
+     }
+    }
+   ],
+   "licence": {
+    "spdx": "CC-BY-SA-3.0",
+    "redistribution": "allowed",
+    "attribution": "required",
+    "share_alike": true,
+    "statements": [
+     "Contains synthetic data B, shared alike under synthetic terms B."
+    ]
+   },
+   "contents": {
+    "assets": [
+     {
+      "type": "trajectory",
+      "asset_id": "synthetic-path-b",
+      "revision": "7777777777777777777777777777777777777777777777777777777777777777",
+      "name": "synthetic-path-b"
+     }
+    ],
+    "entities": []
+   }
+  }
+ ]
+}

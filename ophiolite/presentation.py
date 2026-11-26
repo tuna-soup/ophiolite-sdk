@@ -53,19 +53,21 @@ def send_again(arguments, asset, revision):
     line = dict(arguments)
     if line.get('of') is not None: line['of'], line['expected'] = asset, revision
     else: line.pop('of', None); line.pop('expected', None)
-    order = ('name', 'profile', 'how', 'based_on', 'of', 'declare', 'extra', 'expected')
+    order = ('name', 'profile', 'how', 'based_on', 'of', 'declare', 'extra', 'made_for', 'expected')  # E192 s2: made_for
     text = 'ex.send(new_file, ' + ', '.join('%s=%r' % (k, _lists(line[k])) for k in order if line.get(k) is not None) + ')'
     return text if len(text) <= RECIPE_LIMIT else None
 
 
-def publication_recipe(*, name, from_, method, of_entity=None):
-    """A snapshot of a `publish_derived` call's arguments, taken at call time; None when one is not plain data."""
+def publication_recipe(*, name, from_, method, of_entity=None, made_for=None):
+    """A snapshot of a `publish_derived` call's arguments, taken at call time; None when one is not plain data. E192 s2:
+    `made_for` (the checked wire list) only when given, so other recipes are as before."""
     from .publish import _parent
     try:
         items = from_ if isinstance(from_, (list, tuple)) and not (len(from_) == 2 and isinstance(from_[0], str)) else [from_]
         arguments = {'name': name, 'from_': [[p['asset_id'], p['revision']] for p in map(_parent, items)],
                      'method': method.model_dump() if hasattr(method, 'model_dump') else dict(method),
                      'of_entity': dict(of_entity) if of_entity is not None else None}
+        if made_for is not None: arguments['made_for'] = [[p['asset_id'], p['revision']] for p in made_for]
         return {'call': 'publish_derived', 'arguments': copy.deepcopy(arguments)}
     except Exception:
         return None
@@ -75,7 +77,7 @@ def publish_again(arguments, asset, revision, command_id):
     """The "Publish again" line: the next version of `asset` on `revision`, under the minted `command_id`."""
     if not _plain(arguments): return None
     line = {**arguments, 'command_id': command_id, 'new_version_of': asset, 'expected_parent': revision}
-    order = ('name', 'from_', 'method', 'of_entity', 'command_id', 'new_version_of', 'expected_parent')
+    order = ('name', 'from_', 'method', 'of_entity', 'made_for', 'command_id', 'new_version_of', 'expected_parent')  # E192 s2: made_for
     text = 'client.publish_derived(new_written, ' + ', '.join('%s=%r' % (k, _lists(line[k])) for k in order if line.get(k) is not None) + ')'
     return text if len(text) <= RECIPE_LIMIT else None
 

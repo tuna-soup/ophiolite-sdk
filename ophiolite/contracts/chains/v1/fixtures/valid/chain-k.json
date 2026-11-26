@@ -1,0 +1,17 @@
+{
+ "schema": "ophiolite.chain/1",
+ "label": "Before drilling a well",
+ "trigger": {"on": "request"},
+ "steps": [
+  {"key": "tops", "label": "Tops residuals", "kind": "tool", "follows": [], "tool": {"procedure": "well-residuals", "outcome": {"id": "outcome-tops", "version": 1}, "made_from": []}},
+  {"key": "velocities", "label": "Velocity model", "kind": "tool", "follows": ["tops"], "tool": {"procedure": "velocity-model", "outcome": {"id": "outcome-velocities", "version": 1}, "made_from": []}},
+  {"key": "regional", "label": "Regional seismic review", "kind": "work", "follows": ["velocities"], "work": {"kind": "report/1", "made_from": []}, "done": {"criteria": [{"key": "map", "label": "Regional map attached", "proof": {"kind": "attachment", "label": "regional map"}}], "sign_off": {"role": "geoscientist"}}, "applies_when": {"step": "tops", "measure": "largest_residual", "comparison": "above", "value": 2.0, "unit": "m"}, "applies": ["exploration"]},
+  {"key": "pressure", "label": "Pressure prediction", "kind": "work", "follows": ["velocities"], "work": {"kind": "las2/1", "made_from": ["velocities"]}, "done": {"criteria": [{"key": "offsets", "label": "Two offset wells", "proof": {"kind": "made-from", "item_kind": "las2/1", "at_least": 2, "per": "item", "selection": null, "stated": "ignore"}}, {"key": "chart", "label": "Pressure chart attached", "proof": {"kind": "attachment", "label": "chart"}, "applies": ["exploration"]}], "sign_off": {"role": "geoscientist"}}},
+  {"key": "review", "label": "Design review needed?", "kind": "choice", "follows": ["pressure"], "choice": {"question": "Does the casing design need a review?", "choices": [{"id": "yes", "label": "Review it"}, {"id": "no", "label": "No review"}]}, "applies_when": {"step": "tops", "measure": "largest_residual", "comparison": "above", "value": 5.0, "unit": "m"}},
+  {"key": "casing", "label": "Casing design", "kind": "work", "follows": ["pressure", "review"], "work": {"kind": "casing-design/1", "made_from": ["pressure"]}, "done": {"criteria": [{"key": "inputs", "label": "Made from the current pressure prediction", "proof": {"kind": "current-input", "step": "pressure", "stated": "ignore"}}], "sign_off": {"role": "engineer"}}},
+  {"key": "cost", "label": "Cost estimate", "kind": "work", "follows": ["casing"], "work": {"kind": "report/1", "made_from": ["casing"]}, "done": {"criteria": [{"key": "estimate", "label": "Estimate attached", "proof": {"kind": "attachment", "label": "estimate"}}], "sign_off": {"role": "engineer"}}},
+  {"key": "approve", "label": "Approve the well?", "kind": "choice", "follows": ["cost", "regional"], "choice": {"question": "Approve the well for drilling?", "choices": [{"id": "approve", "label": "Approve"}, {"id": "hold", "label": "Hold"}]}}
+ ],
+ "roles": [{"key": "geoscientist", "label": "Geoscientist", "members": ["ana"]}, {"key": "engineer", "label": "Engineer", "members": ["ben"]}],
+ "job_kinds": [{"key": "exploration", "label": "Exploration well"}, {"key": "appraisal", "label": "Appraisal well"}, {"key": "infill", "label": "Infill well"}]
+}

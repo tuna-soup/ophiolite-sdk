@@ -1,0 +1,8 @@
+{
+  "id": "ophiolite.chain/1",
+  "version": "1.1.0",
+  "path": "chains/v1/chain-schema.json",
+  "file_sha256": "e90d9e7a3187a7b76baefeb1a8dfae3701173bba4c589689782218c7097feece",
+  "file": "the released file bytes: the document with indent 2 and one trailing newline, as main served them before E190 s0",
+  "frozen_by": "E190 s0 C1: 1.2.0 minus job_kinds, the step's and the criterion's applies, the JobKind definition, version set back, is these bytes"
+}

@@ -3,13 +3,13 @@
   "$id": "https://ophiolite.dev/contracts/rules/v1/data-rule-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.data-rule/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
     "RuleParameter": {
       "additionalProperties": false,
-      "description": "One setting of a rule. `minimum`/`maximum` bound the admissible value (inclusive); `compare` is how the rule\ncompares data with the value; `source` cites the default and the range.",
+      "description": "One setting of a rule. `minimum`/`maximum` bound the admissible value (inclusive); `compare` is how the rule\ncompares data with the value; `source` cites the default and the range. 1.1.0 (E192 s0): `column-units`,\n`columns` and `column` name a table's columns; their default is null, and only theirs (a parameterised-only rule\nruns only when a run names them).",
       "properties": {
         "name": {
           "pattern": "^[a-z][a-z0-9_]{0,31}$",
@@ -22,7 +22,10 @@
             "number",
             "integer",
             "choice",
-            "boolean"
+            "boolean",
+            "column-units",
+            "columns",
+            "column"
           ],
           "title": "Type",
           "type": "string"
@@ -52,6 +55,9 @@
             },
             {
               "type": "boolean"
+            },
+            {
+              "type": "null"
             }
           ],
           "title": "Default"
@@ -135,7 +141,7 @@
     },
     "Words": {
       "additionalProperties": false,
-      "description": "The sentence a person reads for a result, in the E86 form: a template and how its examples are written (\u00a71.5).",
+      "description": "The sentence a person reads for a result, in the E86 form: a template and how its examples are written (\u00a71.5).\n1.1.0 (E192 s0): `cells` (a row and a column) and `columns` (a whole column).",
       "properties": {
         "template": {
           "maxLength": 300,
@@ -147,7 +153,9 @@
           "enum": [
             "rows",
             "depths",
-            "none"
+            "none",
+            "cells",
+            "columns"
           ],
           "title": "Examples",
           "type": "string"

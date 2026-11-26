@@ -1,0 +1,55 @@
+{
+ "schema": "ophiolite.chain-run/1",
+ "id": "00000000000000000000000000000102",
+ "project": "p-proof",
+ "chain": {"id": "chain-pressure", "version": 1, "label": "Pressure study after new velocities", "declaration": {
+  "schema": "ophiolite.chain/1",
+  "label": "Pressure study after new velocities",
+  "trigger": {"on": "version", "kind": "las2/1", "selection": null},
+  "steps": [
+   {"key": "velocities", "label": "Velocities", "kind": "tool", "follows": [],
+    "tool": {"procedure": "velocity-model", "outcome": {"id": "outcome-velocities", "version": 1}, "made_from": []}},
+   {"key": "pressure", "label": "Pressure study", "kind": "work", "follows": ["velocities"],
+    "work": {"kind": "las2/1", "made_from": ["velocities"]},
+    "done": {"criteria": [
+      {"key": "wells", "label": "Two wells of pressure points", "proof": {"kind": "made-from", "item_kind": "las2/1", "at_least": 2, "per": "well", "selection": null, "stated": "ignore"}},
+      {"key": "inputs-current", "label": "Made from the current velocities", "proof": {"kind": "current-input", "step": "velocities", "stated": "ignore"}},
+      {"key": "gr", "label": "Gamma ray within range", "proof": {"kind": "rule", "rule": "gr-range/1", "parameters": {"maximum": 200}}},
+      {"key": "check", "label": "Pressure check accepted", "proof": {"kind": "outcome", "outcome": {"id": "pp-check", "version": 1}}},
+      {"key": "chart", "label": "Chart attached", "proof": {"kind": "attachment", "label": "chart"}}],
+     "sign_off": {"role": "geoscientist"}}}
+  ],
+  "roles": [{"key": "geoscientist", "label": "Geoscientist", "members": ["ana"]}]
+ }, "closes_on": "proof"},
+ "trigger": {"on": "version", "asset_id": "velocities", "revision": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1", "kind": "las2/1"},
+ "started": {"by": {"person": "ben", "agent": null, "job": null}, "at": 1795700000.0},
+ "frozen": {"outcomes": [{"step": "velocities", "id": "outcome-velocities", "version": 1}],
+            "tools": [{"step": "velocities", "procedure": "velocity-model", "digest": "e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2"}]},
+ "state": "open",
+ "steps": [
+  {"key": "velocities", "label": "Velocities", "kind": "tool", "follows": [], "state": "accepted", "condition": null,
+   "result": {"asset_id": "velocities", "revision": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1", "check": {"id": "chk-v1", "verdict": "accepted", "measures": null}},
+   "newer": null,
+   "acts": [{"act": "attached", "by": {"person": "ben", "agent": null, "job": null}, "at": 1795700100.0,
+             "result": {"asset_id": "velocities", "revision": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"}, "check": {"id": "chk-v1", "verdict": "accepted"}}],
+   "acts_count": 1, "acts_next": null},
+  {"key": "pressure", "label": "Pressure study", "kind": "work", "follows": ["velocities"], "state": "criteria-not-met", "condition": null,
+   "result": {"asset_id": "pressure-a", "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", "check": null},
+   "newer": null,
+   "acts": [{"act": "attached", "by": {"person": "ben", "agent": "agent-ben", "job": "job-1"}, "at": 1795700200.0,
+             "result": {"asset_id": "pressure-a", "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"}, "check": null}],
+   "acts_count": 1, "acts_next": null,
+   "criteria": {"revision": 3, "items": [
+     {"key": "wells", "label": "Two wells of pressure points", "proof_kind": "made-from", "state": "fails", "exception": null,
+      "proofs": [{"kind": "version", "asset_id": "pressure-well-a", "revision": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1"}]},
+     {"key": "inputs-current", "label": "Made from the current velocities", "proof_kind": "current-input", "state": "holds", "exception": null,
+      "proofs": [{"kind": "version", "asset_id": "velocities", "revision": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"}]},
+     {"key": "gr", "label": "Gamma ray within range", "proof_kind": "rule", "state": "holds", "exception": null,
+      "proofs": [{"kind": "rule-evidence", "asset_id": "pressure-a", "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", "rule": "gr-range/1",
+                  "parameters_sha256": "90077179777af9a453a8e5106d9c80a9e5ce66af8f2b20a9ed1dc65b42865411"}]},
+     {"key": "check", "label": "Pressure check accepted", "proof_kind": "outcome", "state": "holds", "exception": null,
+      "proofs": [{"kind": "check-record", "id": "chk-pp1"}]},
+     {"key": "chart", "label": "Chart attached", "proof_kind": "attachment", "state": "missing", "exception": null, "proofs": []}],
+    "signed": null, "since_sign_off": []}}
+ ]
+}

@@ -50,12 +50,20 @@ with its file.
 ## Lifecycle badges
 
 - `preview`: served and tested, but the deployment may replace it with a new
-  id suffix inside the program without a transition release. Every current
-  pilot schema and profile is `preview` because none has qualification
-  criteria beyond its own fixtures.
+  id suffix inside the program without a transition release. Every schema
+  and profile that is not supported is `preview`.
 - `supported`: qualification criteria are written in the entry
   (`qualified_by`), only additive 1.x changes are allowed, and deprecation
-  requires a transition release with an announced cutoff.
+  requires a transition release with an announced cutoff. The supported
+  contracts are the ones the MVP journey moves, measured on 24 November 2026
+  (E187 s1) and, for the transfer receipt, on 25 November 2026 (E187 s2; the
+  list is in `docs/api-versioning.md`). Each is kept as a frozen copy
+  (`supported-1`, `supported-2`, beside the gateway's tests), and a change the gate
+  (`tools/supported_gate.py`) does not recognise as additive fails the build:
+  an optional property at a plain position, with the entry's minor version
+  raised, and only where the released SDK is shown to read it. A model that
+  publishes a supported schema states `'lifecycle': 'supported'` in its
+  `CONTRACT`, and the generator writes it.
 - `deprecated`: still served until the `cutoff` date recorded in the entry;
   consumers must move to the entry named in `replaced_by`.
 

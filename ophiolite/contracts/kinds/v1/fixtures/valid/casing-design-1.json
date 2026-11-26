@@ -1,0 +1,21 @@
+{
+ "schema": "ophiolite.table-kind/1",
+ "id": "3f2a9c41d07b4e6f8a15c2e9b04d7a63",
+ "version": 1,
+ "digest": "0f7e4f5c48c9b9f035619396f2722a65a7d70613c2bdb6494bfefa3e58445f85",
+ "declaration": {
+  "word": "casing-design",
+  "label": "Casing strings",
+  "row": "One casing string",
+  "columns": [
+   {"name": "string", "type": "text", "required": true, "empty": false},
+   {"name": "od", "type": "number", "required": true, "empty": false, "quantity": "length", "unit": "in"},
+   {"name": "shoe_depth", "type": "number", "required": true, "empty": false, "quantity": "length", "unit": "m"},
+   {"name": "weight", "type": "number", "required": false, "empty": true, "quantity": "mass per length", "unit": "lbm/ft"},
+   {"name": "grade", "type": "text", "required": false, "empty": true}
+  ],
+  "key": ["string"]
+ },
+ "declared_by": "person-drilling-1",
+ "declared_at": "2026-11-24T09:00:00Z"
+}

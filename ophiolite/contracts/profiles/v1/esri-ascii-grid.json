@@ -2,7 +2,7 @@
   "schema": "ophiolite.contract-profile/1",
   "id": "esri-ascii-grid/1",
   "kind": "source",
-  "lifecycle": "preview",
+  "lifecycle": "supported",
   "display_name": "Horizon grid (ESRI ASCII)",
   "description": "A regular grid of surface values in the ESRI ASCII grid format, kept byte for byte as the uploader provided it.",
   "serves": [

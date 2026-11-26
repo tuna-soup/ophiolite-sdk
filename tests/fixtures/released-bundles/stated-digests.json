@@ -1,0 +1,10 @@
+{
+  "1.19": {
+    "assets/0/descriptor-GR.json": "ef2ea648509589132279471360f766694304c55d6e22b0441468d4699a5565cc",
+    "manifest.json": "af05c447d92005b24eae49b5ca67c3e9bc886c488d01bec62bed9b608c56b065"
+  },
+  "2.19": {
+    "assets/0/descriptor.json": "0dff12411db3c713129caa0b1b5c1e81dd8b272f77a6cfde1e4a1a27faa12f37",
+    "manifest.json": "706426a9a2f5506d6b9f7250ec87e3614fd6c2c7a9c8a952ea1dcf7e938c6d3c"
+  }
+}

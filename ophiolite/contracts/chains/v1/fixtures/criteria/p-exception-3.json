@@ -1,0 +1,26 @@
+{
+ "schema": "ophiolite.step-criteria/1",
+ "project": "p-proof",
+ "run": "00000000000000000000000000000106",
+ "step": "pressure",
+ "result": {"asset_id": "pressure-a", "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"},
+ "revision": 3,
+ "cause": "exception",
+ "items": [
+  {"key": "wells", "label": "Two wells of pressure points", "proof_kind": "made-from", "state": "holds", "exception": null, "count": null, "examples": [],
+   "proofs": [{"kind": "version", "asset_id": "pressure-well-a", "revision": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1"},
+              {"kind": "version", "asset_id": "pressure-well-b", "revision": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"}]},
+  {"key": "inputs-current", "label": "Made from the current velocities", "proof_kind": "current-input", "state": "holds", "exception": null, "count": null, "examples": [],
+   "proofs": [{"kind": "version", "asset_id": "velocities", "revision": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"}]},
+  {"key": "gr", "label": "Gamma ray within range", "proof_kind": "rule", "state": "holds", "exception": null, "count": null, "examples": [],
+   "proofs": [{"kind": "rule-evidence", "asset_id": "pressure-a", "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", "rule": "gr-range/1",
+               "parameters_sha256": "90077179777af9a453a8e5106d9c80a9e5ce66af8f2b20a9ed1dc65b42865411"}]},
+  {"key": "check", "label": "Pressure check accepted", "proof_kind": "outcome", "state": "holds", "exception": null, "count": null, "examples": [],
+   "proofs": [{"kind": "check-record", "id": "chk-pp1"}]},
+  {"key": "chart", "label": "Chart attached", "proof_kind": "attachment", "state": "exception", "count": null, "examples": [],
+   "exception": {"by": {"person": "ben", "agent": null, "job": null}, "at": 1795700300.0, "reason": "The chart is in the study report on the shared drive"},
+   "proofs": [{"kind": "exception", "act": 2}]}
+ ],
+ "signed": null,
+ "at": 1795700300.0
+}

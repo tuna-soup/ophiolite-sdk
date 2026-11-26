@@ -3,11 +3,11 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v1/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/1",
-    "version": "1.10.0",
+    "version": "1.19.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifest",
-  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Readers accept bundle_version major 1 and refuse other majors. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept.",
+  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Readers accept bundle_version major 1 and refuse other majors. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept. 1.19 (E192 s0): the revisions a sender stated an asset was made for (stated_parents, with stated_parent_visibility; both or neither), beside and never among the parents; 1.11 to 1.18 changed no schema.",
   "type": "object",
   "required": [
     "schema",
@@ -273,6 +273,21 @@
             "complete",
             "restricted"
           ]
+        },
+        "stated_parents": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/BundleParent"
+          },
+          "description": "1.19.0 (E192): the exact revisions the sender stated this one was made for (made-for, class stated) that the exporter may disclose, as permitted lineage lists parents; never among the parents and never a derivation. Absent when the revision names none; empty only when every one is withheld (restricted)."
+        },
+        "stated_parent_visibility": {
+          "enum": [
+            "complete",
+            "restricted"
+          ],
+          "description": "1.19.0 (E192): as parent_visibility, for stated_parents; present exactly when the revision names a stated parent."
         },
         "omissions": {
           "type": "array",

@@ -1,0 +1,13 @@
+{
+ "description": "E211 s0. Each synthetic manifest's SHA-256, computed once with sha256sum over the committed file and written by hand, and the manifest each fixture bundle key stands for (what a store would serve at that key).",
+ "manifests": {
+  "synthetic-a.manifest.json": "0aaed03f0638d6d72f18e7d47a2088c3650c72fc16eed8b1523d9afefbb99fcc",
+  "synthetic-b.manifest.json": "556582b6e328491782c9083abdc621ad53bd077057b710ed2239484f60fd28a6"
+ },
+ "keys": {
+  "synthetic/f3-block/bundle.zip": "synthetic-a.manifest.json",
+  "synthetic/penobscot/bundle.zip": "synthetic-b.manifest.json",
+  "synthetic/poseidon/bundle.zip": "synthetic-a.manifest.json",
+  "synthetic/utah-forge/bundle.zip": "synthetic-b.manifest.json"
+ }
+}

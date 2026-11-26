@@ -4,7 +4,7 @@
   "x-ophiolite": {
     "id": "ophiolite.asset-summary/1",
     "version": "1.5.0",
-    "lifecycle": "preview"
+    "lifecycle": "supported"
   },
   "$defs": {
     "Display": {

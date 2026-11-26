@@ -1,0 +1,76 @@
+{
+ "description": "E189 s0 (strategy §7 c, d, a2): declarations and runs with criteria, each changed from a valid P fixture by one patch. A schema case is refused by the published schema at `at` and by the model; a semantic case is schema-valid and gives exactly its reasons from chains.chain_problems or chains.run_problems.",
+ "base": "valid/chain-p.json",
+ "cases": [
+  {"name": "seventeen-criteria", "oracle": "schema", "at": "/steps/1/done/criteria", "patch": [{"op": "fill", "path": "/steps/1/done/criteria", "count": 17}]},
+  {"name": "no-criteria", "oracle": "schema", "at": "/steps/1/done/criteria", "patch": [{"op": "replace", "path": "/steps/1/done/criteria", "value": []}]},
+  {"name": "at-least-zero", "oracle": "schema", "at": "/steps/1/done/criteria/0/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/0/proof/at_least", "value": 0}]},
+  {"name": "at-least-65", "oracle": "schema", "at": "/steps/1/done/criteria/0/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/0/proof/at_least", "value": 65}]},
+  {"name": "per-field", "oracle": "schema", "at": "/steps/1/done/criteria/0/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/0/proof/per", "value": "field"}]},
+  {"name": "sixth-proof-kind", "oracle": "schema", "at": "/steps/1/done/criteria/0/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/0/proof", "value": {"kind": "signature"}}]},
+  {"name": "stated-on-rule", "oracle": "schema", "at": "/steps/1/done/criteria/2/proof", "patch": [{"op": "add", "path": "/steps/1/done/criteria/2/proof/stated", "value": "count"}]},
+  {"name": "rule-without-version", "oracle": "schema", "at": "/steps/1/done/criteria/2/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/2/proof/rule", "value": "gr-range"}]},
+  {"name": "attachment-label-81", "oracle": "schema", "at": "/steps/1/done/criteria/4/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/4/proof/label", "value": "chart chart chart chart chart chart chart chart chart chart chart chart chart chart"}]},
+  {"name": "attachment-label-leading-space", "oracle": "schema", "at": "/steps/1/done/criteria/4/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/4/proof/label", "value": " chart"}]},
+  {"name": "attachment-label-control", "oracle": "schema", "at": "/steps/1/done/criteria/4/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/4/proof/label", "value": "chart\u0007"}]},
+  {"name": "thirty-three-holders", "oracle": "schema", "at": "/roles/0/members", "patch": [{"op": "fill", "path": "/roles/0/members", "count": 33}]},
+  {"name": "nine-roles", "oracle": "schema", "at": "/roles", "patch": [{"op": "fill", "path": "/roles", "count": 9}]},
+  {"name": "no-holders", "oracle": "schema", "at": "/roles/0/members", "patch": [{"op": "replace", "path": "/roles/0/members", "value": []}]},
+  {"name": "work-with-procedure", "oracle": "schema", "at": "/steps/1/work", "patch": [{"op": "add", "path": "/steps/1/work/procedure", "value": "velocity-model"}]},
+  {"name": "kind-review", "oracle": "schema", "at": "/steps/1/kind", "patch": [{"op": "replace", "path": "/steps/1/kind", "value": "review"}]},
+  {"name": "parameter-object", "oracle": "schema", "at": "/steps/1/done/criteria/2/proof", "patch": [{"op": "replace", "path": "/steps/1/done/criteria/2/proof/parameters", "value": {"maximum": {"value": 200}}}]},
+  {"name": "signed-verdict-maybe", "oracle": "schema", "base": "valid/run-p-signed.json", "at": "/steps/1/acts/1", "patch": [{"op": "replace", "path": "/steps/1/acts/1/verdict", "value": "maybe"}]},
+  {"name": "signed-reason-empty", "oracle": "schema", "base": "valid/run-p-signed.json", "at": "/steps/1/acts/1", "patch": [{"op": "replace", "path": "/steps/1/acts/1/reason", "value": ""}]},
+  {"name": "signed-without-revision", "oracle": "schema", "base": "valid/run-p-signed.json", "at": "/steps/1/acts/1", "patch": [{"op": "remove", "path": "/steps/1/acts/1/criteria_revision"}]},
+  {"name": "signed-without-result", "oracle": "schema", "base": "valid/run-p-signed.json", "at": "/steps/1/acts/1", "patch": [{"op": "remove", "path": "/steps/1/acts/1/result"}]},
+  {"name": "criterion-state-partly", "oracle": "schema", "base": "valid/run-p-signed.json", "at": "/steps/1/criteria/items/0/state", "patch": [{"op": "replace", "path": "/steps/1/criteria/items/0/state", "value": "partly"}]},
+  {"name": "since-change-other", "oracle": "schema", "base": "valid/run-p-changed.json", "at": "/steps/1/criteria/since_sign_off/0/change", "patch": [{"op": "replace", "path": "/steps/1/criteria/since_sign_off/0/change", "value": "edited"}]},
+  {"name": "sixty-five-proofs", "oracle": "schema", "base": "valid/run-p-signed.json", "at": "/steps/1/criteria/items/0/proofs", "patch": [{"op": "fill", "path": "/steps/1/criteria/items/0/proofs", "count": 65}]},
+  {"name": "no-items", "oracle": "schema", "base": "valid/run-p-signed.json", "at": "/steps/1/criteria/items", "patch": [{"op": "replace", "path": "/steps/1/criteria/items", "value": []}]},
+  {"name": "exception-act-zero", "oracle": "schema", "base": "valid/run-p-exception.json", "at": "/steps/1/criteria/items/4/proofs/0", "patch": [{"op": "replace", "path": "/steps/1/criteria/items/4/proofs/0/act", "value": 0}]},
+  {"name": "closes-on-word", "oracle": "schema", "base": "valid/run-p-signed.json", "at": "/chain/closes_on", "patch": [{"op": "replace", "path": "/chain/closes_on", "value": "word"}]},
+
+  {"name": "work-without-criteria", "oracle": "semantic", "reasons": ["role-unused", "work-without-criteria"], "patch": [{"op": "remove", "path": "/steps/1/done"}]},
+  {"name": "criteria-on-a-choice", "oracle": "semantic", "reasons": ["criteria-not-here"], "base": "valid/chain-after-new-tops.json", "patch": [
+    {"op": "add", "path": "/steps/2/done", "value": {"criteria": [{"key": "chart", "label": "Chart attached", "proof": {"kind": "attachment", "label": "chart"}}], "sign_off": {"role": "geoscientist"}}},
+    {"op": "add", "path": "/roles", "value": [{"key": "geoscientist", "label": "Geoscientist", "members": ["ana"]}]}]},
+  {"name": "duplicate-criterion", "oracle": "semantic", "reasons": ["duplicate-criterion"], "patch": [{"op": "replace", "path": "/steps/1/done/criteria/1/key", "value": "wells"}]},
+  {"name": "role-unknown", "oracle": "semantic", "reasons": ["role-unknown", "role-unused"], "patch": [{"op": "replace", "path": "/steps/1/done/sign_off/role", "value": "reviewer"}]},
+  {"name": "role-unused", "oracle": "semantic", "reasons": ["role-unused"], "patch": [{"op": "add", "path": "/roles/-", "value": {"key": "reviewer", "label": "Reviewer", "members": ["ben"]}}]},
+  {"name": "duplicate-role", "oracle": "semantic", "reasons": ["duplicate-role"], "patch": [{"op": "add", "path": "/roles/-", "value": {"key": "geoscientist", "label": "Second geoscientist", "members": ["ben"]}}]},
+  {"name": "holders-not-sorted", "oracle": "semantic", "reasons": ["not-sorted"], "patch": [{"op": "replace", "path": "/roles/0/members", "value": ["bo", "ana"]}]},
+  {"name": "per-well-of-seismic", "oracle": "semantic", "reasons": ["per-well-kind"], "patch": [{"op": "replace", "path": "/steps/1/done/criteria/0/proof/item_kind", "value": "segy/1"}]},
+  {"name": "input-not-upstream", "oracle": "semantic", "reasons": ["input-not-upstream"], "patch": [{"op": "replace", "path": "/steps/1/done/criteria/1/proof/step", "value": "pressure"}]},
+  {"name": "rule-unknown", "oracle": "semantic", "reasons": ["rule-parameters"], "patch": [{"op": "replace", "path": "/steps/1/done/criteria/2/proof/rule", "value": "no-such-rule/1"}]},
+  {"name": "rule-of-another-kind", "oracle": "semantic", "reasons": ["rule-parameters"], "patch": [{"op": "replace", "path": "/steps/1/done/criteria/2/proof", "value": {"kind": "rule", "rule": "station-step/1", "parameters": {}}}]},
+  {"name": "parameter-unknown", "oracle": "semantic", "reasons": ["rule-parameters"], "patch": [{"op": "replace", "path": "/steps/1/done/criteria/2/proof/parameters", "value": {"limit": 1}}]},
+  {"name": "parameter-below-its-bound", "oracle": "semantic", "reasons": ["rule-parameters"], "patch": [{"op": "replace", "path": "/steps/1/done/criteria/2/proof/parameters", "value": {"maximum": 149}}]},
+  {"name": "parameter-a-word", "oracle": "semantic", "reasons": ["rule-parameters"], "patch": [{"op": "replace", "path": "/steps/1/done/criteria/2/proof/parameters", "value": {"maximum": "high"}}]},
+  {"name": "work-made-from-not-followed", "oracle": "semantic", "reasons": ["made-from-not-followed"], "patch": [{"op": "replace", "path": "/steps/1/work/made_from", "value": ["pressure"]}]},
+  {"name": "work-with-a-tool-block", "oracle": "semantic", "reasons": ["block-mismatch"], "patch": [{"op": "add", "path": "/steps/1/tool", "value": {"procedure": "velocity-model", "outcome": {"id": "outcome-velocities", "version": 1}, "made_from": []}}]},
+
+  {"name": "signed-off-without-a-sign-off", "oracle": "semantic", "reasons": ["sign-off-mismatch"], "base": "valid/run-p-signed.json", "patch": [{"op": "remove", "path": "/steps/1/acts/1"}, {"op": "replace", "path": "/steps/1/acts_count", "value": 1}]},
+  {"name": "an-agent-signs", "oracle": "semantic", "reasons": ["agent-on-person-act"], "base": "valid/run-p-signed.json", "patch": [
+    {"op": "replace", "path": "/steps/1/acts/1/by", "value": {"person": "ana", "agent": "agent-ana", "job": "job-2"}},
+    {"op": "replace", "path": "/steps/1/criteria/signed/by", "value": {"person": "ana", "agent": "agent-ana", "job": "job-2"}}]},
+  {"name": "criteria-on-a-step-without-done", "oracle": "semantic", "reasons": ["criteria-mismatch"], "base": "valid/run-p-waits.json", "patch": [
+    {"op": "add", "path": "/steps/0/criteria", "value": {"revision": 1, "items": [{"key": "chart", "label": "Chart attached", "proof_kind": "attachment", "state": "missing", "exception": null, "proofs": []}], "signed": null, "since_sign_off": []}}]},
+  {"name": "signed-off-while-missing", "oracle": "semantic", "reasons": ["state-disagrees"], "base": "valid/run-p-signed.json", "patch": [
+    {"op": "replace", "path": "/steps/1/criteria/items/4/state", "value": "missing"}, {"op": "replace", "path": "/steps/1/criteria/items/4/proofs", "value": []}]},
+  {"name": "done-with-a-withdrawn-exception", "oracle": "semantic", "reasons": ["exception-mismatch"], "base": "valid/run-p-exception.json", "patch": [
+    {"op": "add", "path": "/steps/1/acts/2", "value": {"act": "exception-withdrawn", "by": {"person": "ben", "agent": null, "job": null}, "at": 1795700350.0, "criterion": "chart", "reason": "The chart can be attached after all"}},
+    {"op": "replace", "path": "/steps/1/acts_count", "value": 4}]},
+  {"name": "a-sign-off-before-any-attach", "oracle": "semantic", "reasons": ["criteria-mismatch", "sign-off-mismatch"], "base": "valid/run-p-rejected.json", "patch": [
+    {"op": "replace", "path": "/steps/1/result", "value": null}, {"op": "remove", "path": "/steps/1/acts/0"}, {"op": "replace", "path": "/steps/1/acts_count", "value": 1}]},
+  {"name": "continued-with-criteria", "oracle": "semantic", "reasons": ["act-field-mismatch"], "base": "valid/run-p-waits.json", "patch": [
+    {"op": "add", "path": "/steps/1/acts/-", "value": {"act": "continued", "by": {"person": "ana", "agent": null, "job": null}, "at": 1795700300.0, "reason": "Good enough"}},
+    {"op": "replace", "path": "/steps/1/acts_count", "value": 2}]},
+  {"name": "exception-on-an-unknown-criterion", "oracle": "semantic", "reasons": ["unknown-criterion"], "base": "valid/run-p-waits.json", "patch": [
+    {"op": "add", "path": "/steps/1/acts/-", "value": {"act": "excepted", "by": {"person": "ben", "agent": null, "job": null}, "at": 1795700300.0, "criterion": "nope", "reason": "Not needed"}},
+    {"op": "replace", "path": "/steps/1/acts_count", "value": 2}]},
+  {"name": "waits-while-failing", "oracle": "semantic", "reasons": ["state-disagrees"], "base": "valid/run-p-waits.json", "patch": [{"op": "replace", "path": "/steps/1/criteria/items/0/state", "value": "fails"}]},
+  {"name": "revision-after-sign-off", "oracle": "semantic", "reasons": ["sign-off-mismatch"], "base": "valid/run-p-signed.json", "patch": [{"op": "replace", "path": "/steps/1/criteria/revision", "value": 6}]},
+  {"name": "exception-without-its-words", "oracle": "semantic", "reasons": ["criteria-mismatch"], "base": "valid/run-p-exception.json", "patch": [{"op": "replace", "path": "/steps/1/criteria/items/4/exception", "value": null}]},
+  {"name": "items-out-of-declared-order", "oracle": "semantic", "reasons": ["criteria-mismatch"], "base": "valid/run-p-waits.json", "patch": [{"op": "remove", "path": "/steps/1/criteria/items/0"}]}
+ ]
+}

@@ -1,0 +1,11 @@
+{
+ "schema": "ophiolite.chain/1",
+ "label": "Branched review",
+ "trigger": {"on": "request"},
+ "steps": [
+  {"key": "a", "label": "Tops residuals", "kind": "tool", "follows": [], "tool": {"procedure": "well-residuals", "outcome": {"id": "outcome-tops", "version": 1}, "made_from": []}},
+  {"key": "b", "label": "Residual map", "kind": "work", "follows": ["a"], "work": {"kind": "report/1", "made_from": ["a"]}, "done": {"criteria": [{"key": "note", "label": "Note attached", "proof": {"kind": "attachment", "label": "note"}}], "sign_off": {"role": "geoscientist"}}},
+  {"key": "c", "label": "Field notes", "kind": "work", "follows": ["a"], "work": {"kind": "report/1", "made_from": []}, "done": {"criteria": [{"key": "note", "label": "Note attached", "proof": {"kind": "attachment", "label": "note"}}], "sign_off": {"role": "geoscientist"}}}
+ ],
+ "roles": [{"key": "geoscientist", "label": "Geoscientist", "members": ["ana"]}]
+}

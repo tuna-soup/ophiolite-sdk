@@ -1,0 +1,22 @@
+{
+ "description": "E211 s0 (T1 b). One change each to the first entry of valid/index-four.json (target entry) or to the index itself (target index), and the one JSON path, in the entry or in the index, at which the schema refuses it.",
+ "cases": [
+  {"name": "unknown-key", "target": "entry", "set": [["extra"], "x"], "paths": ["$"]},
+  {"name": "unknown-key-in-the-card", "target": "entry", "set": [["card", "extra"], "x"], "paths": ["$.card"]},
+  {"name": "wrong-schema", "target": "index", "set": [["schema"], "sample-index/1"], "paths": ["$.schema"]},
+  {"name": "id-with-a-capital", "target": "entry", "set": [["id"], "F3-block"], "paths": ["$.id"]},
+  {"name": "empty-card-text", "target": "entry", "set": [["card", "title"], ""], "paths": ["$.card.title"]},
+  {"name": "digest-of-63-hex", "target": "entry", "set": [["bundle", "sha256"], "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"], "paths": ["$.bundle.sha256"]},
+  {"name": "key-an-absolute-url", "target": "entry", "set": [["bundle", "key"], "https://example.org/synthetic/f3-block/bundle.zip"], "paths": ["$.bundle.key"]},
+  {"name": "key-with-a-host-scheme", "target": "entry", "set": [["bundle", "key"], "s3:synthetic/f3-block/bundle.zip"], "paths": ["$.bundle.key"]},
+  {"name": "key-leaving-its-folder", "target": "entry", "set": [["bundle", "key"], "synthetic/../f3-block/bundle.zip"], "paths": ["$.bundle.key"]},
+  {"name": "key-from-the-root", "target": "entry", "set": [["bundle", "key"], "/synthetic/f3-block/bundle.zip"], "paths": ["$.bundle.key"]},
+  {"name": "key-with-a-capital-in-a-folder", "target": "entry", "set": [["bundle", "key"], "synthetic/F3-block/bundle.zip"], "paths": ["$.bundle.key"]},
+  {"name": "key-with-a-capital-in-the-first-folder", "target": "entry", "set": [["bundle", "key"], "Synthetic/f3-block/bundle.zip"], "paths": ["$.bundle.key"]},
+  {"name": "key-whose-file-name-leaves-its-folder", "target": "entry", "set": [["bundle", "key"], "synthetic/f3-block/.."], "paths": ["$.bundle.key"]},
+  {"name": "no-source", "target": "entry", "set": [["sources"], []], "paths": ["$.sources"]},
+  {"name": "a-count-in-the-contents", "target": "entry", "set": [["contents", "total"], "all of them"], "paths": ["$.contents"]},
+  {"name": "licence-not-an-object", "target": "entry", "set": [["sources", 0, "licence"], "CC-BY-4.0"], "paths": ["$.sources[0].licence"]},
+  {"name": "no-id", "target": "entry", "remove": ["id"], "paths": ["$"]}
+ ]
+}

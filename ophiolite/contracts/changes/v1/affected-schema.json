@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/changes/v1/affected-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.affected/1",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -210,6 +210,11 @@
         },
         "rests_on": {
           "$ref": "#/$defs/AffectedVersion"
+        },
+        "stated": {
+          "const": true,
+          "title": "Stated",
+          "type": "boolean"
         }
       },
       "required": [

@@ -1,0 +1,21 @@
+{
+ "description": "E203 s0: casing-design-1's declaration with one change each. A `schema` case is refused by the published schema at exactly `paths` and by the model; a `reasons` case is schema-valid and breaks exactly those rules (declaration_problems). `set` puts a value at `path`; `remove` takes the field away. The last case is valid: a label may equal its word.",
+ "cases": [
+  {"name": "word-capital", "set": [["word"], "Casing"], "schema": ["$.word"]},
+  {"name": "no-columns", "set": [["columns"], []], "schema": ["$.columns"]},
+  {"name": "key-twice", "set": [["key"], ["string", "string"]], "schema": ["$.key"]},
+  {"name": "unknown-field", "set": [["colour"], "red"], "schema": ["$"]},
+  {"name": "unknown-type", "set": [["columns", 0, "type"], "float"], "schema": ["$.columns[0].type"]},
+  {"name": "quantity-null", "set": [["columns", 1, "quantity"], null], "schema": ["$.columns[1].quantity"]},
+  {"name": "unit-without-quantity", "set": [["columns", 0, "unit"], "m"], "schema": ["$.columns[0].unit"]},
+  {"name": "quantity-without-unit", "remove": ["columns", 1, "unit"], "schema": ["$.columns[1]"]},
+  {"name": "column-repeated", "set": [["columns", 4, "name"], "od"], "reasons": ["column-repeated"]},
+  {"name": "key-not-a-column", "set": [["key"], ["casing"]], "reasons": ["key-not-a-column"]},
+  {"name": "key-may-be-empty", "set": [["columns", 0, "empty"], true], "reasons": ["key-may-be-empty"]},
+  {"name": "key-not-required", "set": [["columns", 0, "required"], false], "reasons": ["key-may-be-empty"]},
+  {"name": "quantity-unknown", "set": [["columns", 1, "quantity"], "lenght"], "reasons": ["quantity-unknown"]},
+  {"name": "unit-not-of-quantity", "set": [["columns", 1, "unit"], "bar"], "reasons": ["unit-not-of-quantity"]},
+  {"name": "quantity-on-text", "set": [["columns", 4], {"name": "grade", "type": "text", "required": false, "empty": true, "quantity": "length", "unit": "m"}], "reasons": ["quantity-on-text"]},
+  {"name": "label-is-word", "set": [["label"], "casing-design"], "reasons": []}
+ ]
+}

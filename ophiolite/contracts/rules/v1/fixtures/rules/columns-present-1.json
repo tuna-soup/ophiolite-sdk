@@ -1,0 +1,15 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "columns-present/1",
+ "title": "Named columns present",
+ "description": "Each column the run names is in the table, in the unit the run names where the kept table declares a unit for it; an undeclared unit is not checked. A missing column fails once with no row; a column declared in another unit fails once with no row and its declared unit as the value.",
+ "class": "file-local",
+ "kinds": ["table-csv/1", "table-excel/1", "table-parquet/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [
+  {"name": "columns", "type": "column-units", "unit": null, "default": null, "minimum": null, "maximum": null, "compare": null, "choices": null, "source": "Named by the run: the columns, and their units, the team expects of the table (E192)."}
+ ],
+ "words": {"template": "{count} named columns are missing or in another unit, the first is {first}.", "examples": "columns"},
+ "since": "1.4.0"
+}

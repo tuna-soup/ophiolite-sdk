@@ -1,0 +1,22 @@
+{
+ "schema": "ophiolite.step-criteria/1",
+ "project": "p-proof",
+ "run": "00000000000000000000000000000106",
+ "step": "pressure",
+ "result": {"asset_id": "pressure-a", "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"},
+ "revision": 1,
+ "cause": "attached",
+ "items": [
+  {"key": "wells", "label": "Two wells of pressure points", "proof_kind": "made-from", "state": "holds", "exception": null, "count": null, "examples": [],
+   "proofs": [{"kind": "version", "asset_id": "pressure-well-a", "revision": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1"},
+              {"kind": "version", "asset_id": "pressure-well-b", "revision": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"}]},
+  {"key": "inputs-current", "label": "Made from the current velocities", "proof_kind": "current-input", "state": "holds", "exception": null, "count": null, "examples": [],
+   "proofs": [{"kind": "version", "asset_id": "velocities", "revision": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"}]},
+  {"key": "gr", "label": "Gamma ray within range", "proof_kind": "rule", "state": "missing", "exception": null, "count": null, "examples": [], "proofs": []},
+  {"key": "check", "label": "Pressure check accepted", "proof_kind": "outcome", "state": "holds", "exception": null, "count": null, "examples": [],
+   "proofs": [{"kind": "check-record", "id": "chk-pp1"}]},
+  {"key": "chart", "label": "Chart attached", "proof_kind": "attachment", "state": "missing", "exception": null, "count": null, "examples": [], "proofs": []}
+ ],
+ "signed": null,
+ "at": 1795700200.0
+}

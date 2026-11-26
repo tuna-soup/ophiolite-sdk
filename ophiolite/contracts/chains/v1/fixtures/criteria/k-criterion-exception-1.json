@@ -1,0 +1,15 @@
+{
+ "schema": "ophiolite.step-criteria/1",
+ "project": "p-kinds",
+ "run": "00000000000000000000000000190010",
+ "step": "pressure",
+ "result": {"asset_id": "pressure-k", "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"},
+ "signed": null,
+ "revision": 1,
+ "cause": "attached",
+ "at": 1795800300.0,
+ "items": [
+  {"key": "offsets", "label": "Two offset wells", "proof_kind": "made-from", "state": "fails", "proofs": [{"kind": "version", "asset_id": "pressure-point-1", "revision": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1"}], "exception": null, "count": null, "examples": []},
+  {"key": "chart", "label": "Pressure chart attached", "proof_kind": "attachment", "state": "missing", "proofs": [], "exception": null, "count": null, "examples": []}
+ ]
+}

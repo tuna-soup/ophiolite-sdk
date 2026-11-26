@@ -54,3 +54,55 @@ the job-step admission sentence, step state words and comparison words are
 `fixtures/invalid/chain-cases.json` and `run-cases.json` each change one valid fixture and name the path the schema
 refuses or the reasons the structural rules give. Slice 0 publishes the contracts and declares the routes, which
 answer that chains are not available on this deployment yet.
+
+## Criteria, proof and sign-off (E189, 1.1.0)
+
+`chain/1` and `chain-run/1` 1.1.0 add, and change nothing released: a step kind `work` (a person makes the result
+outside the platform and attaches it; its `work` block names the result kind and the steps it is made from), a
+step's `done` list (1 to 16 criteria, each with one proof of kind `made-from`, `current-input`, `rule`, `outcome` or
+`attachment`, and the role that signs off), and the chain's `roles` (up to 8, each listing its holders by member id,
+sorted). `done` is allowed on `work` and `tool` steps only; a `work` step must have it. On a run, a step with `done`
+carries the criteria view (`criteria`: the revision, one item per criterion in declared order with its state and
+proofs, the sign-off and what changed since) and the states `criteria-not-met`, `waits-for-sign-off`, `signed-off`
+and `done-with-exception`; the person acts `signed`, `excepted` and `exception-withdrawn` are added, and a version
+declared with criteria reads `closes_on: proof`. The contract records who signed and who excepted; it has no rule
+that they differ.
+
+An attachment proof's label is 1 to 80 characters with no control character and no space at either end, in
+Unicode normal form C (the model checks the form; the schema cannot), compared exactly (E191). A rule proof names a
+released rule and its parameter values; the rule must apply to the step's result kind and every value must be in
+the rule's type and bounds (`rule-parameters`). The released 1.0.0 files are kept as digests under
+`fixtures/frozen/`: 1.1.0 with exactly these additions taken away hashes to them.
+
+`fixtures/valid/chain-p.json` is the pressure study after new velocities and its `run-p-*.json` runs, counted by
+hand; `fixtures/invalid/criteria-cases.json` holds the refusals. Until E189 slice 1 a served declare or revise that
+uses any of this answers 503 with the sentence `chains.CRITERIA_UNAVAILABLE`, and stores nothing.
+
+## Kinds of work, applies, and taking a step out (E190, 1.2.0; step-criteria 1.1.0)
+
+`chain/1` and `chain-run/1` 1.2.0 add, and change nothing released: the chain's `job_kinds` (1 to 8, each a key and
+the team's label), and an `applies` list on a step and on a criterion (1 to 8 listed keys, sorted, each once;
+absent means every kind). On a run, `job_kind` names the run's kind (present exactly when the chain lists kinds),
+`counts` gives how many steps apply and how many do not, the step and criterion state `does-not-apply` carries its
+cause in `not_applying` (`job-kind`, or `taken-out` with who, when and the reason), and the person acts `taken-out`
+and `put-back` name the step, or one criterion of it, with a reason (1 to 500 characters). `does-not-apply` is a
+closed state: a step that follows it may open. `step-criteria/1` 1.1.0 adds an item's `not_applying` and the
+revision causes `taken-out` and `put-back`.
+
+The schema cannot say these, so `chains.chain_problems` does: a kind listed twice (`duplicate-job-kind`), an
+`applies` naming a kind the chain does not list (`applies-unknown-kind`), a criterion wider than its step
+(`applies-wider-than-step`), a step limited to fewer kinds than a step made from its result
+(`applies-data-successor`), and a condition or a current-input criterion reading a step limited to fewer kinds than
+its own (`applies-reads-limited`). `chains.run_problems` checks what one response shows: `job_kind` against the
+chain (`job-kind-mismatch`), a step outside the run's kind not reading `does-not-apply` (`state-disagrees`), the
+cause against the state and the act shown (`not-applying-mismatch`; an act on an older page is not guessed), a step
+made from a taken-out step still applying (`made-from-taken-out`), and the counts (`counts-mismatch`). A step that
+does not apply has no `condition`, and is never closed after a step that is open. The order of take-out and put-back
+over the whole journal is checked where the act is written (E190 slice 1), not in a response.
+
+The released 1.1.0 chain files and the 1.0.0 step-criteria file are kept as digests under `fixtures/frozen/`.
+`fixtures/valid/chain-k.json` ("Before drilling a well") and its `run-k-*.json` runs, with `chain-k-b.json` and
+`run-kb-taken-out-both.json`, are counted by hand; `fixtures/criteria/k-criterion-exception-*.json` are the revisions
+behind `run-k-criterion-exception`, and `fixtures/invalid/applies-cases.json` holds the refusals. The words are
+`ophiolite.applies-words/1`. Until E190 slice 1 a served declare or revise that uses kinds of work answers 503 with
+the sentence `job_kinds.UNAVAILABLE`, before anything is checked, and stores nothing.

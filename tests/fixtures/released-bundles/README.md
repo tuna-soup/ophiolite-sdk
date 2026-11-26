@@ -33,8 +33,12 @@ Written once on 2 November 2026 (lane e148s2, base `edf29d0aecd5`; the SDK code 
 | 1.18 | `ophiolite/bundle.py` (no frozen 1.18 module) | the LAS curve with a sender in its entry (`reported`: client `qgis-plugin` 1.4.0, host `qgis` 3.34.2, transport `http`, accepted as `las2/1`), the same view also served on its descriptor and left out of the descriptor file; written on 22 November 2026 (lane e182s2b, commit E182 s2b C2) | `test_bundle.Read` with `.sender` set |
 | 2.18 | `ophiolite/bundle.py` (no frozen 2.18 module) | the tops with a sender in their entry (`not reported`, transport `mcp`, accepted as `well-tops-csv/1`), served on the descriptor too and left out of its file; written as 1.18 | `typed_read('tops')` with `.sender` set |
 
+| 1.19 | `ophiolite/bundle.py` (no frozen 1.19 module) | the LAS curve with one stated parent in its entry (`synthetic-design` at `r-design-1`, `complete`), served on its descriptor with a revision manifest disclosing the made-for entry; written on 24 November 2026 (lane e192s1, commit E192 s1 C5) | `test_bundle.Read` through `test_bundle_stated.stated` |
+| 2.19 | `ophiolite/bundle.py` (no frozen 2.19 module) | the tops with two stated parents (`synthetic-design`, `synthetic-model`), written as 1.19 | `typed_read('tops')` through `test_bundle_stated.stated` |
+
 The 1.18 and 2.18 descriptor and manifest digests are pinned in `sender-digests.json` beside these directories (their
-other files are the 1.10 / 2.10 LAS and tops files, byte for byte).
+other files are the 1.10 / 2.10 LAS and tops files, byte for byte); the 1.19 and 2.19 ones in `stated-digests.json`,
+the same way.
 
 No frozen writer fell back to a later one: each wrote its version offline.
 

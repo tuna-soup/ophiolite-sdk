@@ -1,0 +1,29 @@
+{
+  "project": "p-affected",
+  "asked": "tops-north",
+  "item": {"asset_id": "tops-north", "name": "Tops North", "kind": "tops", "head": {"revision": "rev-tops-2", "version": 2}},
+  "against": "head",
+  "as_of": "2026-11-23T10:00:00Z",
+  "counts": {"results": 2, "acceptances": 0, "held": 0},
+  "without_inputs": 0,
+  "restricted": false,
+  "complete": true,
+  "rows": [
+    {
+      "kind": "result",
+      "item": {"asset_id": "cost-table", "name": "Cost Table", "kind": "tables"},
+      "head": {"revision": "rev-cost-1", "version": 1},
+      "distance": 1,
+      "rests_on": {"revision": "rev-tops-1", "version": 1},
+      "stated": true
+    },
+    {
+      "kind": "result",
+      "item": {"asset_id": "residual-top", "name": "Residual Top", "kind": "tables"},
+      "head": {"revision": "rev-residual-1", "version": 1},
+      "distance": 1,
+      "rests_on": {"revision": "rev-tops-1", "version": 1}
+    }
+  ],
+  "next": null
+}

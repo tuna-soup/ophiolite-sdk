@@ -1,0 +1,46 @@
+{
+ "description": "E203 s0: what each table of tables.json lacks to be a table of a kind, written by hand (never produced by the check): {column, reason, row, detail}, sorted by column then reason; a reason about the key as a whole has no column. An empty list: the table publishes as the kind, values and units as sent.",
+ "expected": [
+  {"table": "t1-complete", "kind": "casing-design-1", "problems": []},
+  {"table": "t1-complete", "kind": "casing-design-2", "problems": [
+   {"column": "burst", "reason": "column-missing", "row": null, "detail": {}}]},
+  {"table": "t2-no-shoe-depth", "kind": "casing-design-1", "problems": [
+   {"column": "shoe_depth", "reason": "column-missing", "row": null, "detail": {}}]},
+  {"table": "t2-no-shoe-depth", "kind": "casing-design-2", "problems": [
+   {"column": "burst", "reason": "column-missing", "row": null, "detail": {}},
+   {"column": "shoe_depth", "reason": "column-missing", "row": null, "detail": {}}]},
+  {"table": "t3-feet", "kind": "casing-design-1", "problems": []},
+  {"table": "t4-bar", "kind": "casing-design-1", "problems": [
+   {"column": "shoe_depth", "reason": "unit-wrong-dimension", "row": null, "detail": {"unit": "bar", "quantity": "length"}}]},
+  {"table": "required-cell-empty", "kind": "casing-design-1", "problems": [
+   {"column": "shoe_depth", "reason": "empty", "row": 2, "detail": {}}]},
+  {"table": "number-read-as-text", "kind": "casing-design-1", "problems": [
+   {"column": "od", "reason": "wrong-type", "row": null, "detail": {"logical": "text"}}]},
+  {"table": "required-unread", "kind": "casing-design-1", "problems": [
+   {"column": "shoe_depth", "reason": "column-missing", "row": null, "detail": {}}]},
+  {"table": "unread-before-key", "kind": "casing-design-1", "problems": []},
+  {"table": "key-blank", "kind": "casing-design-1", "problems": [
+   {"column": "string", "reason": "key-empty", "row": 3, "detail": {}}]},
+  {"table": "key-repeated", "kind": "casing-design-1", "problems": [
+   {"column": null, "reason": "key-repeated", "row": 3, "detail": {"key": ["string"], "rows": [2, 3]}}]},
+  {"table": "key-decimal-scale", "kind": "casing-design-1", "problems": [
+   {"column": null, "reason": "key-repeated", "row": 2, "detail": {"key": ["string"], "rows": [1, 2]}}]},
+  {"table": "text-marker", "kind": "casing-design-1", "problems": [
+   {"column": "string", "reason": "key-empty", "row": 2, "detail": {}}]},
+  {"table": "numeric-marker", "kind": "casing-design-1", "problems": [
+   {"column": "shoe_depth", "reason": "empty", "row": 1, "detail": {}}]},
+  {"table": "boolean-marker", "kind": "string-tally-1", "problems": [
+   {"column": "cemented", "reason": "empty", "row": 2, "detail": {}}]},
+  {"table": "unit-not-stated", "kind": "casing-design-1", "problems": [
+   {"column": "od", "reason": "unit-missing", "row": null, "detail": {"quantity": "length"}}]},
+  {"table": "optional-unread", "kind": "casing-design-1", "problems": []},
+  {"table": "optional-wrong", "kind": "casing-design-1", "problems": [
+   {"column": "weight", "reason": "unit-wrong-dimension", "row": null, "detail": {"unit": "m", "quantity": "mass per length"}},
+   {"column": "weight", "reason": "wrong-type", "row": null, "detail": {"logical": "text"}}]},
+  {"table": "optional-empty", "kind": "string-tally-1", "problems": [
+   {"column": "length", "reason": "empty", "row": 2, "detail": {}}]},
+  {"table": "pair-repeated", "kind": "string-tally-1", "problems": [
+   {"column": null, "reason": "key-repeated", "row": 3, "detail": {"key": ["well", "string"], "rows": [1, 3]}}]},
+  {"table": "pair-sharing-one-part", "kind": "string-tally-1", "problems": []}
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "description": "E203 s0 (ruling Q1): a quantity as a person writes it and as it is stored, one case each way. The written declaration names the label (pressure); the stored one names the unit registry's class (energy per volume) and is casing-design-2's. A refusal about that column reads the label, never the class.",
+ "written": {
+  "word": "casing-design",
+  "label": "Casing strings",
+  "row": "One casing string",
+  "columns": [
+   {"name": "string", "type": "text", "required": true, "empty": false},
+   {"name": "od", "type": "number", "required": true, "empty": false, "quantity": "length", "unit": "in"},
+   {"name": "shoe_depth", "type": "number", "required": true, "empty": false, "quantity": "length", "unit": "m"},
+   {"name": "weight", "type": "number", "required": false, "empty": true, "quantity": "weight per length", "unit": "lbm/ft"},
+   {"name": "grade", "type": "text", "required": false, "empty": true},
+   {"name": "burst", "type": "number", "required": true, "empty": false, "quantity": "pressure", "unit": "bar"}
+  ],
+  "key": ["string"]
+ },
+ "stored": "casing-design-2",
+ "refusal": {
+  "problem": {"column": "burst", "reason": "unit-wrong-dimension", "row": null, "detail": {"unit": "m", "quantity": "energy per volume"}},
+  "sentence": "The column burst is in m, which does not measure pressure."
+ }
+}

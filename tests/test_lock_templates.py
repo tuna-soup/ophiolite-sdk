@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ACCEPTED = '622b528bb70318d322b52bf090ed0395515c1f76'
 spec = importlib.util.spec_from_file_location('lock_templates', ROOT / 'tools/lock_templates.py')
 lock = importlib.util.module_from_spec(spec); spec.loader.exec_module(lock)
-EXTRAS = lock.requested_extras('ophiolite[pandas,numpy,validation] @ git+https://github.com/tuna-soup/ophiolite-sdk@622b528b')
+EXTRAS = lock.requested_extras('ophiolite[pandas,numpy,validation] @ git+https://github.com/ophiolite-labs/ophiolite-sdk@622b528b')
 
 
 def pyproject(dependencies='"anyio>=4.2,<5", "httpx>=0.28,<1"', pandas='"pandas>=2"', lasio=None, python='>=3.10', description='SDK'):

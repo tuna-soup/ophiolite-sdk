@@ -3,49 +3,25 @@
   "$id": "https://ophiolite.dev/contracts/rules/v1/rule-results-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.rule-results/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
-    "ContextVersion": {
+    "ColumnExample": {
       "additionalProperties": false,
-      "description": "Another version of the project a project-context rule read (online only).",
-      "properties": {
-        "asset_id": {
-          "maxLength": 200,
-          "minLength": 1,
-          "title": "Asset Id",
-          "type": "string"
-        },
-        "revision": {
-          "maxLength": 200,
-          "minLength": 1,
-          "title": "Revision",
-          "type": "string"
-        },
-        "kind": {
-          "maxLength": 128,
-          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
-          "title": "Kind",
-          "type": "string"
-        }
-      },
-      "required": [
-        "asset_id",
-        "revision",
-        "kind"
-      ],
-      "title": "ContextVersion",
-      "type": "object"
-    },
-    "Example": {
-      "additionalProperties": false,
-      "description": "One failing row, in the file's order: its 1-based data row, and its depth and value when the rule has them.",
+      "description": "One failing row or column, in the file's order (rule-results/1 1.1.0, E192 s0): `column` names a table's\ncolumn, with `row` null only when the whole column fails; `key` is the failing row's key cell as text (\"\" when\nempty). Both are absent, never null, on an example that names no column, which is then the 1.0.0 example.",
       "properties": {
         "row": {
-          "minimum": 1,
-          "title": "Row",
-          "type": "integer"
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Row"
         },
         "depth": {
           "anyOf": [
@@ -72,6 +48,17 @@
             }
           ],
           "title": "Value"
+        },
+        "column": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 200,
+          "title": "Key",
+          "type": "string"
         }
       },
       "required": [
@@ -79,11 +66,12 @@
         "depth",
         "value"
       ],
-      "title": "Example",
+      "title": "ColumnExample",
       "type": "object"
     },
-    "RuleResult": {
+    "ColumnRuleResult": {
       "additionalProperties": false,
+      "description": "One rule's result (rule-results/1 1.1.0, E192 s0): its examples may name columns, and its parameters as run may\nbe column names, columns with their units, or null (a `column` parameter run with none). `RuleResult` stays the\n1.0.0 result the outcome records embed: they run the default rules only, which name no column.",
       "properties": {
         "rule": {
           "maxLength": 64,
@@ -114,7 +102,7 @@
         },
         "examples": {
           "items": {
-            "$ref": "#/$defs/Example"
+            "$ref": "#/$defs/ColumnExample"
           },
           "maxItems": 5,
           "title": "Examples",
@@ -132,6 +120,28 @@
               },
               {
                 "type": "boolean"
+              },
+              {
+                "items": {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 32,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              {
+                "items": {
+                  "$ref": "#/$defs/ColumnUnit"
+                },
+                "maxItems": 32,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
               }
             ]
           },
@@ -180,7 +190,69 @@
         "reason",
         "context"
       ],
-      "title": "RuleResult",
+      "title": "ColumnRuleResult",
+      "type": "object"
+    },
+    "ColumnUnit": {
+      "additionalProperties": false,
+      "description": "E192 s0 (D6): a column a rule is run on, and the unit it is declared in (null: any unit).",
+      "properties": {
+        "column": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "column",
+        "unit"
+      ],
+      "title": "ColumnUnit",
+      "type": "object"
+    },
+    "ContextVersion": {
+      "additionalProperties": false,
+      "description": "Another version of the project a project-context rule read (online only).",
+      "properties": {
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "kind"
+      ],
+      "title": "ContextVersion",
       "type": "object"
     }
   },
@@ -206,7 +278,7 @@
     },
     "results": {
       "items": {
-        "$ref": "#/$defs/RuleResult"
+        "$ref": "#/$defs/ColumnRuleResult"
       },
       "maxItems": 64,
       "title": "Results",

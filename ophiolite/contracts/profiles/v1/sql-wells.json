@@ -2,7 +2,7 @@
   "schema": "ophiolite.contract-profile/1",
   "id": "sql-wells/1",
   "kind": "source",
-  "lifecycle": "preview",
+  "lifecycle": "supported",
   "display_name": "Well locations from a SQL table",
   "description": "Well records read through a reviewed customer mapping from a SQL table; current values only.",
   "connector": {

@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/relationships/v1/lineage-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.lineage/1",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -219,6 +219,22 @@
         }
       ],
       "default": null
+    },
+    "stated_parents": {
+      "items": {
+        "$ref": "#/$defs/Reference"
+      },
+      "maxItems": 32,
+      "title": "Stated Parents",
+      "type": "array"
+    },
+    "stated_parent_visibility": {
+      "enum": [
+        "complete",
+        "restricted"
+      ],
+      "title": "Stated Parent Visibility",
+      "type": "string"
     }
   },
   "required": [

@@ -1,0 +1,81 @@
+{
+ "schema": "ophiolite.portable-bundle/2",
+ "bundle_version": "2.4.0",
+ "created_at": "2026-11-25T00:00:00Z",
+ "exporter": {
+  "name": "ophiolite-sdk",
+  "version": "0.1.0"
+ },
+ "scope": "selection",
+ "selection": [
+  {
+   "asset_id": "synthetic-log-twice",
+   "revision": "6868686868686868686868686868686868686868686868686868686868686868",
+   "curves": []
+  }
+ ],
+ "assets": [
+  {
+   "asset_id": "synthetic-log-twice",
+   "revision": "6868686868686868686868686868686868686868686868686868686868686868",
+   "origin": "source-reference",
+   "profile": "las/2",
+   "name": "synthetic-log-twice",
+   "files": [
+    {
+     "path": "assets/0/original.las",
+     "role": "original",
+     "sha256": "7979797979797979797979797979797979797979797979797979797979797979",
+     "bytes": 10
+    },
+    {
+     "path": "assets/0/descriptor.json",
+     "role": "descriptor",
+     "sha256": "8080808080808080808080808080808080808080808080808080808080808080",
+     "bytes": 10
+    }
+   ],
+   "history": null,
+   "parents": [],
+   "parent_visibility": "complete",
+   "omissions": [],
+   "losses": [],
+   "type": "well-log"
+  },
+  {
+   "asset_id": "synthetic-log-twice",
+   "revision": "6868686868686868686868686868686868686868686868686868686868686868",
+   "origin": "source-reference",
+   "profile": "las/2",
+   "name": "synthetic-log-twice",
+   "files": [
+    {
+     "path": "assets/1/original.las",
+     "role": "original",
+     "sha256": "9191919191919191919191919191919191919191919191919191919191919191",
+     "bytes": 10
+    },
+    {
+     "path": "assets/1/descriptor.json",
+     "role": "descriptor",
+     "sha256": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+     "bytes": 10
+    }
+   ],
+   "history": null,
+   "parents": [],
+   "parent_visibility": "complete",
+   "omissions": [],
+   "losses": [],
+   "type": "well-log"
+  }
+ ],
+ "groups": null,
+ "recommendations": null,
+ "limits": {
+  "max_assets": 128,
+  "max_file_bytes": 33554432,
+  "max_total_bytes": 268435456
+ },
+ "notice": "Synthetic manifest for the sample index fixtures; no real data."
+}

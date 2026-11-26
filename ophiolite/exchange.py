@@ -56,6 +56,7 @@ from .errors import AuthenticationRequired, Busy, IntegrityConflict, OphioliteEr
 SCHEMA = 'ophiolite.held/1'
 SCHEMA_WORDS = 'ophiolite.held/2'  # E173 s0 (D1): written once an entry carries `words` or `mode`; never back to /1
 MAX_SEND = 32 * 1024 * 1024
+DECLARATION = ('well', 'depth_kind', 'depth_datum')  # E188 C1: a sent curve's declaration, all three (E183 s2b's upload_data)
 CREDENTIAL_STAGES = ('no-credential', 'malformed-credential', 'credential-refused')
 REPORT_TIMEOUT = 10.0  # seconds; E70b: a delivery report never holds a confirmation for longer
 
@@ -176,6 +177,8 @@ SENTENCES = {
     'stays': _stays,  # E173 s0 (D2): a folder that stays on the version it holds
     'name-unclear': _unclear,
     'name-not-found': lambda f: 'No item you can see is called %s%s. Nothing was changed.' % (f['name'], ' (%s)' % f['type'] if f.get('type') else ''),
+    'made-for': lambda f: ('%s%s: the version this name means now. Send with this exact version to record what your file was made for. '
+                           'Nothing was changed.' % (f['name'], _version({'number': f.get('number'), 'who': f.get('by'), 'when': f.get('when')}))),  # E192 s2
 }
 OUTCOMES = tuple(SENTENCES)
 
@@ -505,6 +508,25 @@ def application_wire(word):
     if not isinstance(word, str) or not APPLICATION_WORD.fullmatch(word):
         raise ValueError("Name the application by its word (letters, digits, '.', '_' or '-'), such as 'qgis-plugin'.")
     return 'application:' + word
+
+
+_REVISION = re.compile(r'[0-9a-f]{64}')
+MADE_FOR_UNRECORDED = "This project's release does not record what a version was made for."  # publish.MADE_FOR_UNRECORDED
+
+
+def _made_for(made_for):
+    """E192 s2: [{asset_id, revision}] of 1 to 32 distinct exact versions, each a dict of those two keys or a pair; None
+    when the list is not that (this file is vendored and imports nothing but errors, so publish.made_for_field is not used)."""
+    if not isinstance(made_for, (list, tuple)): return None
+    named = []
+    for value in made_for:
+        if isinstance(value, dict) and set(value) == {'asset_id', 'revision'}: pair = (value['asset_id'], value['revision'])
+        elif isinstance(value, (list, tuple)) and len(value) == 2: pair = tuple(value)
+        else: return None
+        if not (isinstance(pair[0], str) and 0 < len(pair[0]) <= 160 and isinstance(pair[1], str) and _REVISION.fullmatch(pair[1])): return None
+        named.append(pair)
+    if not 1 <= len(named) <= 32 or len(set(named)) != len(named): return None
+    return [{'asset_id': a, 'revision': r} for a, r in named]
 
 
 def _takes(function, name):
@@ -902,11 +924,43 @@ class Exchange:
         got = self._fetch(item_id, words, output, how, stay, True)
         return got if isinstance(got, Outcome) else got.confirm(applied_to=output)  # a `stays` receipt answers `stays`
 
+    # what a file is made for (E192 s2)
+
+    def made_for(self, item_id=None, *, name=None, type=None):
+        """E192 s2 (D2): the first answer. The exact version an item means now, by its id or by `name` (and `type`) among
+        the items you can see; this folder's own names are not consulted, since what a file is made for need not be held.
+        Writes nothing, here or in the project. Answers `made-for` with facts {name, number, by, at, when} of that very
+        version and technical {asset_id, revision}: pass the technical pair to `send(made_for=[...])`."""
+        words = self._named(item_id, name, type)
+        inventory = self._inventory()
+        item_id = self._resolve(words, {'items': {}}, inventory) if words is not None else item_id
+        item = inventory.get(item_id)
+        if item is None: self._raise('not-visible', {'name': display(item_id, 'that item')}, {'asset_id': item_id})
+        shown = self._name(item)
+        if item.get('kind') not in ('uploaded', 'derived'):
+            self._raise('not-valid', {'reasons': '%s can be named as made for only when it is an uploaded or published version' % shown}, {'asset_id': item_id})
+        revision = item.get('revision')
+        try: versions = self.transport.history(item)
+        except Exception as error: self._transport_error(error, refused='not-visible', invalid='could-not-reach', facts={'name': shown})
+        version = next((v for v in versions or () if isinstance(v, dict) and v.get('revision') == revision), None)
+        if version is None: self._raise('could-not-reach', {'name': shown}, {'asset_id': item_id, 'revision': revision})
+        who = self._who(version)
+        facts = {'name': shown, 'number': version.get('number'), 'by': who['who'], 'at': version.get('at'), 'when': who['when']}
+        return Outcome('made-for', self._say('made-for', facts), facts, {'asset_id': item_id, 'revision': revision})
+
     # send to project
 
     def send(self, data, *, name, profile, how, based_on=(), of=None, declare=None, extra=None, expected=None, source=None,
-             rights_confirmed=False, receipt=None):
-        """E184 s0: `receipt`, the transfer receipt the connector computed for this send, is checked before anything
+             rights_confirmed=False, receipt=None, curve_declaration=None, made_for=None):
+        """E192 s2: `made_for`, 1 to 32 exact versions ({asset_id, revision} or a pair, as `made_for()` answers in
+        technical) this file was made for, none also a version it is based on; saved in the request only when given, so
+        a retry sends the saved ones and a retry naming others is refused. A transport that does not say
+        `takes_made_for` refuses it before anything is saved.
+        E188 C1: `curve_declaration` ({'well', 'depth_kind', 'depth_datum'}, three non-blank texts; the project's model
+        decides the rest) declares the curve of the next version of a held LAS upload (`of`, profile 'las2/1' only). It
+        is saved in the request only when given, so every other request and its replay is as before, and a retry sends
+        the saved one. A sent item keeps the survey object it was placed as (`applied_to`).
+        E184 s0: `receipt`, the transfer receipt the connector computed for this send, is checked before anything
         is sent, saved with the pending send (a retry of an unfinished send carries the saved one, never a new one),
         sent only to a project that keeps it, and returned on the outcome; a project that does not keep it adds
         NOT_KEPT to the sentence.
@@ -931,14 +985,25 @@ class Exchange:
                                    (declare is None or isinstance(declare, dict), 'give declarations as names and values'),
                                    (extra is None or isinstance(extra, dict), 'give extra details as names and values')) if not ok]
         if source is not None and not isinstance(source, dict): reasons.append('give the source as names and values')
+        if curve_declaration is not None and not (isinstance(curve_declaration, dict) and set(curve_declaration) == set(DECLARATION)
+                                                  and all(isinstance(v, str) and v.strip() for v in curve_declaration.values())):
+            reasons.append('declare the curve as its well, depth kind and depth datum, each as text')
         if not isinstance(rights_confirmed, bool): reasons.append('confirm that you may share this version, or leave it out')
+        if made_for is not None:  # E192 s2: exact versions, checked as the client checks them (publish.made_for_field)
+            made_for = _made_for(made_for)
+            if made_for is None: reasons.append('name between 1 and 32 exact versions it was made for, each once (an id and a revision, as made_for answers)')
         if reasons: self._raise('not-valid', {'reasons': '; '.join(reasons)})
+        if made_for is not None and getattr(self.transport, 'takes_made_for', False) is not True:
+            self._raise('not-valid', {'reasons': 'this application does not send what a file was made for; send it from Python or the command line'},
+                        {'argument': 'made_for'})
         if receipt is not None: self._check_receipt(receipt)
         if len(data) > MAX_SEND: self._raise('too-large', {})
         request = {'name': name, 'profile': profile, 'how': how, 'based_on': list(based_on), 'of': of, 'declare': dict(declare or {}),
                    'extra': json.loads(json.dumps(extra or {}, sort_keys=True)), 'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data)}
         if source is not None: request['source'] = json.loads(json.dumps(source, sort_keys=True))  # E122 s4a: only when given (R13)
         if rights_confirmed: request['rights_confirmed'] = True  # E70d (D2): only when given, so a derived request is as before
+        if curve_declaration is not None: request['curve_declaration'] = {k: curve_declaration[k] for k in DECLARATION}  # E188 C1: only when given
+        if made_for is not None: request['made_for'] = made_for  # E192 s2: only when given, compared whole on a retry
         with self._locked():
             record = self._load()
             pending, first = record.get('pending'), False
@@ -959,6 +1024,9 @@ class Exchange:
                 if upload and list(based_on) != [of]:  # E70d (D3): the upload route records only the version it builds on
                     self._raise('not-valid', {'reasons': "an upload's next version records only the version it builds on; name only %s as based on"
                                               % self._name(record['items'][of])})
+                if curve_declaration is not None and not (upload and profile == 'las2/1'):  # E188 C1: the upload route's las2/1 only
+                    self._raise('not-valid', {'reasons': 'a curve declaration goes only with the next version of an uploaded LAS 2.0 file'},
+                                {'argument': 'curve_declaration'})
                 if upload and not rights_confirmed:  # E70d (D2): rights belong to uploads (ADR 0021)
                     self._raise('not-valid', {'reasons': 'confirm that you may share this version'}, {'argument': 'rights_confirmed'})
                 if rights_confirmed and not upload:
@@ -974,6 +1042,8 @@ class Exchange:
                 resolved = {'parents': [{'asset_id': i, 'revision': record['items'][i]['revision']} for i in based_on],
                             'expected_parent': record['items'][of]['revision'] if of is not None else None}
                 if upload: resolved = {'parents': [], 'expected_parent': record['items'][of]['revision'], 'route': 'upload'}  # E70d (D1)
+                if made_for is not None and {(p['asset_id'], p['revision']) for p in resolved['parents']} & {(m['asset_id'], m['revision']) for m in made_for}:
+                    self._raise('not-valid', {'reasons': 'a version it is based on is not also what it was made for'}, {'argument': 'made_for'})  # E192 s0 (D3)
                 pending ={'command_id': uuid.uuid4().hex, 'request': request, 'resolved': resolved, 'owner': identity, 'started': self.clock()}
                 # E171 s1 (Codex D4): who holds the sent version, saved with the send and sent from here, outside `request`
                 # (compared whole) and `resolved`; a send saved before the upgrade has none and is resent as it was.
@@ -1000,6 +1070,9 @@ class Exchange:
                 if by_upload and kind == 'invalid' and _server_said(error) == NOT_VERSIONED:
                     if first: self._clear()
                     self._raise('not-valid', {**facts, 'reasons': 'this type of file does not take a new version by upload'}, error=error)
+                if 'made_for' in pending['request'] and getattr(error, 'message', None) == MADE_FOR_UNRECORDED:  # E192 s2: the client's sentence
+                    if first: self._clear()
+                    self._raise('not-valid', {**facts, 'reasons': "this project's release does not record what a version was made for"}, error=error)
                 if kind == 'could-not-reach': self._raise('outcome-unknown', facts, {'command_id': pending['command_id']}, error=error)
                 if first and kind != 'rate-limited': self._clear()  # refused before anything was kept; a retry's earlier attempt stays unknown
                 self._transport_error(error, refused='access-refused', facts=facts)
@@ -1008,10 +1081,12 @@ class Exchange:
             if by_upload and number is None:  # E70d (D5): an upload answers no number; history may (never fails the send)
                 number = self._at({'asset_id': receipt['asset_id'], 'kind': 'uploaded'}, receipt['revision']).get('number')
             record = self._load()
+            previous = record['items'].get(receipt['asset_id']) or {}
+            placed = {'applied_to': previous['applied_to']} if 'applied_to' in previous else {}  # E188 C1 (Codex D1): in the same save
             record['items'][receipt['asset_id']] = {'asset_id': receipt['asset_id'], 'name': name, 'kind': 'uploaded' if by_upload else 'derived',
                                                     'revision': receipt['revision'],
                                                     'number': number, 'got_at': self.clock(), 'sent': True, 'output': None,
-                                                    **_kept(record['items'].get(receipt['asset_id']))}  # a send keeps the mode
+                                                    **placed, **_kept(previous)}  # a send keeps the mode
             record['pending'] = None
             self._save(record)
             change = receipt.get('source_change')  # E122 s4a: what the project decided for a send naming its source
@@ -1127,6 +1202,8 @@ class Exchange:
 class ClientTransport:
     """check, get and send over an ophiolite.Client: the inventory, result history, exact reads and derived
     publication routes that already exist. No route of its own."""
+    takes_made_for = True  # E192 s2: a send's `made_for` goes with the upload or the derived publication
+
     def __init__(self, client):
         self.client, self.url, self.project = client, client.url, client.project
         self._names = {}
@@ -1291,7 +1368,9 @@ class ClientTransport:
     def publish(self, data, request, resolved, command_id, attribution=None, receipt=None):
         held = {k: v for k, v in (attribution or {}).items() if k in ('holder', 'application') and v is not None}  # E171 s1
         if receipt is not None: held['receipt'] = receipt  # E184 s0: only when the project keeps it (Exchange.send asks)
+        if request.get('made_for') is not None: held['made_for'] = request['made_for']  # E192 s2: the saved versions, on both routes
         if resolved.get('route') == 'upload':  # E70d: the author's own upload, at the version this folder holds
+            if request.get('curve_declaration') is not None: held['curve_declaration'] = request['curve_declaration']  # E188 C1: the saved one
             got = self.client.upload_data(data, profile=request['profile'], name=request['name'], attribution=request['how'], audience=[],
                                           rights_confirmed=request.get('rights_confirmed') is True, declared=request.get('declare') or None,
                                           filename=request['name'], command_id=command_id, append_to=request['of'],

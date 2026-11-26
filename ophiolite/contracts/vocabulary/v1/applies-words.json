@@ -1,0 +1,29 @@
+{
+ "schema": "ophiolite.applies-words/1",
+ "id": "ophiolite.applies-words/1",
+ "description": "E190. The words of kinds of work, of what applies to which, and of taking a step or a criterion out of one run, beside ophiolite.chain-reasons/1 and ophiolite.criteria-words/1, which are unchanged. `reasons`: why a declaration, a start or a take-out or put-back was refused, one closed key each, one sentence each; nothing was stored (the HTTP status of each is the service's `job_kinds.STATUS`). `not_applying`: the words a person reads for each cause of a step or a criterion that does not apply. `step_states`: the words of the state `does-not-apply`. `counts`: how many steps of a run apply. `unavailable`: the sentence every kinds-of-work request answers until it is served. Placeholders are in braces; no sentence carries a code.",
+ "reasons": {
+  "duplicate-job-kind": "Each kind of work is listed once.",
+  "applies-unknown-kind": "A step or a criterion can only be limited to kinds of work this process lists.",
+  "applies-wider-than-step": "A criterion cannot apply to a kind of work its step does not apply to.",
+  "applies-data-successor": "A step cannot be limited to fewer kinds of work than a step made from its result.",
+  "applies-reads-limited": "A condition, or a criterion that uses an earlier step's latest result, cannot read a step that applies to fewer kinds of work than its own.",
+  "job-kind-needed": "Say which kind of work this run is: {kinds}.",
+  "job-kind-unknown": "This process knows these kinds of work: {kinds}.",
+  "job-kind-not-here": "This process lists no kinds of work; start it without one.",
+  "step-made-from": "{step} is made from this step's result: take {step} out first, or both.",
+  "later-step-attached": "A later step has a version attached, so this cannot be put back.",
+  "not-taken-out": "This was not taken out of the run.",
+  "already-out": "This does not apply to this run already.",
+  "step-rejected": "A rejected step is not taken out: attach a new result, or the run stays stopped."
+ },
+ "not_applying": {
+  "job-kind": "Does not apply: not for {kind}",
+  "taken-out": "Does not apply: taken out by {person}: {reason}"
+ },
+ "step_states": {
+  "does-not-apply": "Does not apply"
+ },
+ "counts": "{applying} of {steps} steps apply; {not applying} do not",
+ "unavailable": "Kinds of work and taking a step out of a run are not available on this deployment yet."
+}

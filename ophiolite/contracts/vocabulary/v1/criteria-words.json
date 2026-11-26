@@ -1,0 +1,57 @@
+{
+ "schema": "ophiolite.criteria-words/1",
+ "id": "ophiolite.criteria-words/1",
+ "description": "E189. The words of criteria, proof and sign-off on a chain step, beside ophiolite.chain-reasons/1, which is unchanged. `reasons`: why a declaration with criteria, or a sign-off, exception or continue on a step with criteria, was refused, one closed key each, one sentence each; nothing was stored (the HTTP status of each is the service's `criteria.STATUS`). `criterion_states`: the words a person reads for each criterion state. `step_states`: the words of the four states of a step with criteria. `proof_kinds`: what each kind of proof asks for, with its placeholders. `since_sign_off`: one sentence per change after a sign-off. `unavailable`: the sentence every criteria row answers until it is served. Placeholders are in braces; no sentence carries a code.",
+ "reasons": {
+  "work-without-criteria": "A step done outside the platform needs a list of criteria that says when it is done.",
+  "criteria-not-here": "Only a step whose result is attached can have criteria: a tool step or a step done outside the platform.",
+  "duplicate-criterion": "Two criteria of this step have the same key.",
+  "role-unknown": "The sign-off names a role this chain does not list.",
+  "role-unused": "This chain lists a role that no step's sign-off names.",
+  "duplicate-role": "Two roles of this chain have the same key.",
+  "input-not-upstream": "A criterion about current inputs must name an earlier step that this step follows.",
+  "rule-parameters": "The rule a criterion names is not released for this kind of result, or a value is not one the rule accepts.",
+  "per-well-kind": "Only well logs can be counted per well.",
+  "holder-not-member": "Everyone named for a role must be a member of this project who can do work in it.",
+  "proof-outcome": "A criterion names an outcome this project does not have for this kind of result.",
+  "outside-retired": "A step done outside the platform is now declared as work, with the criteria that say when it is done.",
+  "not-named-for-role": "Only a person this chain names for the role can sign off this step.",
+  "criteria-stand": "Sign-off waits for: {labels}.",
+  "agent-cannot-sign": "Only a person can do this on a chain step.",
+  "not-a-member": "Only a member of this project can record or withdraw an exception.",
+  "cannot-read-proof": "You cannot open every record this step's criteria rest on, so you cannot sign it off.",
+  "input-moved": "An input changed after this page was read; read the step again before signing off.",
+  "no-exception": "There is no exception on this criterion to withdraw.",
+  "step-not-open": "This step is not open for this.",
+  "nothing-attached": "Nothing is attached to this step yet.",
+  "has-criteria": "This step has criteria: it is done when they hold and a person signs it off, never by continuing."
+ },
+ "criterion_states": {
+  "holds": "Holds",
+  "fails": "Does not hold",
+  "missing": "Not shown yet",
+  "exception": "Exception recorded by {person}: {reason}",
+  "does-not-apply": "Does not apply"
+ },
+ "step_states": {
+  "criteria-not-met": "Criteria not met",
+  "waits-for-sign-off": "Waits for sign-off by the {role}",
+  "signed-off": "Signed off by {person}",
+  "done-with-exception": "Done with an exception, signed off by {person}"
+ },
+ "proof_kinds": {
+  "made-from": "Made from at least {count} {item words} per {per}",
+  "current-input": "Made from the current result of \"{step}\"",
+  "rule": "The rule \"{rule}\" holds with the team's values",
+  "outcome": "The check \"{outcome}\" passes",
+  "attachment": "An attachment called \"{label}\""
+ },
+ "since_sign_off": {
+  "newer-input": "A newer version of an input was published after the sign-off.",
+  "attachment-replaced": "The attachment was replaced after the sign-off.",
+  "attachment-withdrawn": "The attachment was withdrawn after the sign-off.",
+  "exception-withdrawn": "An exception was withdrawn after the sign-off.",
+  "verdict": "The verdict on the result changed after the sign-off."
+ },
+ "unavailable": "Criteria and sign-off on a step are not available on this deployment yet."
+}

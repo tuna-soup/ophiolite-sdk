@@ -4,7 +4,7 @@
   "x-ophiolite": {
     "id": "ophiolite.well-location/1",
     "version": "1.0.0",
-    "lifecycle": "preview"
+    "lifecycle": "supported"
   },
   "$defs": {
     "LocationProvenance": {

@@ -1,0 +1,15 @@
+{
+ "schema": "ophiolite.step-criteria/1",
+ "project": "p-kinds",
+ "run": "00000000000000000000000000190010",
+ "step": "pressure",
+ "result": {"asset_id": "pressure-k", "revision": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"},
+ "signed": null,
+ "revision": 3,
+ "cause": "taken-out",
+ "at": 1795800350.0,
+ "items": [
+  {"key": "offsets", "label": "Two offset wells", "proof_kind": "made-from", "state": "exception", "proofs": [{"kind": "exception", "act": 2}], "exception": {"by": {"person": "ben", "agent": null, "job": null}, "at": 1795800320.0, "reason": "The second offset well is in the partner's well file"}, "count": null, "examples": []},
+  {"key": "chart", "label": "Pressure chart attached", "proof_kind": "attachment", "state": "does-not-apply", "proofs": [], "exception": null, "count": null, "examples": [], "not_applying": {"cause": "taken-out", "by": {"person": "ana", "agent": null, "job": null}, "at": 1795800350.0, "reason": "The pressure chart is in the partner's well report"}}
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "schema": "ophiolite.sample-source-rules/1",
+ "id": "ophiolite.sample-source-rules/1",
+ "description": "E211 s0. Which sources may make a sample, apart from the index format: the approved sample ids (R7; a fifth id needs an owner ruling), the samples and OSD records refused with the reason, the hosts an input of a named record may be fetched from (R3), and the SPDX identifiers a source licence may carry (Q6: anything else fails closed; a share-alike licence only with store-only placement, R2). samples.py reads it as data; a change is an additive minor of this document with an owner ruling.",
+ "approved_samples": ["f3-block", "penobscot", "poseidon", "utah-forge"],
+ "refused_samples": {
+  "teapot-dome": "The owner skipped the Teapot Dome sample on 25 Nov 2026 (E211 O2, R7)."
+ },
+ "refused_records": {
+  "rmotc/teapot-dome": "Teapot Dome is out of the samples (R7); its origin also needs a registration.",
+  "terranubis/nw-shelf-australia-poseidon-3d": "Poseidon seismic comes only from the TGS bucket, never from this deposit (R3, E211 O3)."
+ },
+ "acquisition_hosts": {
+  "nopims/poseidon": ["tgs-opendata-poseidon.s3.amazonaws.com"]
+ },
+ "spdx": ["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-3.0", "CC-BY-SA-4.0", "PDDL-1.0", "ODC-By-1.0"]
+}

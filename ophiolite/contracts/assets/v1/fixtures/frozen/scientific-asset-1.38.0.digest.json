@@ -1,0 +1,10 @@
+{
+  "id": "ophiolite.scientific-asset/1",
+  "version": "1.38.0",
+  "path": "assets/v1/schema.json",
+  "canonical": "the released document as JSON with keys sorted, separators ',' and ':', UTF-8, no trailing newline",
+  "canonical_sha256": "5fc72484bc2a1b10a2e32218c9725c8efedfb29598b1764775c601b877de4793",
+  "file_sha256": "207304ec5bac9de7796e7c685ee8be3a2160a207faf1bce65a9efa6c2cc43a15",
+  "file": "the released file bytes as main served them before E192 s0 (edecfdff9): the document with indent 2 and one trailing newline",
+  "frozen_by": "E192 s0: 1.39.0 minus its two stated-parent properties, the made-for predicate and its LineageEntry sentence, version set back, is these bytes"
+}

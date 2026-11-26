@@ -70,7 +70,8 @@ CHANGES = ('applications/configure', 'applications/start', 'applications/publish
            'sources/mapping-save', 'layouts/save', 'layouts/keep',  # E153 s1b: the saves of picks the person settled
            'org-connections/request', 'org-connections/request-withdraw',  # E154 s0: a secret-free request for its person; withdraw its own
            'sources/bind',  # E154 s1: a link job's last step; the person confirms the link, the source is kept at the reviewed version
-           'chains/declare', 'chains/revise', 'chain-runs/start', 'chain-runs/attach')  # E178 s0: declared proposable; the server answers "not yet" until slices 1-2
+           'chains/declare', 'chains/revise', 'chain-runs/start', 'chain-runs/attach',  # E178 s0: declared proposable; the server answers "not yet" until slices 1-2
+           'attachments/add')  # E191 s0: declared proposable; the server answers "not yet" until slice 1
 # E153 s1: table-imports/read is proposable, but its bytes go with a job (propose_job / run_job files=), never a single proposal.
 
 # E166 s0 (D3): the gateway's tool-run-refused sentences (reason -> sentence, in its order), the SDK's one copy; E155 and

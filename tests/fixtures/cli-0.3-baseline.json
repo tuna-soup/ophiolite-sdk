@@ -2999,7 +2999,8 @@
       "well-tops",
       "deviation-survey",
       "point-set",
-      "time-depth"
+      "time-depth",
+      "table"
      ],
      "default": "None",
      "dest": "target",
@@ -3192,6 +3193,32 @@
      ],
      "required": false,
      "type": null
+    },
+    {
+     "action": "_AppendAction",
+     "choices": null,
+     "default": "None",
+     "dest": "made_for",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--made-for"
+     ],
+     "required": false,
+     "type": "_exact_version"
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "table_kind",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--table-kind"
+     ],
+     "required": false,
+     "type": null
     }
    ],
    "argv": [
@@ -3213,9 +3240,11 @@
     "header_row": null,
     "json": false,
     "layout": null,
+    "made_for": null,
     "map": [],
     "separate": [],
     "sheet": null,
+    "table_kind": null,
     "target": null,
     "well": null,
     "what": null
@@ -8489,6 +8518,19 @@
      ],
      "required": false,
      "type": null
+    },
+    {
+     "action": "_AppendAction",
+     "choices": null,
+     "default": "None",
+     "dest": "made_for",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--made-for"
+     ],
+     "required": false,
+     "type": "_exact_version"
     }
    ],
    "argv": [
@@ -8513,6 +8555,7 @@
     "file": "x",
     "how": "x",
     "json": false,
+    "made_for": null,
     "name": "x",
     "of": null,
     "profile": "las2/1",

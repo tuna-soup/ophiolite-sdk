@@ -1,0 +1,28 @@
+{
+  "about": "E192 s0: what each read that lists parents gives for table.csv sent with made_for design.json's exact version, beside (never among) its parents. s0 checks these fragments against every model and schema; s1 serves them. The salt is the first 32 hex digits of sha256('E192 s0 synthetic salt').",
+  "sent": {"file": "table.csv", "made_for": [{"asset_id": "design-a", "revision": "ce707862b735eff5fa02d216b96730a12b6982ebe0ae5cb52f92d580d5531bf5"}]},
+  "scientific_asset": {
+    "stated_parents": [{"authority": "ophiolite:managed", "key": "design-a", "revision": "ce707862b735eff5fa02d216b96730a12b6982ebe0ae5cb52f92d580d5531bf5", "profile": "table-csv/1"}],
+    "stated_parent_visibility": "complete"
+  },
+  "lineage": {
+    "stated_parents": [{"authority": "ophiolite:managed", "key": "design-a", "revision": "ce707862b735eff5fa02d216b96730a12b6982ebe0ae5cb52f92d580d5531bf5", "profile": "table-csv/1"}],
+    "stated_parent_visibility": "complete"
+  },
+  "bundle_asset": {
+    "stated_parents": [{"authority": "ophiolite:managed", "key": "design-a", "revision": "ce707862b735eff5fa02d216b96730a12b6982ebe0ae5cb52f92d580d5531bf5", "profile": "table-csv/1"}],
+    "stated_parent_visibility": "complete"
+  },
+  "unreadable": {"stated_parents": [], "stated_parent_visibility": "restricted"},
+  "story": {
+    "made_for": [{"asset_id": "design-a", "revision": "ce707862b735eff5fa02d216b96730a12b6982ebe0ae5cb52f92d580d5531bf5", "kind": "version", "name": "Design A", "version": 5, "file": null}]
+  },
+  "story_unreadable": {"made_for_hidden": true},
+  "lineage_entry": {
+    "commitment": "43820293b43c249a65ba31de006ceb0d461cddbd6ee85d9a7536bd59b749e6aa",
+    "predicate": "made-for",
+    "reference": {"authority": "ophiolite:managed", "key": "design-a", "revision": "ce707862b735eff5fa02d216b96730a12b6982ebe0ae5cb52f92d580d5531bf5"},
+    "salt": "5dc369e457284e3c047e1a93336aa0fc"
+  },
+  "lineage_entry_strict": {"commitment": "43820293b43c249a65ba31de006ceb0d461cddbd6ee85d9a7536bd59b749e6aa"}
+}

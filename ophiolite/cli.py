@@ -120,6 +120,14 @@ def configuration(path):
 def credentials_path(config):return auth.default_path(config['url'],config['project'])
 
 
+def _exact_version(text):
+    """E192 s2: ITEM@VERSION (the version is the 64-character fingerprint ophiolite exchange made-for prints) as [item, revision]."""
+    item,at,revision=text.rpartition('@')
+    if not at or not item or len(revision)!=64 or not set(revision)<=set(string.digits+'abcdef'):
+        raise argparse.ArgumentTypeError('give an exact version as ITEM@VERSION, as ophiolite exchange made-for prints it')
+    return [item,revision]
+
+
 def parser():
     parser=argparse.ArgumentParser(description=__doc__)
     common=argparse.ArgumentParser(add_help=False)  # E31: every verb prints its documented JSON shape with --json
@@ -414,7 +422,7 @@ def parser():
     tables=project(sub.add_parser('import',help='Add a table file as wells, well tops, deviation surveys, point sets or time-depth pairs: table FILE --target T (--dry-run to review), list, status ID, pause ID, resume ID, cancel ID'))
     tables.add_argument('action',choices=['table','list','status','pause','resume','cancel'])
     tables.add_argument('what',nargs='?',help='table: the file (.csv, .xlsx, .xls); status/pause/resume/cancel: the run id from `import list`')
-    tables.add_argument('--target',choices=['wells','well-tops','deviation-survey','point-set','time-depth'],help='table: what the table holds')
+    tables.add_argument('--target',choices=['wells','well-tops','deviation-survey','point-set','time-depth','table'],help='table: what the table holds (table: keep the file as it is)')
     tables.add_argument('--map',action='append',default=[],metavar='FIELD=COLUMN',help='table: which column holds each value, e.g. --map name=Formation,md="Top MD (m)" (repeat; a field given twice is a list). Omitted: the table must be in the standard layout')
     tables.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='table: what the table does not say, e.g. depth_unit=m (repeat)')
     tables.add_argument('--well',help='table: the well a table without a well column belongs to')
@@ -427,6 +435,10 @@ def parser():
     tables.add_argument('--command-id',help='table: the same id returns the same run instead of starting another')
     tables.add_argument('--dry-run',action='store_true',help='table: show what would be added; nothing is added')
     tables.add_argument('--layout',metavar='NAME',help='table: use this project layout\'s mapping (its target is the layout\'s); a layout is never used unless named (E89)')
+    tables.add_argument('--made-for',dest='made_for',action='append',type=_exact_version,metavar='ITEM@VERSION',  # E192 s2b; "revision" is an internal word
+                        help='table --target table: an exact version this table was made for, as ophiolite exchange made-for prints it (repeat, up to 32)')
+    tables.add_argument('--table-kind',dest='table_kind',metavar='WORD',  # E203 s1 (D6)
+                        help="table --target table: publish it as this kind of table, checked against the kind's latest version")
     newdata=project(sub.add_parser('new-data',help='What new files start with in this project: who can see them, depth reference, coordinate system, units and attribution'))
     newdata.add_argument('--set',action='append',default=[],metavar='KEY=VALUE',help='An administrator\'s change: visible_to, depth_reference, coordinate_system, unit_system or attribution (repeat)')
     project(sub.add_parser('templates',help='The table targets you can download a template for, their units and formats'))
@@ -569,6 +581,10 @@ def parser():
     send.add_argument('--of',help='An item you hold and wrote: send this as its next version')
     send.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='A declaration such as crs=EPSG:28992 (repeat)')
     send.add_argument('--rights-confirmed',dest='rights_confirmed',action='store_true',help='With --of an upload: I may share this version')  # E70d
+    send.add_argument('--made-for',dest='made_for',action='append',type=_exact_version,metavar='ITEM@VERSION',  # "revision" is an internal word (test_cli_exchange BANNED)
+                      help='An exact version this file was made for, as ophiolite exchange made-for prints it (repeat, 1-32)')  # E192 s2
+    named(held(sub.add_parser('made-for',help='Say which exact version an item means now, to send a file made for it; nothing is changed')),
+          item='The item id from ophiolite data list')  # E192 s2: the first answer
     # E96: checks against a reference (`check` above is E70a's exchange command and stays)
     checks=sub.add_parser('checks',help='Checks against a reference: publish, list, compare a result with a file, and who may publish')
     verbs=checks.add_subparsers(dest='action',required=True)
@@ -672,6 +688,36 @@ def parser():
     applies.add_argument('--applies',dest='apply',action='store_true',default=None,help='The step applies')
     applies.add_argument('--does-not-apply',dest='apply',action='store_false',help='The step does not apply; it is skipped')
     for one in (rdecide,rcont):one.add_argument('--reason',required=True,help='Your reason, in words')
+    # E191 s1: figures kept with one item version (a PNG, a JPEG or a PDF); a figure is named by its label
+    figs=sub.add_parser('figures',help='Figures: a picture or a PDF kept with one item version')
+    fverbs=figs.add_subparsers(dest='action',required=True)
+    fverb=lambda name,help:project(fverbs.add_parser(name,help=help,parents=[common]))
+    FIG_ITEM='The item by its name and version number (default: its latest); or exactly, as @ASSET:REVISION'
+    fatt=fverb('attach','Attach a figure (PNG, JPEG or PDF) to one item version')
+    fatt.add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help=FIG_ITEM)
+    fatt.add_argument('file',type=Path,help='The figure file')
+    fatt.add_argument('--label',required=True,help='What the figure shows, in words')
+    flist=fverb('list','The figures of one item version, newest first, in words')
+    flist.add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help=FIG_ITEM)
+    fget=fverb('get','Save a figure of one item version to a file')
+    fwd=fverb('withdraw','Withdraw a figure with your reason; its line stays with the version')
+    for one in (fget,fwd):
+        one.add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help=FIG_ITEM)
+        one.add_argument('label',nargs='?',help='The figure by its label (the newest with that label)')
+        one.add_argument('--id',dest='figure_id',help='The figure exactly, by its id as --json gives it')
+    fget.add_argument('--out',type=Path,required=True,help='The file to write; the bytes are never printed')
+    fwd.add_argument('--reason',required=True,help='Why it is withdrawn, in words')
+    # E203 s1 (D5, D6): the project's kinds of table (declare, list, show) and a file exported as one checked here (check, offline)
+    tk=sub.add_parser('table-kinds',help="Kinds of table: your team's own kinds of table, and a file exported as one checked on this computer")
+    tkverbs=tk.add_subparsers(dest='action',required=True)
+    tkd=project(tkverbs.add_parser('declare',help='Declare a kind of table, or its next version, from a JSON file',parents=[common]))
+    tkd.add_argument('file',type=Path,metavar='FILE',help='The declaration: word, label, row, columns and key, as one JSON object')
+    project(tkverbs.add_parser('list',help="The project's kinds of table, each at its latest version",parents=[common]))
+    tks=project(tkverbs.add_parser('show',help='One kind of table: its columns and what each must hold',parents=[common]))
+    tks.add_argument('word',metavar='WORD',help='The kind of table by its word, such as casing-design')
+    tks.add_argument('--version',dest='kind_version',type=int,metavar='N',help='This version of it (default: its latest)')
+    tkc=tkverbs.add_parser('check',help='Check a file exported as a kind of table against the kind written with it (offline; nothing is sent)',parents=[common])
+    tkc.add_argument('file',type=Path,metavar='FILE',help='A Parquet file, or a CSV file with its .table-kind.json beside it')
     # E134: your own consented work in a project, exported as a folder of work episodes (s2: values where the rights allow)
     traj=sub.add_parser('trajectories',help='Your own work in a project as episodes a model may learn from')
     tverbs=traj.add_subparsers(dest='action',required=True)
@@ -1126,6 +1172,88 @@ def _outcomes(args,client):
     o=getattr(client,'outcome_'+args.action)(named['outcome_id'])
     text={'enable':'"%s" is enabled.','disable':'"%s" is disabled; it is kept and can be enabled again.','withdraw':'"%s" is withdrawn; its name is free again.'}[args.action]
     return done(args,text % o['label'],o)
+
+
+def _figures(args,client):
+    """E191 s1: figures attach | list | get | withdraw. Words by default (labels, types, sizes and people; no ids or
+    digests); the served answer under --json. `get` and `withdraw` take the newest figure with the label (E189's rule)."""
+    from . import figures as told
+    asset_id,revision=client.result_version(args.item);version={'asset_id':asset_id,'revision':revision}
+    if args.action=='attach':
+        f=client.figures.attach(version,args.file,label=args.label)
+        return done(args,'Attached '+told.figure_line(f),f)
+    if args.action=='list':
+        found=client.figures.every(version)
+        return done(args,'\n'.join(told.figure_line(f) for f in found) or 'This version has no figures.',{'attachments':found})
+    note=None
+    if args.figure_id is not None:
+        if args.label is not None:raise Refused('Name the figure by its label or by --id, not both.')
+        ident=args.figure_id
+    else:
+        if args.label is None:raise Refused('Name the figure by its label, or by --id.')
+        chosen,count=told.newest(client.figures.every(version),args.label)
+        if chosen is None:raise Refused('This version has no figure labelled "%s".' % args.label)
+        ident=chosen['attachment_id']
+        if count>1:note='%d figures carry this label; the newest was taken.' % count
+    if args.action=='get':
+        data,media=client.figures.read(ident)
+        args.out.write_bytes(data)
+        return done(args,'\n'.join(x for x in (note,'Saved %s (%s) to %s.' % (told.size_words(len(data)),told.TYPE_WORDS.get(media,media),args.out)) if x),
+                    {'attachment_id':ident,'media_type':media,'bytes':len(data),'out':str(args.out)})
+    f=client.figures.withdraw(ident,reason=args.reason)
+    return done(args,'\n'.join(x for x in (note,'Withdrawn: '+told.figure_line(f)) if x),f)
+
+
+class _Checked(dict):
+    """E203 s1: `table-kinds check`'s answer and the exit code it ends with (entrypoint reads exit_code)."""
+    exit_code=0
+
+
+def _kind_lines(version):
+    """E203 s1 (D6): a kind of table in words: its word, version and label, what a row is, each column and the key. A
+    quantity is named by the label a person reads (table-kind-words `quantities`), never by its class."""
+    from . import table_kinds
+    labels=table_kinds.words()['quantities'];d=version['declaration']
+    lines=['%s, version %d: %s. One row: %s.' % (d['word'],version['version'],d['label'],d['row'])]
+    for c in d['columns']:
+        said=[c['type']]+(['%s in %s' % (labels.get(c['quantity'],c['quantity']),c['unit'])] if c.get('quantity') else [])
+        said+=['required' if c['required'] else 'optional']+(['may be empty'] if c['empty'] else [])
+        lines.append('  %s: %s' % (c['name'],', '.join(said)))
+    lines.append('  Each row is told apart by: %s' % ', '.join(d['key']))
+    return lines
+
+
+def _table_kinds(args,client):
+    """E203 s1 (D6): table-kinds declare FILE | list | show WORD [--version N]. Words by default; the served answer under --json."""
+    if args.action=='declare':
+        if not args.file.is_file():raise Refused('%s is not a file.' % args.file)
+        try:declaration=json.loads(args.file.read_text(encoding='utf-8'))
+        except ValueError:raise Refused('%s is not a JSON file: give the declaration as one JSON object.' % args.file) from None
+        version=client.table_kinds.declare(declaration)
+        return done(args,'\n'.join(['Declared.']+_kind_lines(version)),version)
+    if args.action=='list':
+        found=client.table_kinds.list()
+        return done(args,'\n'.join('%s, version %d: %s' % (k['declaration']['word'],k['version'],k['declaration']['label']) for k in found)
+                    or 'This project has no kinds of table yet.',{'kinds':found})
+    version=client.table_kinds.show(args.word,args.kind_version)
+    return done(args,'\n'.join(_kind_lines(version)),version)
+
+
+def _table_kinds_check(args):
+    """E203 s1 (D5): table-kinds check FILE, offline: exit 0 when the file is a table of the kind written with it, 1 with
+    each problem when it is not, 2 when it carries no kind or the kind cannot be read (its sentence)."""
+    from . import table_kinds
+    if not args.file.is_file():raise Refused('%s is not a file.' % args.file)
+    try:found=table_kinds.check(args.file)
+    except table_kinds.Unreadable as error:
+        if args.json:print(json.dumps({'error':{'code':error.reason,'message':str(error)}},indent=2))
+        else:print(str(error),file=sys.stderr)
+        raise SystemExit(EXIT['usage'])
+    kind,said=found['kind'],table_kinds.words()
+    head=said['offline']['fits'].format(word=kind['word'],version=kind['version']) if not found['problems'] else said['refusals']['kind-refused'].format(word=kind['word'])
+    answer=_Checked(done(args,'\n'.join([head]+found['sentences']),found))
+    answer.exit_code=0 if not found['problems'] else EXIT['refused']
+    return answer
 
 
 def _chain_named(client,label):
@@ -2040,15 +2168,15 @@ def _table_import(args,client):
     from .errors import IntegrityConflict
     from .imports import STOPPED,parse_mapping,result_lines,review_lines
     imports=client.imports
-    table_only=(args.target,args.layout,args.map,args.declare,args.well,args.authority,args.sheet,args.header_row,args.delimiter,args.decimal_mark,args.encoding,args.separate,args.audience,args.command_id,args.dry_run)
-    if args.action!='table' and any(table_only):raise Refused('Only import table takes --target, --layout, --map, --declare, --well, the reading options, --audience, --command-id or --dry-run.')
+    table_only=(args.target,args.layout,args.map,args.declare,args.well,args.authority,args.sheet,args.header_row,args.delimiter,args.decimal_mark,args.encoding,args.separate,args.audience,args.command_id,args.dry_run,args.made_for,args.table_kind)
+    if args.action!='table' and any(table_only):raise Refused('Only import table takes --target, --layout, --map, --declare, --well, the reading options, --audience, --command-id, --dry-run, --made-for or --table-kind.')
     if args.action=='list':
         if args.what:raise Refused('import list takes no id.')
         rows=imports.list()
         return done(args,'\n'.join('%s  %s (%s): %s' % (r['id'],r.get('key') or '',r['target'],r['words']) for r in rows) or 'No table import in this project.',{'imports':rows})
     if not args.what:raise Refused('Give the file: ophiolite exchange import table FILE --target well-tops.' if args.action=='table' else 'Give the run id: ophiolite exchange import %s ID (see `ophiolite exchange import list`).' % args.action)
     if args.action=='table':
-        if not (args.target or args.layout):raise Refused('Say what the table holds with --target: wells, well-tops, deviation-survey, point-set or time-depth.')
+        if not (args.target or args.layout):raise Refused('Say what the table holds with --target: wells, well-tops, deviation-survey, point-set, time-depth or table.')
         declared={}
         for text in args.declare:
             key,eq,value=text.partition('=')
@@ -2060,7 +2188,8 @@ def _table_import(args,client):
         path=Path(args.what)
         if not path.is_file():raise Refused('%s is not a file.' % args.what)
         result=imports.from_table(path,args.target,parse_mapping(args.map) if args.map else None,layout=args.layout,declarations=declared or None,reading=reading or None,well=args.well,
-                                  separate=args.separate,authority=args.authority,audience=args.audience,command_id=args.command_id,dry_run=args.dry_run,on_start=started)
+                                  separate=args.separate,authority=args.authority,audience=args.audience,command_id=args.command_id,dry_run=args.dry_run,on_start=started,made_for=args.made_for,
+                                  table_kind=args.table_kind)
         review=result['preview']
         if args.dry_run:
             lines=['Dry run, nothing was added.']+(review_lines(review) if review['target']!='wells' else ['{:,} wells to create · {:,} already here · {:,} rows skipped'.format(
@@ -2087,6 +2216,11 @@ def _exchange(args,client):
     from .exchange import SENTENCES
     exchange=client.exchange(args.work,sentences=dict(SENTENCES,stays=lambda f:SENTENCES['stays'](f).replace('stay=False','--latest')))  # E173 s1 (F12)
     if args.command=='check':result=exchange.check(name=args.name,type=args.type)
+    elif args.command=='made-for':  # E192 s2: the sentence, then the exact version to pass to send --made-for on a line of its own
+        result=exchange.made_for(args.item,name=args.name,type=args.type)
+        done(args,result.sentence,result.to_dict())
+        if not getattr(args,'json',False):print('%s@%s' % (result.technical['asset_id'],result.technical['revision']))
+        return result
     elif args.command=='get':result=exchange.get(args.item,name=args.name,type=args.type,stay=args.stay,output=args.output,
                                                  **({'curves':args.curve} if args.curve else {}),**({'window':window} if window is not None else {}))
     else:
@@ -2094,7 +2228,7 @@ def _exchange(args,client):
         if len(declared)!=len(args.declare):exchange._raise('not-valid',{'reasons':'give each declaration as KEY=VALUE'})
         from .exchange import NotValid
         try:result=exchange.send(args.file,name=args.name,profile=args.profile,how=args.how,based_on=args.based_on,of=args.of,declare=declared or None,
-                                 rights_confirmed=args.rights_confirmed)
+                                 rights_confirmed=args.rights_confirmed,**({'made_for':args.made_for} if args.made_for else {}))  # E192 s2
         except NotValid as refusal:  # E70d (D2): the command line names its flag
             if refusal.facts.get('reasons')!='confirm that you may share this version':raise
             exchange._raise('not-valid',{**refusal.facts,'reasons':refusal.facts['reasons']+' with --rights-confirmed'},refusal.technical)
@@ -2612,6 +2746,7 @@ def _main(argv=None):
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
     if args.command=='targets':return _targets(args)  # E86: offline; reads the packaged contracts only
     if args.command=='kinds':return _kinds(args)  # E168 s1: offline; reads the packaged export matrix only
+    if args.command=='table-kinds' and args.action=='check':return _table_kinds_check(args)  # E203 s1: offline; reads the file only
     if args.command=='recipes' and args.action=='show':return _recipes(args)  # E112 s2: offline; reads the journal only
     if args.command=='starter' and args.action in ('finalise','export','python','resinsight'):return _starter(args)  # E129 Sa, sb, (e), (d): offline; reads local files only
     if args.command=='procedures' and not _catalogue_verb(args):return _procedures(args)  # E105a: offline; reads and runs local files only
@@ -2697,6 +2832,8 @@ def _main(argv=None):
         if args.command=='outcomes':return _outcomes(args,client)  # E120
         if args.command=='chains':return _chains(args,client)  # E178 s2c
         if args.command=='chain-runs':return _chain_runs(args,client)  # E178 s2c
+        if args.command=='figures':return _figures(args,client)  # E191 s1
+        if args.command=='table-kinds':return _table_kinds(args,client)  # E203 s1
         if args.command=='verdicts':return _verdicts(args,client)  # E132
         if args.command=='withdraw':return _withdraw(args,client)  # E132 s2
         if args.command=='rules':return _rules_show(args,client)  # E144 s3
@@ -2716,7 +2853,7 @@ def _main(argv=None):
         if args.command=='affected':return _affected(args,client)  # E177 s1
         if args.command=='try':return _try(args,client)  # E150 s1b
         if args.command=='procedures':return _catalogue(args,client)  # E105b: the project's catalogue
-        if args.command in ('check','get','send'):return _exchange(args,client)
+        if args.command in ('check','get','send','made-for'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
         if args.command=='intake':return _intake(args,client)  # E107a
         if args.command=='source':return _source(args,client)  # E108

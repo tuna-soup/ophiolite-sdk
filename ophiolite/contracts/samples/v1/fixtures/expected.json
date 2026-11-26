@@ -1,0 +1,44 @@
+{
+ "description": "E211 s0 (T3). The contents each synthetic manifest projects to, written by hand from the manifest files: assets by (type, asset_id, revision) with the name or null, entities by (kind, entity_id); lists, never counts.",
+ "contents": {
+  "synthetic-a.manifest.json": {
+   "assets": [
+    {"type": "well-log", "asset_id": "synthetic-log-a", "revision": "1111111111111111111111111111111111111111111111111111111111111111", "name": "synthetic-log-a"},
+    {"type": "well-tops", "asset_id": "synthetic-tops-a", "revision": "2222222222222222222222222222222222222222222222222222222222222222", "name": "synthetic-tops-a"}
+   ],
+   "entities": [
+    {"kind": "well", "entity_id": "synthetic-well-a", "name": "synthetic-well-a"},
+    {"kind": "wellbore", "entity_id": "synthetic-wellbore-a1", "name": "synthetic-wellbore-a1"}
+   ]
+  },
+  "synthetic-b.manifest.json": {
+   "assets": [
+    {"type": "trajectory", "asset_id": "synthetic-path-b", "revision": "7777777777777777777777777777777777777777777777777777777777777777", "name": "synthetic-path-b"}
+   ],
+   "entities": []
+  },
+  "synthetic-null-names.manifest.json": {
+   "assets": [
+    {"type": "well-log", "asset_id": "synthetic-shared-id", "revision": "1212121212121212121212121212121212121212121212121212121212121212", "name": null},
+    {"type": "well-tops", "asset_id": "synthetic-unnamed", "revision": "3434343434343434343434343434343434343434343434343434343434343434", "name": null}
+   ],
+   "entities": [
+    {"kind": "well", "entity_id": "synthetic-shared-id", "name": "synthetic-well-shared"}
+   ]
+  },
+  "synthetic-revisions.manifest.json": {
+   "assets": [
+    {"type": "well-log", "asset_id": "synthetic-log-r", "revision": "1313131313131313131313131313131313131313131313131313131313131313", "name": "synthetic-log-r-first"},
+    {"type": "well-log", "asset_id": "synthetic-log-r", "revision": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd", "name": "synthetic-log-r-second"}
+   ],
+   "entities": []
+  },
+  "synthetic-repeat.manifest.json": {
+   "assets": [
+    {"type": "well-log", "asset_id": "synthetic-log-twice", "revision": "6868686868686868686868686868686868686868686868686868686868686868", "name": "synthetic-log-twice"},
+    {"type": "well-log", "asset_id": "synthetic-log-twice", "revision": "6868686868686868686868686868686868686868686868686868686868686868", "name": "synthetic-log-twice"}
+   ],
+   "entities": []
+  }
+ }
+}
