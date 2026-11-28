@@ -1,5 +1,24 @@
 """Preview scientific client. Local import never initializes credentials or transport."""
+from typing import TYPE_CHECKING
+
 from ._version import __version__
+
+if TYPE_CHECKING:  # E217 s0 (D9): what __getattr__ serves, named for a type checker; at run time each still loads lazily
+    from . import oauth_app as oauth_app, tools as tools
+    from ._deprecation import OphioliteDeprecationWarning as OphioliteDeprecationWarning
+    from .account import Account as Account, connect as connect
+    from .aio import AsyncClient as AsyncClient
+    from .auth import Credential as Credential
+    from .client import Client as Client, CurveSet as CurveSet
+    from .oauth_app import OAuthApp as OAuthApp
+    from .osdu import kinds as kinds, profiles_for as profiles_for
+    from .procedures import (compared as compared, delivered as delivered, not_delivered as not_delivered, procedure as procedure,
+                             refused as refused, unknown as unknown)
+    from .scientific import Descriptor as Descriptor
+    from .sync import Checkpoint as Checkpoint, ResyncRequired as ResyncRequired, Sync as Sync
+    from .tools import tool as tool
+    from .writers import WrittenOriginal as WrittenOriginal
+del TYPE_CHECKING  # dir(ophiolite) stays as it was
 
 # E163 s1: what `from ophiolite import *` and an editor show; each name is still served lazily by __getattr__.
 # Left out but still served: __contracts__ (a dunder), procedure (D78: `tool` is the word) and oauth_app (its

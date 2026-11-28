@@ -1,0 +1,62 @@
+{
+ "schema": "ophiolite.sample-start-words/1",
+ "id": "ophiolite.sample-start-words/1",
+ "description": "E211 s1. What a person reads when a sample project from the public store is offered, prepared, started and restored (project_gateway/sample_store.py CODES): one closed key each, one sentence each. `{sample}` is the sample's name as a person reads it; no sentence carries a code, a field name, a path, a count or an identifier. `limits` (E212 s1) are what a person reads when a per-person limit on public-store fetches refuses (HTTP 429): `{limit}` is the limit's value and `{reset}` the time (UTC) it resets. `labels` are the readable licence words a card shows, `kinds` the names of what a sample holds. Why a sample's own description is not offered is E211 s0's words (vocabulary/v1/sample-index-words.json); why the store's index is refused is E212 s0's (vocabulary/v1/public-store-words.json).",
+ "reasons": {
+  "no-store": "This deployment does not offer samples from the public store, so {sample} is not offered here.",
+  "store-unreachable": "The public store of samples could not be reached, so {sample} and the other samples from it are not offered now. Try again later.",
+  "store-index-invalid": "The list of what the public store holds is not valid, so {sample} and the other samples from it are not offered now.",
+  "sample-index-unreadable": "The list of samples in the public store could not be read completely, so {sample} and the other samples from it are not offered now. Try again in a minute.",
+  "bundle-not-in-store": "The data of {sample} are not where the list of samples says they are, so it is not offered.",
+  "not-offered": "{sample} is not offered now, so nothing was created.",
+  "bundle-unreadable": "The data of {sample} could not be downloaded, so nothing was created. Try again later.",
+  "bundle-size": "The data of {sample} arrived with the wrong size, so they were deleted and nothing was created.",
+  "bundle-digest": "The data of {sample} do not match their published checksum, so they were deleted and nothing was created.",
+  "bundle-manifest-differs": "What the data of {sample} hold is not what was published for it, so they were deleted and nothing was created.",
+  "not-owner": "Only an owner of the organisation can create a project with {sample}, so nothing was created.",
+  "not-administrator": "Only the project's administrator can fill it with {sample}, so nothing was added.",
+  "handle-expired": "The download of {sample} is no longer held, so nothing was added. Press again to download it again.",
+  "not-organization-project": "{sample} was downloaded for another organisation than the one this project belongs to, so nothing was added.",
+  "command-conflict": "This request was already used for something other than {sample}, so nothing was added.",
+  "restore-running": "{sample} is already being added to this project, so a second one was not started.",
+  "entry-changed": "{sample} changed in the public store after it was downloaded, so nothing was added. Press again to use the new one.",
+  "restore-unavailable": "This deployment cannot add {sample} to a project now, so nothing was added.",
+  "key-allowance-full": "You hold as many project access keys as you may, so {sample} could not be added. Remove one of your access keys and press again.",
+  "restore-incomplete": "Not everything in {sample} was added to this project. Press again to add the rest; what is already here is kept.",
+  "restore-refused": "Adding {sample} stopped part way, so this project may hold part of it. Press again to finish it.",
+  "restore-cannot-run": "This deployment cannot run the restore of {sample}, so this project may hold nothing of it yet.",
+  "restore-failed": "Adding {sample} failed, so this project may hold part of it. Press again to finish it.",
+  "restore-timeout": "Adding {sample} took too long and was stopped, so this project may hold part of it. Press again to finish it.",
+  "restore-interrupted": "The service restarted while {sample} was being added, so this project may hold part of it. Press again to finish it.",
+  "operation-unknown": "There is no addition of {sample} of yours with that name in this project.",
+  "dataset-unbound": "The public store does not list {sample} under exactly one dataset, so its licence and credits cannot be kept with it and nothing was added."
+ },
+ "states": {
+  "restoring": "{sample} is being added to this project.",
+  "complete": "{sample} was added to this project."
+ },
+ "limits": {
+  "fetch-busy": "You are already fetching {limit} public datasets. Try again after {reset}.",
+  "creations-today": "You have created {limit} sample projects today. You can create more after {reset}.",
+  "bytes-today": "Fetching this sample would pass today's limit of {limit} from the public store. You can fetch it after {reset}."
+ },
+ "item": "The first item not added: {item}.",
+ "labels": {
+  "publisher-terms": "Under the publisher's own terms, kept as written",
+  "licence": "Under the licence {licence}",
+  "may-share": "May be shared",
+  "credit-required": "Credit required",
+  "credit-not-required": "No credit required",
+  "share-alike": "Shared with the same terms"
+ },
+ "kinds": {
+  "well-log": "Well logs",
+  "well-tops": "Formation tops",
+  "trajectory": "Well paths",
+  "regular-grid-surface": "Horizons",
+  "well-table": "Wells",
+  "well": "Wells",
+  "wellbore": "Wellbores",
+  "other": "Other data"
+ }
+}

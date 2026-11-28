@@ -3,11 +3,11 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.19.0",
+    "version": "2.20.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
-  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Bundle 2 adds typed assets (well tops, trajectories, regular-grid surfaces) beside curves. Readers accept the majors they know and refuse others; 1.x readers refuse 2.0. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept. 2.9 (E107a): a file read on a computer may carry the original it was read from (one provenance file) beside the recorded reading (read_by). 2.12 (E116 s1): a project folder block (folder); with it, assets and selection may be empty. 2.13 (E142 s0): surveys, their members and relations (surveys). 2.14 (E117 s1): the folder block may be ophiolite.project-folder/2, which any program may write. 2.15 (E147 s0): a citation block (citation) the standard descriptors beside the manifest are derived from, and a media type on asset files (media_type). 2.16 (E147 s2b): with a citation, the Croissant descriptor holds a record set per typed table (well tops, deviation survey, time-depth, point set) read from the asset's data.json. 2.19 (E192 s0): the revisions a sender stated an asset was made for (stated_parents, with stated_parent_visibility; both or neither), beside and never among the parents; 2.17 and 2.18 changed no schema.",
+  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Bundle 2 adds typed assets (well tops, trajectories, regular-grid surfaces) beside curves. Readers accept the majors they know and refuse others; 1.x readers refuse 2.0. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept. 2.9 (E107a): a file read on a computer may carry the original it was read from (one provenance file) beside the recorded reading (read_by). 2.12 (E116 s1): a project folder block (folder); with it, assets and selection may be empty. 2.13 (E142 s0): surveys, their members and relations (surveys). 2.14 (E117 s1): the folder block may be ophiolite.project-folder/2, which any program may write. 2.15 (E147 s0): a citation block (citation) the standard descriptors beside the manifest are derived from, and a media type on asset files (media_type). 2.16 (E147 s2b): with a citation, the Croissant descriptor holds a record set per typed table (well tops, deviation survey, time-depth, point set) read from the asset's data.json. 2.19 (E192 s0): the revisions a sender stated an asset was made for (stated_parents, with stated_parent_visibility; both or neither), beside and never among the parents; 2.17 and 2.18 changed no schema. 2.20 (E211 s1, additive): what the SDK writer has written since bundle 2.17 and before, which the schema did not yet admit: the well-table asset type (2.17), a relationship subject's row (E29), null evidence source and statement as served, and observations.entities_omitted (E22b). A writer still names the lowest minor its content needs; nothing valid before is refused.",
   "type": "object",
   "required": [
     "schema",
@@ -129,6 +129,12 @@
           "minLength": 1,
           "maxLength": 160,
           "description": "1.10/2.10 (E122 s5b): why no source records travel although the exporter writes them (for example, this server has no source records); never silently empty."
+        },
+        "entities_omitted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "2.20.0 (E211 s1): why no wells and wellbores travel (for example, they were not requested, or this sign-in may not read them), as the SDK writer has stated since E22b; never silently empty."
         }
       }
     },
@@ -230,6 +236,12 @@
               },
               "entity_id": {
                 "type": "string"
+              },
+              "row": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160,
+                "description": "2.20.0 (E211 s1): the row of a table of wells (a well-table revision) the association names, as the SDK writer has written since E29 and bundle 2.17; only on a predicate that scopes rows."
               }
             }
           },
@@ -268,7 +280,10 @@
                 "additionalProperties": false,
                 "properties": {
                   "source": {
-                    "type": "object",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
                     "additionalProperties": false,
                     "required": [
                       "asset_id",
@@ -281,11 +296,16 @@
                       "revision": {
                         "type": "string"
                       }
-                    }
+                    },
+                    "description": "2.20.0 (E211 s1): may be null, as the association's evidence is served (entities/v1 Evidence) and the SDK writer copies it."
                   },
                   "statement": {
-                    "type": "string",
-                    "maxLength": 500
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 500,
+                    "description": "2.20.0 (E211 s1): may be null, as the association's evidence is served (entities/v1 Evidence) and the SDK writer copies it."
                   }
                 }
               }
@@ -640,8 +660,10 @@
             "model-section",
             "seismic-section",
             "time-depth",
-            "feature-set"
-          ]
+            "feature-set",
+            "well-table"
+          ],
+          "description": "2.20.0 (E211 s1): well-table, the accepted rows a wells import kept (sql-wells/1), as the SDK writer has written since bundle 2.17 (E162 s2a)."
         },
         "relationships": {
           "type": "object",

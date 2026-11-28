@@ -5,6 +5,23 @@
 Supported 0.x client over preview contracts, published on PyPI as `ophiolite` since 29 October 2026 and numbered by
 release date (ADR 0015). No stable 1.0 or production-support promise is claimed.
 
+- The client explains itself to an editor and a type checker (E217 s0). The public methods of `Client`, `CurveSet` and
+  `AsyncClient` state what they return, and the package's type information (`py.typed`) is checked against the
+  installed wheel with `mypy --strict`. Each public method has a docstring that opens with one sentence; the methods
+  the documents call also list what they take and return. `AsyncClient` declares each coroutine it attaches, so an
+  awaited call has the type of the `Client` call; the methods it refuses say so in their help. No call changes what it
+  takes or does.
+- `AsyncClient.find`, `find_all` and `find_log` are awaited (D133 item 4); `find_all` returns every row as a list.
+  Before, `find` raised `TypeError` ('_AsyncGeneratorContextManager' ...) and `find_log` "'async_generator' object is not
+  iterable". The inherited methods whose synchronous body cannot run over the asynchronous transport (`wells`,
+  `entities`, `upload`, `templates`, `layouts`, `exchange`, ... and the `upload_runs`, `imports`, `table_kinds` facades)
+  now raise `TypeError` naming the `Client` method, before any request, instead of failing on an un-awaited answer.
+  The inherited methods that only return their request (`search`, `lineage`, `rights`, ...) are awaited as before.
+
+- The source distribution carries the four attachment fixture images (`ophiolite/contracts/assets/v1/fixtures/
+  attachments/files/*.png`, E191 s0), so a wheel built from it is the wheel built from the repository. Only images
+  under `ophiolite/templates` stay out of it.
+
 - A team's own kind of table (E203 s1). `client.table_kinds` declares, lists and shows a project's kinds of table;
   `imports.from_table(..., table_kind=WORD)` and `ophiolite exchange import table --table-kind WORD` publish a kept
   table as one, refused with each problem when it is not one. A CSV export of such a version gets

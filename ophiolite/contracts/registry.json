@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.150.0",
+  "version": "1.158.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.39.0",
+      "version": "1.40.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -196,11 +196,11 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.19.0",
+      "version": "2.20.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it; 2.11 (E123 S1f-c) carries a packaged polyline set (Petrel fault sticks); 2.12 (E116 s1) carries a project folder block, and with it may list no assets (a folder ophiolite-mapper writes alone); 2.13 (E142 s0) carries surveys, their members by exact revision and the relations between them; 2.14 (E117 s1) carries a project folder block of its own format (ophiolite.project-folder/2), which any program may write; 2.15 (E147 s0) carries a citation block and the standard descriptors derived from it, and a media type on asset files; 2.16 (E147 s2b) describes a cited bundle's well tops, deviation surveys, time-depth tables and point sets as Croissant record sets read from their normalized data; 2.19 (E192 s0) carries the stated parents beside the parents (the format minors 2.17 and 2.18 were taken by E162 s2a and E182 s2b without a schema change)."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it; 2.11 (E123 S1f-c) carries a packaged polyline set (Petrel fault sticks); 2.12 (E116 s1) carries a project folder block, and with it may list no assets (a folder ophiolite-mapper writes alone); 2.13 (E142 s0) carries surveys, their members by exact revision and the relations between them; 2.14 (E117 s1) carries a project folder block of its own format (ophiolite.project-folder/2), which any program may write; 2.15 (E147 s0) carries a citation block and the standard descriptors derived from it, and a media type on asset files; 2.16 (E147 s2b) describes a cited bundle's well tops, deviation surveys, time-depth tables and point sets as Croissant record sets read from their normalized data; 2.19 (E192 s0) carries the stated parents beside the parents (the format minors 2.17 and 2.18 were taken by E162 s2a and E182 s2b without a schema change); 2.20 (E211 s1, additive) admits what the SDK writer already wrote: the well-table type, a relationship subject's row, null evidence source and statement, and observations.entities_omitted."
     },
     {
       "id": "ophiolite.polyline-set/1",
@@ -777,6 +777,14 @@
       "description": "One figure (a PNG, JPEG or PDF, its type decided from the bytes) bound once to one item version: its label, byte count and SHA-256, who sent it, through what and when, and its withdrawal with a reason; never moved or replaced, served as a file under that version's access only, with the add, list, read and withdraw request bodies in $defs (E191 s0)."
     },
     {
+      "id": "ophiolite.document/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/document-schema.json",
+      "title": "Document",
+      "description": "One document as OSDU defines one (a PDF, PNG or JPEG under E191's checks) kept with a well, a wellbore, a survey or the project: its types from OSDU's document type list, its name and short description, byte count and SHA-256, who added it, through what and when; its own record, served as a file only through documents/read under project membership and the parent's own rule, with the add, list, read and describe request bodies in $defs (E222 s0)."
+    },
+    {
       "id": "ophiolite.table-kind/1",
       "version": "1.0.0",
       "lifecycle": "preview",
@@ -791,6 +799,22 @@
       "path": "samples/v1/sample-index-schema.json",
       "title": "SampleIndex",
       "description": "The list of sample projects the public store offers: per sample its id, title and card text, its bundle by a key relative to the store with the bundle's and its manifest's SHA-256 and the bundle's bytes, its sources (OSD record, retrieval day, catalogue origin, the address fetched, the licence object kept whole, the reading of the terms and the credit), the licence block computed from them, and its contents taken from the bundle manifest; never a count (E211 s0)."
+    },
+    {
+      "id": "ophiolite.public-store/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "public-store/v1/public-store-schema.json",
+      "title": "PublicStore",
+      "description": "The public store's index (index.json at the store's root), the byte and licence authority per dataset: its id and title, its sources (the sample index's source, verbatim) and the licence block computed from them, the unique OSD records of its sources in first-appearance order, and every object ever published under it by a content-addressed immutable key datasets/<id>/<sha256>/<name> with its SHA-256, bytes and publication day (append-only, at most 16); and, optionally, the sample index it holds at samples/index.json (E212 s0)."
+    },
+    {
+      "id": "ophiolite.activity-item/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "activity/v1/item-schema.json",
+      "title": "ActivityItem",
+      "description": "The item one activity or action row acted on, as it was named at the action: its id, its kind as stored for it (or project), its name, the exact version (every kind but project) and, where there is one, the wellbore it is linked to; stored at data.item, or data.detail.item on an action row, never back-filled; shown to a reader of that exact version now, a project item to every reader of the row, a place to readers of the wellbore (adhoc-activity-item-names)."
     }
   ],
   "profiles": [
@@ -1043,6 +1067,14 @@
       "description": "A Petrel well-tops export (VERSION 2) of one well, kept byte for byte; each row is a top named by its Surface at its MD, in file order with repeats kept, and the file states its depth unit. Other columns are listed as not read.",
       "lifecycle": "preview",
       "path": "profiles/v1/petrel-well-tops.json"
+    },
+    {
+      "id": "gocad-ascii/1",
+      "kind": "source",
+      "display_name": "GOCAD object (TSurf, PLine, VSet)",
+      "description": "A GOCAD ASCII TSurf, PLine or VSet (version 1, one object per file), kept byte for byte; a TSurf lands as one triangulated surface, a PLine as fault sticks when its header states GEOLOGICAL_TYPE fault and as map lines otherwise, a VSet as a point set, each in file order, and the coordinate system, units and positive direction are what its header states.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/gocad-ascii.json"
     },
     {
       "id": "opendtect-horizon-ascii/1",
@@ -1495,6 +1527,12 @@
       "kind": "fixture",
       "path": "assets/v1/fixtures/frozen/scientific-asset-1.38.0.digest.json",
       "title": "The released scientific asset 1.38.0, as its digests, frozen; never regenerated (E192 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/frozen/scientific-asset-1.39.0.digest.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/scientific-asset-1.39.0.digest.json",
+      "title": "The released scientific asset 1.39.0, as its digests, frozen; never regenerated (E212 s1)"
     },
     {
       "id": "ophiolite.fixture/pre-e1/source.json/1",
@@ -2198,6 +2236,12 @@
       "title": "Curve quantities with their OSDU LogCurveFamily names (E52)"
     },
     {
+      "id": "ophiolite.osdu-document-types/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/osdu-document-types.json",
+      "title": "The document types: every active row of OSDU's DocumentTaxonomy at v0.30.1, the list Document 2.0.0's TaxonomyIDs name, as OSDU spells it, with its source file's digest; generated by tools/osdu-vocabulary.py at the pinned commit (E222 s0)"
+    },
+    {
       "id": "ophiolite.parameter-labels/1",
       "kind": "vocabulary",
       "path": "scientific/v1/parameter-labels.json",
@@ -2893,6 +2937,12 @@
       "title": "Why a figure was not attached, served or withdrawn, one sentence each, no codes; the bound named as a person reads it (E191 s0)"
     },
     {
+      "id": "ophiolite.document-reasons/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/document-reasons.json",
+      "title": "Why a document was not added, listed, served or described, one sentence each, no codes; spreadsheets, archives and text files named, the order of the byte checks stated (E222 s0)"
+    },
+    {
       "id": "ophiolite.reference-reasons/1",
       "kind": "vocabulary",
       "path": "vocabulary/v1/reference-reasons.json",
@@ -3420,6 +3470,33 @@
       "title": "Attachment records and request bodies the schema refuses at their paths, and those only the model refuses (Unicode normal form C) (E191 s0)"
     },
     {
+      "id": "ophiolite.fixture/document/wellbore.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/document/valid/wellbore.json",
+      "title": "A person's synthetic end-of-well report kept with a wellbore, one type from OSDU's list, its sender reported (E222 s0)",
+      "schema": "ophiolite.document/1"
+    },
+    {
+      "id": "ophiolite.fixture/document/project.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/document/valid/project.json",
+      "title": "A synthetic plan kept with the project, two types, its description changed once (E222 s0)",
+      "schema": "ophiolite.document/1"
+    },
+    {
+      "id": "ophiolite.fixture/document/survey-by-assistant.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/document/valid/survey-by-assistant.json",
+      "title": "A synthetic section picture an assistant added to a survey for a person under an approved job (E222 s0)",
+      "schema": "ophiolite.document/1"
+    },
+    {
+      "id": "ophiolite.fixture/document/cases.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/document/invalid/cases.json",
+      "title": "Document records and request bodies the schema refuses at their paths, and those only the model refuses (a type not in the list or inactive, a project parent of another project, Unicode normal form C) (E222 s0)"
+    },
+    {
       "id": "ophiolite.fixture/attachments/expected.json/1",
       "kind": "fixture",
       "path": "assets/v1/fixtures/attachments/expected.json",
@@ -3545,6 +3622,37 @@
       "kind": "fixture",
       "path": "samples/v1/fixtures/invalid/licence-cases.json",
       "title": "One change each to a well-formed sample entry and exactly the licence, credit and policy problems it gives (E211 s0)"
+    },
+    {
+      "id": "ophiolite.public-store-words/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/public-store-words.json",
+      "title": "Why the public store's index or a dataset in it is refused, one sentence per code of the index's own with the dataset's name, no codes, field names or paths (E212 s0)"
+    },
+    {
+      "id": "ophiolite.sample-start-words/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/sample-start-words.json",
+      "title": "What a person reads when a sample project from the public store is offered, prepared, started and restored, one sentence per closed reason with the sample's name, no codes, field names or paths (E211 s1)"
+    },
+    {
+      "id": "ophiolite.fixture/public-store/store-two.json/1",
+      "kind": "fixture",
+      "path": "public-store/v1/fixtures/valid/store-two.json",
+      "title": "Two synthetic store datasets, one share-alike, with three objects under content-addressed keys and a sample index (E212 s0)",
+      "schema": "ophiolite.public-store/1"
+    },
+    {
+      "id": "ophiolite.fixture/public-store/cases.json/1",
+      "kind": "fixture",
+      "path": "public-store/v1/fixtures/invalid/cases.json",
+      "title": "Public store index changes the schema or the rules refuse, each with its paths and exactly its problems (E212 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/public-store/synthetic-rules.json/1",
+      "kind": "fixture",
+      "path": "public-store/v1/synthetic-rules.json",
+      "title": "A synthetic source-rules document approving the synthetic store dataset ids, for the store's tests only (E212 s0)"
     }
   ]
 }

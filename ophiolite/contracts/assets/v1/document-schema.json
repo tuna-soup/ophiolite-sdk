@@ -1,0 +1,852 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/document-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.document/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "DocumentActor": {
+      "additionalProperties": false,
+      "else": {
+        "properties": {
+          "job": {
+            "type": "string"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "agent": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "agent"
+        ]
+      },
+      "properties": {
+        "person": {
+          "description": "The person who acted, always",
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Person",
+          "type": "string"
+        },
+        "agent": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The assistant that acted for the person under an approved job; null for the person's own act",
+          "title": "Agent"
+        },
+        "job": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The approved job the assistant acted under; null exactly when agent is",
+          "title": "Job"
+        }
+      },
+      "required": [
+        "person",
+        "agent",
+        "job"
+      ],
+      "then": {
+        "properties": {
+          "job": {
+            "type": "null"
+          }
+        }
+      },
+      "title": "DocumentActor",
+      "type": "object"
+    },
+    "DocumentFile": {
+      "additionalProperties": false,
+      "properties": {
+        "media_type": {
+          "description": "Decided from the bytes, never from the name",
+          "enum": [
+            "image/png",
+            "image/jpeg",
+            "application/pdf"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "bytes": {
+          "description": "The stored length; the deployment's bound is at most E191's ceiling",
+          "maximum": 16777216,
+          "minimum": 1,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "media_type",
+        "bytes",
+        "sha256"
+      ],
+      "title": "DocumentFile",
+      "type": "object"
+    },
+    "DocumentParent": {
+      "additionalProperties": false,
+      "description": "What the document belongs to; it never changes.",
+      "else": {
+        "if": {
+          "properties": {
+            "kind": {
+              "enum": [
+                "well",
+                "wellbore"
+              ]
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        "then": {
+          "properties": {
+            "id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "survey"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "properties": {
+        "kind": {
+          "enum": [
+            "well",
+            "wellbore",
+            "survey",
+            "project"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "description": "The entity id of a well or wellbore, a survey's id, or the project's own id",
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "then": {
+        "properties": {
+          "id": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "title": "DocumentParent",
+      "type": "object"
+    },
+    "Sender": {
+      "additionalProperties": false,
+      "description": "What a version says sent it: a report, never a proof; no access, trust or verification decision reads it.",
+      "else": {
+        "if": {
+          "properties": {
+            "state": {
+              "const": "not recorded"
+            }
+          },
+          "required": [
+            "state"
+          ]
+        },
+        "properties": {
+          "client": {
+            "type": "null"
+          },
+          "host": {
+            "type": "null"
+          }
+        },
+        "then": {
+          "properties": {
+            "transport": {
+              "type": "null"
+            },
+            "accepted_as": {
+              "type": "null"
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "state": {
+            "const": "reported"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "properties": {
+        "schema": {
+          "const": "ophiolite.sender/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "reported",
+            "not reported",
+            "not recorded"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "client": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SenderClient"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "host": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SenderHost"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9-]{0,15}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transport"
+        },
+        "accepted_as": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Accepted As"
+        }
+      },
+      "required": [
+        "schema",
+        "state",
+        "client",
+        "host",
+        "transport",
+        "accepted_as"
+      ],
+      "then": {
+        "properties": {
+          "client": {
+            "type": "object"
+          }
+        }
+      },
+      "title": "Sender",
+      "type": "object"
+    },
+    "SenderClient": {
+      "additionalProperties": false,
+      "properties": {
+        "product": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Product"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        }
+      },
+      "required": [
+        "product",
+        "version"
+      ],
+      "title": "SenderClient",
+      "type": "object"
+    },
+    "SenderHost": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 40,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 40,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,39}$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "SenderHost",
+      "type": "object"
+    },
+    "Document": {
+      "additionalProperties": false,
+      "description": "One document kept with one parent: a file served under the parent's access only, never as a page.",
+      "else": {
+        "properties": {
+          "sender": {
+            "properties": {
+              "accepted_as": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "described_at": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "described_at"
+        ]
+      },
+      "properties": {
+        "schema": {
+          "const": "ophiolite.document/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "document_id": {
+          "description": "Minted by the server at random; never derived from the bytes",
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "parent": {
+          "$ref": "#/$defs/DocumentParent"
+        },
+        "taxonomy": {
+          "description": "The document's types from OSDU's list (TaxonomyIDs), at least one",
+          "items": {
+            "description": "A code of OSDU's document type list, as OSDU spells it (the last part of a TaxonomyIDs id)",
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.-]+$",
+            "type": "string"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Taxonomy",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "name": {
+          "description": "As people name the document (OSDU's Name)",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "A short description, possibly empty (OSDU's Description)",
+          "maxLength": 500,
+          "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+          "title": "Description",
+          "type": "string"
+        },
+        "file": {
+          "$ref": "#/$defs/DocumentFile"
+        },
+        "added_by": {
+          "$ref": "#/$defs/DocumentActor"
+        },
+        "sender": {
+          "$ref": "#/$defs/Sender",
+          "description": "What the request that added the document said sent it (ophiolite.sender/1); accepted_as is always null"
+        },
+        "added_at": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "title": "Added At",
+          "type": "string"
+        },
+        "described_at": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "When the description was last changed; null until then",
+          "title": "Described At"
+        }
+      },
+      "required": [
+        "schema",
+        "document_id",
+        "project_id",
+        "parent",
+        "taxonomy",
+        "name",
+        "description",
+        "file",
+        "added_by",
+        "sender",
+        "added_at",
+        "described_at"
+      ],
+      "then": {
+        "properties": {
+          "sender": {
+            "properties": {
+              "accepted_as": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      },
+      "title": "Document",
+      "type": "object"
+    },
+    "DocumentList": {
+      "additionalProperties": false,
+      "description": "A project's documents, or one parent's, newest first in the order they were added (no two tie).",
+      "properties": {
+        "documents": {
+          "items": {
+            "$ref": "#/$defs/Document"
+          },
+          "maxItems": 200,
+          "title": "Documents",
+          "type": "array"
+        },
+        "next": {
+          "anyOf": [
+            {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next"
+        }
+      },
+      "required": [
+        "documents",
+        "next"
+      ],
+      "title": "DocumentList",
+      "type": "object"
+    },
+    "DocumentAddRequest": {
+      "additionalProperties": false,
+      "description": "`documents/add`: one file, base64, with its type, name and description, for a parent the caller may read.\n`command_id` is E191's: the same command and body answer the first answer again; another body is refused.",
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "command_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "parent": {
+          "$ref": "#/$defs/DocumentParent"
+        },
+        "taxonomy": {
+          "items": {
+            "description": "A code of OSDU's document type list, as OSDU spells it (the last part of a TaxonomyIDs id)",
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.-]+$",
+            "type": "string"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Taxonomy",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "name": {
+          "description": "As people name the document (OSDU's Name)",
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "A short description, possibly empty (OSDU's Description)",
+          "maxLength": 500,
+          "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+          "title": "Description",
+          "type": "string"
+        },
+        "file_name": {
+          "anyOf": [
+            {
+              "description": "The name the sender gave, kept as text; never placed in a header",
+              "maxLength": 255,
+              "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "File Name"
+        },
+        "content": {
+          "description": "The file's bytes, base64 (RFC 4648, padded)",
+          "maxLength": 22369624,
+          "minLength": 4,
+          "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$",
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "command_id",
+        "parent",
+        "taxonomy",
+        "name",
+        "description",
+        "content"
+      ],
+      "title": "DocumentAddRequest",
+      "type": "object"
+    },
+    "DocumentListRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DocumentParent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "default": 50,
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cursor"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "title": "DocumentListRequest",
+      "type": "object"
+    },
+    "DocumentReadRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "document_id": {
+          "description": "Minted by the server at random; never derived from the bytes",
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Document Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "document_id"
+      ],
+      "title": "DocumentReadRequest",
+      "type": "object"
+    },
+    "DocumentDescribeRequest": {
+      "additionalProperties": false,
+      "description": "`documents/describe`: the description, replaced; the record keeps everything else. `command_id` as add's.",
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "command_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "document_id": {
+          "description": "Minted by the server at random; never derived from the bytes",
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "description": {
+          "description": "A short description, possibly empty (OSDU's Description)",
+          "maxLength": 500,
+          "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "command_id",
+        "document_id",
+        "description"
+      ],
+      "title": "DocumentDescribeRequest",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One document kept with one parent: a file served under the parent's access only, never as a page.",
+  "else": {
+    "properties": {
+      "sender": {
+        "properties": {
+          "accepted_as": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "described_at": {
+        "type": "null"
+      }
+    },
+    "required": [
+      "described_at"
+    ]
+  },
+  "properties": {
+    "schema": {
+      "const": "ophiolite.document/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "document_id": {
+      "description": "Minted by the server at random; never derived from the bytes",
+      "pattern": "^[0-9a-f]{32}$",
+      "title": "Document Id",
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Project Id",
+      "type": "string"
+    },
+    "parent": {
+      "$ref": "#/$defs/DocumentParent"
+    },
+    "taxonomy": {
+      "description": "The document's types from OSDU's list (TaxonomyIDs), at least one",
+      "items": {
+        "description": "A code of OSDU's document type list, as OSDU spells it (the last part of a TaxonomyIDs id)",
+        "maxLength": 200,
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9_.-]+$",
+        "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Taxonomy",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "name": {
+      "description": "As people name the document (OSDU's Name)",
+      "maxLength": 160,
+      "minLength": 1,
+      "pattern": "^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "description": "A short description, possibly empty (OSDU's Description)",
+      "maxLength": 500,
+      "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+      "title": "Description",
+      "type": "string"
+    },
+    "file": {
+      "$ref": "#/$defs/DocumentFile"
+    },
+    "added_by": {
+      "$ref": "#/$defs/DocumentActor"
+    },
+    "sender": {
+      "$ref": "#/$defs/Sender",
+      "description": "What the request that added the document said sent it (ophiolite.sender/1); accepted_as is always null"
+    },
+    "added_at": {
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+      "title": "Added At",
+      "type": "string"
+    },
+    "described_at": {
+      "anyOf": [
+        {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "When the description was last changed; null until then",
+      "title": "Described At"
+    }
+  },
+  "required": [
+    "schema",
+    "document_id",
+    "project_id",
+    "parent",
+    "taxonomy",
+    "name",
+    "description",
+    "file",
+    "added_by",
+    "sender",
+    "added_at",
+    "described_at"
+  ],
+  "then": {
+    "properties": {
+      "sender": {
+        "properties": {
+          "accepted_as": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  },
+  "title": "Document",
+  "type": "object"
+}

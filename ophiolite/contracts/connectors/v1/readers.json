@@ -2584,6 +2584,123 @@
     ]
    },
    "landing": "retained"
+  },
+  {
+   "profile": "gocad-ascii/1",
+   "label": "GOCAD object (TSurf, PLine, VSet)",
+   "extensions": [
+    ".ts",
+    ".pl",
+    ".vs"
+   ],
+   "detect": "gocad_header",
+   "limits": {
+    "names": [],
+    "template": "GOCAD ASCII TSurf, PLine and VSet (version 1, one object per file: header, coordinate system, properties, then TFACE parts of VRTX, PVRTX, ATOM, PATOM and TRGL lines, ILINE parts of VRTX, ATOM and SEG lines, or the VSet's VRTX, PVRTX, ATOM and PATOM lines, then END) · up to 200,000 vertices, 400,000 triangles and 20,000 lines. Several TFACE parts land as one surface; a PLine that states GEOLOGICAL_TYPE fault lands as fault sticks, any other PLine as map lines, and a PLine with properties is not read; a VSet lands as points. The coordinate system is what the file states, and only an EPSG code decides it."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/gocad/tsurf_full.ts",
+    "sha256": "71881e7c1a600c30ba1fd22df61cedb8405cc7af79544ec4d000388aaad7f24b",
+    "bytes": 467,
+    "exception": "D75"
+   },
+   "report": "{vertex_count:,} vertices, {triangle_count:,} triangles",
+   "type": "triangulated-surface",
+   "alternate_types": [
+    "polyline-set",
+    "feature-set",
+    "point-set"
+   ],
+   "alternate_reports": {
+    "polyline-set": "{sticks:,} sticks, {points:,} points",
+    "feature-set": "{count:,} features, {vertex_count:,} vertices",
+    "point-set": "{count:,} points"
+   },
+   "mapping": "triangulated-surface/1",
+   "states": {
+    "function": "gocad",
+    "items": [
+     {
+      "key": "crs",
+      "label": "Coordinate system",
+      "from": "head"
+     },
+     {
+      "key": "xy_unit",
+      "label": "Map unit",
+      "from": "head"
+     },
+     {
+      "key": "z_unit",
+      "label": "Value unit",
+      "from": "head"
+     },
+     {
+      "key": "positive",
+      "label": "Positive direction",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
   }
  ]
 }

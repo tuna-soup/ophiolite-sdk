@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.public-store-words/1",
+ "id": "ophiolite.public-store-words/1",
+ "description": "E212 s0. Why the public store's index, or a dataset in it, is refused: one closed key each (public-store/v1/store.py OWN_CODES), one sentence each. `{dataset}` is the dataset's name as a person reads it; no sentence carries a code, a field name or a path. The per-source licence and policy sentences are E211's (vocabulary/v1/sample-index-words.json).",
+ "reasons": {
+  "index-malformed": "The list of what the public store holds could not be read, so {dataset} and every other dataset are refused.",
+  "dataset-repeated": "{dataset} is listed more than once, so the list is refused until it is listed once.",
+  "key-repeated": "A file of {dataset} has the same address as another file, so the list is refused.",
+  "key-outside-dataset": "A file of {dataset} is not stored under its own dataset and checksum, so the list is refused.",
+  "records-differ": "The catalogue records listed for {dataset} are not those of its sources, in their order, so the list is refused.",
+  "too-many-objects": "{dataset} would hold more files than the store allows for one dataset, so the list is refused until that limit is ruled on."
+ }
+}

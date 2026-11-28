@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.39.0",
+    "version": "1.40.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -3972,6 +3972,247 @@
       "title": "Provenance",
       "type": "object"
     },
+    "PublicDatasetLicence": {
+      "additionalProperties": false,
+      "description": "The dataset's licence as the index computed it from its sources.",
+      "properties": {
+        "spdx": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spdx"
+        },
+        "redistribution": {
+          "const": "allowed",
+          "title": "Redistribution",
+          "type": "string"
+        },
+        "attribution": {
+          "enum": [
+            "required",
+            "not-required"
+          ],
+          "title": "Attribution",
+          "type": "string"
+        },
+        "share_alike": {
+          "title": "Share Alike",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "spdx",
+        "redistribution",
+        "attribution",
+        "share_alike"
+      ],
+      "title": "PublicDatasetLicence",
+      "type": "object"
+    },
+    "PublicDatasetLine": {
+      "additionalProperties": false,
+      "description": "1.40.0 (E212 s1): one line per public dataset, with its own statements and licence as recorded (no catalogue\nsentence is made for it); `documents` are the dataset objects.",
+      "properties": {
+        "kind": {
+          "const": "public-dataset",
+          "title": "Kind",
+          "type": "string"
+        },
+        "dataset": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Dataset",
+          "type": "string"
+        },
+        "licence": {
+          "$ref": "#/$defs/PublicDatasetLicence"
+        },
+        "statements": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Statements",
+          "type": "array"
+        },
+        "documents": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Documents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "dataset",
+        "licence",
+        "statements",
+        "documents"
+      ],
+      "title": "PublicDatasetLine",
+      "type": "object"
+    },
+    "PublicDatasetLink": {
+      "additionalProperties": false,
+      "description": "1.40.0 (E212 s1): the public dataset an original was restored from, written by the gateway inside the insert that\nstored the revision (the sample start's key, its listed digest); it never changes. `object_sha256` is the dataset\nobject (the bundle), `member_sha256` this original's digest as the bundle's manifest lists it.",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.public-dataset-link/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "dataset": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Dataset",
+          "type": "string"
+        },
+        "object_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Object Sha256",
+          "type": "string"
+        },
+        "member_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Member Sha256",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/PublicDatasetSource"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "licence": {
+          "$ref": "#/$defs/PublicDatasetLicence"
+        },
+        "statements": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Statements",
+          "type": "array"
+        },
+        "linked_at": {
+          "title": "Linked At",
+          "type": "number"
+        },
+        "run": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Run",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema",
+        "dataset",
+        "object_sha256",
+        "member_sha256",
+        "sources",
+        "licence",
+        "statements",
+        "linked_at",
+        "run"
+      ],
+      "title": "PublicDatasetLink",
+      "type": "object"
+    },
+    "PublicDatasetRecord": {
+      "additionalProperties": false,
+      "description": "1.40.0 (E212 s1): the record a result made from a linked item keeps (not a link: not an unchanged copy).",
+      "properties": {
+        "kind": {
+          "const": "public-dataset",
+          "title": "Kind",
+          "type": "string"
+        },
+        "dataset": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Dataset",
+          "type": "string"
+        },
+        "object_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Object Sha256",
+          "type": "string"
+        },
+        "statements": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Statements",
+          "type": "array"
+        },
+        "licence": {
+          "$ref": "#/$defs/PublicDatasetLicence"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/PublicDatasetSource"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "dataset",
+        "object_sha256",
+        "statements",
+        "licence",
+        "sources"
+      ],
+      "title": "PublicDatasetRecord",
+      "type": "object"
+    },
+    "PublicDatasetSource": {
+      "additionalProperties": false,
+      "description": "One input of a public dataset as the store's index stated it when the item was restored: its OSD record and its\nlicence object whole (a null SPDX id with the publisher's own terms is kept as written).",
+      "properties": {
+        "osd_record": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Osd Record",
+          "type": "string"
+        },
+        "licence": {
+          "additionalProperties": true,
+          "title": "Licence",
+          "type": "object"
+        }
+      },
+      "required": [
+        "osd_record",
+        "licence"
+      ],
+      "title": "PublicDatasetSource",
+      "type": "object"
+    },
     "PublicSourceDocument": {
       "additionalProperties": false,
       "properties": {
@@ -4091,11 +4332,18 @@
     },
     "PublicSources": {
       "additionalProperties": false,
-      "description": "1.23.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from.",
+      "description": "1.23.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from. 1.40.0 (E212\ns1): a record or line may name a public dataset.",
       "properties": {
         "records": {
           "items": {
-            "$ref": "#/$defs/PublicSourceRecord"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PublicSourceRecord"
+              },
+              {
+                "$ref": "#/$defs/PublicDatasetRecord"
+              }
+            ]
           },
           "maxItems": 64,
           "minItems": 1,
@@ -4104,7 +4352,14 @@
         },
         "lines": {
           "items": {
-            "$ref": "#/$defs/PublicSourceLine"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PublicSourceLine"
+              },
+              {
+                "$ref": "#/$defs/PublicDatasetLine"
+              }
+            ]
           },
           "maxItems": 64,
           "minItems": 1,
@@ -7517,6 +7772,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/PublicSources"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "public_dataset": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PublicDatasetLink"
         },
         {
           "type": "null"

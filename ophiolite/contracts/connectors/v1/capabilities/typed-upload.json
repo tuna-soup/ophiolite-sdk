@@ -346,6 +346,30 @@
       }
     },
     {
+      "profile": "gocad-ascii/1",
+      "data": "GOCAD surface (TSurf, one object per file, its TFACE parts as one surface)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "HEADER keys other than name, property class headers and units, BSTONE and BORDER lines are kept only in the exact original",
+        "The division into TFACE parts and the vertex numbers as written are kept only in the exact original",
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "several objects in one file",
+        "GOCAD types other than TSurf",
+        "properties with more than one value per vertex"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
       "profile": "opendtect-horizon-ascii/1",
       "data": "OpendTect horizon (x y z)",
       "direction": "read",

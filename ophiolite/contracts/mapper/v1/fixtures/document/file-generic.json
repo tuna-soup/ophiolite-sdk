@@ -1,0 +1,24 @@
+{
+  "id": "{{NAMESPACE}}:dataset--File.Generic:document-d0c00000000000000000000000000001",
+  "kind": "osdu:wks:dataset--File.Generic:1.1.0",
+  "acl": {
+    "owners": ["data.default.owners@{{DATA_PARTITION}}"],
+    "viewers": ["data.default.viewers@{{DATA_PARTITION}}"]
+  },
+  "legal": {
+    "legaltags": ["{{LEGAL_TAG}}"],
+    "otherRelevantDataCountries": []
+  },
+  "data": {
+    "EncodingFormatTypeID": "{{NAMESPACE}}:reference-data--EncodingFormatType:application%2Fpdf:",
+    "DatasetProperties": {
+      "FileSourceInfo": {
+        "FileSource": "documents/d0c00000000000000000000000000001.pdf",
+        "Name": "d0c00000000000000000000000000001.pdf",
+        "FileSize": "943",
+        "Checksum": "7d907549223f4b31a40fc25c140d37870f208597666da17da755cff0320a20b1",
+        "ChecksumAlgorithm": "SHA-256"
+      }
+    }
+  }
+}

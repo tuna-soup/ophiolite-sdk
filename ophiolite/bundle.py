@@ -32,7 +32,8 @@ TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'origin
                    'petrel-points-attributes/1': 'original.txt', 'opendtect-horizon-ascii/1': 'original.txt', 'esri-shapefile/1': 'original.shp',  # E23c: package primaries
                    'petrel-horizon-ilxl/1': 'original.txt',  # E123 s1b
                    'petrel-scattered-data/1': 'original.txt',  # E123 s1c: a grid or a point set, by its content
-                   'petrel-faultsticks/1': 'original.txt'}  # E123 S1f-c: a packaged polyline set (bundle 2.11)
+                   'petrel-faultsticks/1': 'original.txt',  # E123 S1f-c: a packaged polyline set (bundle 2.11)
+                   'gocad-ascii/1': 'original.ts'}  # E213 s1: a GOCAD TSurf, as petrel-scattered-data/1 without a minor of its own
 NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5, 'time-depth': 6,
                'feature-set': 7, 'well-table': 17}  # the 2.x minor that introduced them
 # E56: grids of the new formats are a known type with an original an older reader cannot send back; they need 2.7 too

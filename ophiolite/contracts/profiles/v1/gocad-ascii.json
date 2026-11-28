@@ -1,0 +1,43 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "gocad-ascii/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "GOCAD object (TSurf, PLine, VSet)",
+  "description": "A GOCAD ASCII TSurf, PLine or VSet (version 1, one object per file), kept byte for byte; a TSurf lands as one triangulated surface, a PLine as fault sticks when its header states GEOLOGICAL_TYPE fault and as map lines otherwise, a VSet as a point set, each in file order, and the coordinate system, units and positive direction are what its header states.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "triangulated-surface-source/1",
+    "source_schema": "GOCAD-ASCII/TSurf-1",
+    "mapping_version": "triangulated-surface/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.triangulated-surface/1",
+  "normalized_profiles": [
+    "ophiolite.triangulated-surface/1",
+    "ophiolite.polyline-set/1",
+    "ophiolite.feature-set/1",
+    "ophiolite.point-set/1"
+  ],
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  },
+  "osdu_kind": "osdu:wks:work-product-component--SeismicHorizon:2.1.0",
+  "osdu_kind_reason": null
+}

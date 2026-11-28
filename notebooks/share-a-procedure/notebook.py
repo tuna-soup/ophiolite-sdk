@@ -91,14 +91,14 @@ else:
           'until an administrator enables it for everyone.')
 # %% [markdown]
 # ## Enable it for everyone
-# Only a project administrator enables a version. If you are not one, ask one to enable it in Settings → Tools.
+# Only a project administrator enables a version. If you are not one, ask one to enable it with `ophiolite tools enable`.
 # %%
 if added:
     try:
         client.procedure_enable(added['digest'])
         print('Enabled for everyone in this project.')
     except OphioliteError as refused:
-        print(refused, '- ask a project administrator to enable it in Settings → Tools.')
+        print(refused, '- ask a project administrator to enable it with ophiolite tools enable.')
 # %% [markdown]
 # ## Your colleague trusts it, once
 # Your colleague would run code you wrote on their own computer, so Ophiolite asks them first: who added it, when, and

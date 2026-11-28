@@ -5,12 +5,15 @@ Offline. The project is a fake client with the four calls a recipe makes (`proce
 The fake `deliver` keeps the real signature (checked below against `ProcedureClient.deliver`) and writes the E109
 records the real SDK writes (`deliveries/<id>/attempt.json`, renamed `set-aside.json`), so the step's recovery reads
 them through the real `procedures.delivery_records` (round 6, 6-C3). Each test names the mutation it catches."""
+from __future__ import annotations  # E217 s0: the fake's annotations are strings, as ProcedureClient.deliver's are
+
 import hashlib
 import inspect
 import json
 import sys
 import uuid
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -72,8 +75,8 @@ class Project:
         return {'outcomes': [{'label': 'Residuals within 5 m', 'version': 1, 'state': 'accepted', 'line': 'Accepted.',
                               'earlier_publications': [], 'earlier_versions': []}]}
 
-    def deliver(self, name, *, systems=None, items=(), settings=None, work='.ophiolite-held', wait=0, prompt=None, yes=False, cache=None,
-                version=None, set_aside=False, as_=None):
+    def deliver(self, name: str, *, systems=None, items=(), settings=None, work='.ophiolite-held', wait: float = 0, prompt=None, yes: bool = False,
+                cache=None, version: int | None = None, set_aside: bool = False, as_=None) -> dict[str, Any]:
         self.calls.append(('deliver', str(work), tuple(items), set_aside))
         how, work = self._next('deliver'), Path(work)
         if how == 'requires': raise NotRun('x', sentence='Not run: psycopg is not installed.')

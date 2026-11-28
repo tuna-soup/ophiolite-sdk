@@ -155,6 +155,7 @@ SURVEY_OPERATIONS={'surveys':{'get','list','history','create','add','remove','re
 EXCHANGE_OPERATIONS={'exchange':{'holders','release','receipts','host-report'}}  # E171 s1: who holds which version of an item; a folder's copy released; E184 s0a: a version's transfer receipts; E185 s2c: a connector's report of its record
 CHANGE_OPERATIONS={'changes':{'affected'}}  # E177 s1: what rests on the versions a change replaces
 ATTACHMENT_OPERATIONS={'attachments':{'add','list','read','withdraw'}}  # E191 s1: figures kept with an item version
+DOCUMENT_OPERATIONS={'documents':{'add','list','read','describe'}}  # E222 s1: documents kept with a well, a wellbore, a survey or the project
 TABLE_KIND_OPERATIONS={'table-kinds':{'declare','list','show'}}  # E203 s1: a project's kinds of table
 
 
@@ -168,7 +169,7 @@ def operation_path(project,area,operation):
         return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
              else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or OUTCOME_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or JOB_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
-    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())|EXCHANGE_OPERATIONS.get(area,set())|CHANGE_OPERATIONS.get(area,set())|ATTACHMENT_OPERATIONS.get(area,set())|TABLE_KIND_OPERATIONS.get(area,set())
+    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())|EXCHANGE_OPERATIONS.get(area,set())|CHANGE_OPERATIONS.get(area,set())|ATTACHMENT_OPERATIONS.get(area,set())|TABLE_KIND_OPERATIONS.get(area,set())|DOCUMENT_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation

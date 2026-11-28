@@ -59,7 +59,7 @@ def test_the_report_reads_reported_by_with_the_procedure_and_never_checked():
     assert lines == ['Reported check by Anna with Tops vs reference well version 2: differed.', '3 of 24 differed.', 'Ophiolite did not repeat this check.']
     assert not any('Checked' in line for line in lines)
     malformed = stored(body, procedure={'digest': DIGEST, 'label': 'tops_vs_ref_v2', 'version_label': 'rc_7f3a9b', 'version_number': 2}, counts=None, outcome='passed')
-    assert checks.record_lines(malformed, {}) == ['Reported check by a project member with a procedure version 2: passed.', 'Ophiolite did not repeat this check.']
+    assert checks.record_lines(malformed, {}) == ['Reported check by a project member with unnamed code version 2: passed.', 'Ophiolite did not repeat this check.']
     labelled = stored(body, procedure={'digest': DIGEST, 'label': 'Tops vs reference well', 'version_label': 'Spring release', 'version_number': 2})
     assert checks.record_lines(labelled, {'marit': 'Anna'})[0] == 'Reported check by Anna with Tops vs reference well version Spring release: differed.'
 

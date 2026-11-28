@@ -14,7 +14,12 @@ import time
 from .errors import Refused
 
 BUNDLE_SHA256 = '7f8f1078b6ca7b40cad2e8afdb5f7bbe0e73aa10a26e32d61595d0e62c47c5f3'  # the restorable F3-block bundle (E162 s2a; item 241)
-BUNDLE_URL = None  # set once the owner publishes the bundle for download (item 241); until then --bundle PATH
+# E212 s0: the public store the bundle is downloaded from (ophiolite.public-store/1): OPHIOLITE_PUBLIC_STORE, else this
+# built-in address, recorded after the first publication (E212 C6, 26 Nov 2026). No trailing slash.
+PUBLIC_STORE = 'https://ophiolite-public-data.nbg1.your-objectstorage.com'
+STORE_VARIABLE = 'OPHIOLITE_PUBLIC_STORE'
+CONTRACTS = Path(__file__).resolve().parent / 'contracts'
+SOURCE_RULES = CONTRACTS / 'samples' / 'v1' / 'source-rules.json'  # the production rules the store's index is valid by
 BUNDLE_NAME = 'f3-block.zip'
 FOLDER = 'ophiolite-demo'
 MARKER = '.ophiolite-demo'
@@ -23,6 +28,11 @@ IDLE_SECONDS = 2 * 3600  # the server ends itself after this long without a requ
 START_SECONDS = 30
 DEPLOYMENT = 'https://ophiolite.dev/docs/operate/install/'  # web/docs/src/content/docs/operate/install.md
 NOT_PUBLISHED = 'The demo bundle is not yet published for download; use --bundle PATH.'
+INDEX_UNREAD = "The public store's index could not be read (HTTP %d)."
+INDEX_INVALID = "The public store's index is not valid."
+NOT_IN_STORE = "The public store does not hold this version's demo bundle; use --bundle PATH."
+WRONG_SIZE = 'The downloaded demo bundle has the wrong size; it was deleted.'
+WRONG_DIGEST = 'The downloaded demo bundle does not match its published checksum; it was deleted.'
 FOREIGN = 'An ophiolite-demo folder or link that the demo did not make is here; move it, or run ophiolite demo in another folder.'
 TOKEN_HEADER = 'X-Ophiolite-Demo-Token'
 # the support.py an earlier demo wrote (E162 s1), replaced when unchanged: it read the catalogue's first item (E162 s1b)
@@ -69,19 +79,62 @@ def locate(given, folder):
         return Path(given)
     kept = folder / BUNDLE_NAME
     if kept.is_file(): return kept
-    if BUNDLE_URL is None: raise Refused(NOT_PUBLISHED)
-    return download(BUNDLE_URL, kept)
+    address = store()
+    if address is None: raise Refused(NOT_PUBLISHED)
+    found = published(address)
+    return download(address + '/' + found['key'], kept, found['bytes'])
 
 
-def download(url, target):
-    """The published bundle into the demo folder, kept only when its digest is the pinned one."""
+def store():
+    """The public store's address: the environment's, else the built-in one, else None."""
+    address = os.environ.get(STORE_VARIABLE) or PUBLIC_STORE
+    return address.rstrip('/') if address else None
+
+
+def _contract(*parts):
+    import types
+    path = CONTRACTS.joinpath(*parts)
+    module = types.ModuleType('ophiolite_public_store_contract')
+    module.__file__ = str(path)
+    exec(compile(path.read_text(encoding='utf-8'), str(path), 'exec'), module.__dict__)
+    return module
+
+
+def published(address):
+    """{key, bytes} of this version's bundle in the store's index, found by the pinned digest (never by dataset id)."""
     import httpx
-    partial = target.with_name(target.name + '.partial'); digest = hashlib.sha256()
+    rules = _contract('public-store', 'v1', 'store.py')
+    with httpx.stream('GET', address + '/' + rules.INDEX_KEY, follow_redirects=True, timeout=60) as answer:
+        if answer.status_code != 200: raise Refused(INDEX_UNREAD % answer.status_code)
+        raw = b''
+        for chunk in answer.iter_bytes():
+            raw += chunk
+            if len(raw) > rules.MAX_INDEX_BYTES: raise Refused(INDEX_INVALID)
+    try: index = json.loads(raw.decode('utf-8'))
+    except ValueError: raise Refused(INDEX_INVALID) from None
+    source_rules = json.loads(SOURCE_RULES.read_text(encoding='utf-8'))
+    if rules.index_problems(index, source_rules): raise Refused(INDEX_INVALID)
+    found = rules.find(index, BUNDLE_SHA256)
+    if found is None: raise Refused(NOT_IN_STORE)
+    return found
+
+
+def download(url, target, size):
+    """The published bundle into the demo folder, kept only when it is `size` bytes (never more than MAX_TOTAL_BYTES)
+    and its digest is the pinned one."""
+    import httpx
+    from .bundle import MAX_TOTAL_BYTES
+    limit = min(size, MAX_TOTAL_BYTES)
+    partial = target.with_name(target.name + '.partial'); digest = hashlib.sha256(); written = 0
     try:
         with httpx.stream('GET', url, follow_redirects=True, timeout=60) as answer, open(os.open(partial, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o600), 'wb') as out:
             if answer.status_code != 200: raise Refused('The demo bundle could not be downloaded (HTTP %d).' % answer.status_code)
-            for chunk in answer.iter_bytes(): digest.update(chunk); out.write(chunk)
-        if digest.hexdigest() != BUNDLE_SHA256: raise Refused('The downloaded demo bundle does not match its published checksum; it was deleted.')
+            for chunk in answer.iter_bytes():
+                written += len(chunk)
+                if written > limit: raise Refused(WRONG_SIZE)
+                digest.update(chunk); out.write(chunk)
+        if written != size: raise Refused(WRONG_SIZE)
+        if digest.hexdigest() != BUNDLE_SHA256: raise Refused(WRONG_DIGEST)
         os.replace(partial, target)
         return target
     finally:

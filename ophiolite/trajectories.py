@@ -29,14 +29,20 @@ E134 s4: `scope='members'` (a project's administrators) exports every consenting
 person and agent under its own pseudonym, as the administrator reads it; the folder has the same shape and its manifest
 names the project, no person (`MembersScope`). `own` (the default) sends no `scope`, so the body is the one before s4.
 """
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; nothing below is imported to run
+
 import hashlib
 import json
 import os
 import secrets
 import shutil
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from .errors import IntegrityConflict, Refused, VerificationFailed
+
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only
+    from typing import Any
 
 MANIFEST, EPISODES, PARQUET = 'trajectories.json', 'episodes.jsonl', 'episodes.parquet'
 # s3 D4: the derived file's schema, written explicitly (never inferred); `episode` is the line's text
@@ -217,11 +223,45 @@ def export(client, destination, *, purpose, mode='auto', window_seconds=None, se
 
 class TrajectoryClient:
     def export_trajectories(self, destination, *, purpose, mode='auto', window_seconds=None, seed=0, until=None, scope='own',
-                            describe=False):
-        """E134: your own consented work in this project, as a folder of work episodes at `destination` (a new folder);
-        `auto` gives values where the rights allow, `shape` never values; `until` repeats an earlier export's boundary
-        (s3). `scope='members'` (s4, the project's administrators only): every consenting member's work in this project,
-        as you read it. With pyarrow installed the folder also holds episodes.parquet. `describe=True` (E160) is not
-        available yet and is refused before anything is sent. Returns {episodes, values, destination, parquet}."""
+                            describe=False) -> dict[str, Any]:
+        """Save your own consented work in this project as a new folder of work episodes.
+
+        With pyarrow installed the folder also holds episodes.parquet.
+
+        Parameters
+        ----------
+        destination
+            The new folder to write; it must not exist yet.
+        purpose
+            What the export is for, such as 'training'; it is kept in the folder's manifest.
+        mode : str
+            'auto' gives values where the rights allow; 'shape' never gives values.
+        window_seconds : optional
+            A gap between two steps at or above this many seconds starts a new episode; the server's default when None.
+        seed : int
+            The seed that splits the episodes the same way every time.
+        until : optional
+            An earlier export's boundary, to repeat that export; by default everything up to now.
+        scope : str
+            'own' for your own work; 'members' (the project's administrators only) for every consenting member's
+            work in this project, as you read it.
+        describe : bool
+            Not available yet: True is refused before anything is sent.
+
+        Returns
+        -------
+        dict
+            {episodes, values, destination, parquet}: how many episodes and values were written, where, and whether
+            episodes.parquet was written.
+
+        Raises
+        ------
+        Refused
+            When `describe` is True, the scope is not 'own' or 'members', the destination exists, or its folder does
+            not.
+        VerificationFailed
+            When the server answers another scope than the one asked.
+        """
+        # E134; until: s3; scope='members': s4; describe: E160
         return export(self, destination, purpose=purpose, mode=mode, window_seconds=window_seconds, seed=seed, until=until, scope=scope,
                       describe=describe)

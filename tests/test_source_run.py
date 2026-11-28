@@ -149,7 +149,7 @@ def test_without_a_folder_the_run_leaves_nothing_behind_and_names_the_given_syst
     assert [m for m in made if 'ophiolite-source-' in m and Path(m).exists()] == []
 
 
-ENABLE = ' A project administrator enables one in Settings → Tools or with ophiolite tools enable.'  # E121 B5
+ENABLE = ' A project administrator enables one with ophiolite tools enable.'  # E121 B5; D125-4: no Settings → Tools
 CASES = {
     'not-enabled': (dict(), dict(state='private'), 'Not run: Survey share has no enabled version in this project.' + ENABLE),  # B6 rev 5 (R4-8): its label
     'wrong-step': (dict(step='process'), dict(), None),
@@ -172,7 +172,7 @@ def test_disabled_procedure_wrong_step_or_role_is_refused(tmp_path, case):
         m.update(step='process', inputs=[{'slot': 'share', 'label': 'Locations', 'class': 'version', 'kinds': ['well-location/1'], 'cardinality': 'one'}])
         (root / 'procedure.json').write_text(json.dumps(m)); (root / 'procedure.py').write_text(CODE % (WELLS, TOKEN, made))
         assert procedures.validate(root)['valid'], procedures.validate(root)
-        sentence = "Not run: Survey share does not read from a team's system; only a source tool adds its results this way."
+        sentence = "Not run: Survey share does not read from a team's system; only a source adds its results this way."
     else:
         root = folder(tmp_path / 'procedure', made=made, **shape)
     server = Server(root, state=given.pop('state', 'enabled'))
@@ -211,7 +211,7 @@ def test_the_command_line_runs_it_and_prints_what_became_of_each_file(tmp_path, 
 # --- B6 rev 4: what a refused run keeps, and the words it prints -------------------------------------------------------
 
 SHARED = ('Someone in this project already added the same file from this system and shared it with you. Use that file; adding '
-          'your own copy from this tool is not available on this deployment yet.')
+          'your own copy from this version is not available on this deployment yet.')
 SETTINGS = 'This file is already in the project with other settings.'
 PLANTED = CODE.replace("    with open(config['counter']", "    print('log line', config['token'], 'planted-log-7c2e')\n    with open(config['counter']")
 

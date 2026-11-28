@@ -322,7 +322,8 @@ def _publisher_id(citation):
 
 
 def _licence(citation):
-    return SPDX + citation['licence']['spdx'] if citation['licence'] else MISSING
+    licence = citation['licence']
+    return SPDX + licence['spdx'] if isinstance(licence, dict) and isinstance(licence.get('spdx'), str) else MISSING  # E212 s1: a null SPDX id names none
 
 
 def _expected_ro_crate(c, files, tables, manifest=MANIFEST_NAME):

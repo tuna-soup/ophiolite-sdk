@@ -273,7 +273,7 @@ class Credential:
             return dict(headers)
 
     def discovery_headers(self, url, *, cancel=None):
-        """E27: headers for the two discovery routes only (projects/list, projects/organizations): the saved
+        """Headers for the two discovery routes only (projects/list, projects/organizations): the saved
         gateway is still checked, refresh and replacement work as for headers(), but no project is named."""
         with self.snapshot(url,None,cancel=cancel,discovery=True) as headers:
             return dict(headers)

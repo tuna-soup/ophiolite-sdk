@@ -6,6 +6,8 @@ Platform's (the contract snapshot, SOURCE.json). It is loaded from its source te
 the package. Validating, hashing and packing read files only: nothing is imported from a procedure, and nothing
 here contacts a server. A run publishes nothing; its run.json is local and provisional.
 """
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; the dataclasses below accept them
+
 import contextlib
 import copy
 import hashlib
@@ -23,6 +25,12 @@ import uuid
 import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only
+    from typing import Any
+
+    from .presentation import PresentedRun
 
 CONTRACT = Path(__file__).resolve().parent / 'contracts' / 'procedures' / 'v1' / 'procedure.py'
 _contract = None
@@ -223,7 +231,7 @@ def procedure(function):
 
 
 class Stopped(Exception):
-    """E123 SZ: raised by a procedure body to stop on purpose with a sentence for the person (at most 1000 characters).
+    """Raised by a procedure body to stop on purpose with a sentence for the person (at most 1000 characters).
     `run` reports it as NotRun 'asked' (asks=True: the procedure needs an answer, given as settings) or
     'procedure-stopped', with that sentence, instead of the generic 'raised'."""
 
@@ -266,8 +274,8 @@ SENTENCES = {  # E131 s2: person-read sentences say tool; `withdrawn` is kept (t
     # E105b: the project catalogue
     'changed-before-run': "Not run: the tool's files changed after they were checked; nothing ran. Run it again.",
     'cache-changed': 'Not run: the copy of this tool on this computer was changed, so it was removed. Run it again to fetch it from the project.',
-    'no-enabled-version': ('Not run: {name} has no enabled version in this project. A project administrator enables one in '  # E121 B5: the way
-                           'Settings → Tools or with ophiolite tools enable.'),
+    'no-enabled-version': ('Not run: {name} has no enabled version in this project. A project administrator enables one '  # E121 B5: the way
+                           'with ophiolite tools enable.'),  # D125-4: the Workspace has no Tools section
     'no-such-version': 'Not run: there is no version {version} of {name} in this project that you can see.',
     'withdrawn': 'Not run: this procedure was withdrawn on {date}.',
     'not-enabled': 'This tool version is not enabled in this project yet.',  # E155 s2: AgentClient.procedure_fetch, the gate's private version
@@ -289,7 +297,7 @@ SENTENCES = {  # E131 s2: person-read sentences say tool; `withdrawn` is kept (t
     'inputs-differ': 'Not published: the project describes {label} differently from what the run used ({which}); run it again.',  # E121 B9
     'refused': '{sentence}',
     # E108: a source procedure's results added to the project
-    'not-a-source': "Not run: {name} does not read from a team's system; only a source tool adds its results this way.",
+    'not-a-source': "Not run: {name} does not read from a team's system; only a source adds its results this way.",  # gateway SOURCE_STEP's words
     'system-words': "Not run: name the team's system in words; its address and passwords stay in the configuration on this computer.",
     'setting-secret': 'A setting looks like an address or a password; put it in the system configuration on this computer.',  # D9 (ii)
     # E109: `ophiolite deliver` (slice 0's `not-available-yet` stays a reason code a host may still meet)
@@ -728,9 +736,9 @@ def run(folder, destination, inputs=None, *, kinds=None, declared=None, systems=
     """Run a procedure on this computer and write its outputs, a log and run.json into `destination`, a new folder;
     nothing is published. `inputs` maps slot -> paths; `kinds` and `declared` give a version input's type and
     declarations (an output of an earlier run carries its own); `systems` maps slot -> a local configuration file;
-    `settings` are `name=value` texts. With `expected_digest` (E105b), the copy that runs must be exactly that version
+    `settings` are `name=value` texts. With `expected_digest`, the copy that runs must be exactly that version
     or nothing runs (`changed-before-run`). Raises NotRun; then no destination exists. The result shows itself in a
-    notebook with a "Run again" line made from the arguments as they were here (E112 s3)."""
+    notebook with a "Run again" line made from the arguments as they were here."""
     try: call = copy.deepcopy({'folder': str(Path(folder).resolve()), 'inputs': inputs, 'kinds': kinds, 'declared': declared, 'systems': systems,
                                'settings': settings})
     except Exception: call = None  # no line, and the card says why
@@ -833,10 +841,10 @@ def _presented(result, call, label):
 
 
 def new(folder, step, label=None, *, kind=None):
-    """Write a working start for a step and a kind (E112 s1; well tops when no kind is given): procedure.json,
+    """Write a working start for a step and a kind (well tops when no kind is given): procedure.json,
     procedure.py, its own tests and sample data, made by `procedure_templates.make`; returns `validate` of the folder.
     A pair with no start in this version raises ValueError with its sentence and makes no folder. `process` with no
-    kind keeps E105a's start (frozen; ruling 25 Oct): a process start for a kind waits for ophiolite.readers."""
+    kind keeps its first start, unchanged: a process start for a kind waits for ophiolite.readers."""
     from . import procedure_templates
     if step == 'process' and kind is None: return _process_start(folder, label or procedure_templates.default_label(step, procedure_templates.DEFAULT))
     return procedure_templates.make(folder, step, procedure_templates.DEFAULT if kind is None else kind, label)
@@ -1183,9 +1191,12 @@ class ProcedureClient:
     version; an administrator enables it for the project; running a version someone else registered asks once whether
     you trust it (`trust`), then runs it on this computer exactly as `procedures.run` runs a folder."""
 
-    def procedure_register(self, folder, *, command_id=None):
-        """Register a procedure folder as a private version of this project (the server computes its digest). A
-        `requires` text this SDK cannot check is registered as given, with a ProcedureWarning (E112 s4)."""
+    def procedure_register(self, folder, *, command_id: str | None = None) -> dict[str, Any]:
+        """Register a tool folder as a private version of this project; the server computes its digest.
+
+        A `requires` text this SDK cannot check is registered as given, with a ProcedureWarning.
+        """
+        # E112 s4: the ProcedureWarning
         from . import _requires
         request = register_request(folder, command_id)
         manifest = manifest_of(folder)
@@ -1196,14 +1207,15 @@ class ProcedureClient:
                               'is a package name with optional versions.', ProcedureWarning, stacklevel=2)
         return self._post('procedures', 'register', request, retry=True)
 
-    def procedure_list(self, name=None):
+    def procedure_list(self, name: str | None = None) -> list[dict[str, Any]]:
         """The versions you can see, by name then version number, each with its words, state and whether you trust it."""
         return self._post('procedures', 'list', {'name': name} if name else {}, retry=True)['versions']
 
-    def procedure_get(self, digest):
+    def procedure_get(self, digest: str) -> dict[str, Any]:
+        """One tool version by its digest, with its words, state and whether you trust it."""
         return self._post('procedures', 'get', {'digest': digest}, retry=True)
 
-    def procedure_bundle(self, digest):
+    def procedure_bundle(self, digest: str) -> bytes:
         """The version's archive, checked here: its sha256 and the digest of the files it holds."""
         import base64
         out = self._post('procedures', 'bundle', {'digest': digest}, retry=True)
@@ -1216,24 +1228,30 @@ class ProcedureClient:
     def _procedure_change(self, operation, digest, command_id):
         return self._post('procedures', operation, {'command_id': command_id or f'{operation}-{digest[:48]}', 'digest': digest}, retry=True)
 
-    def procedure_enable(self, digest, *, command_id=None):
+    def procedure_enable(self, digest: str, *, command_id: str | None = None) -> dict[str, Any]:
+        """Enable a private tool version for the project, as a project administrator."""
         return self._procedure_change('enable', digest, command_id)
 
-    def procedure_withdraw(self, digest, *, command_id=None):
+    def procedure_withdraw(self, digest: str, *, command_id: str | None = None) -> dict[str, Any]:
+        """Withdraw a tool version; a run reads the version again first, so a withdrawal ends it."""
         return self._procedure_change('withdraw', digest, command_id)
 
-    def procedure_trust(self, digest, *, command_id=None):
+    def procedure_trust(self, digest: str, *, command_id: str | None = None) -> dict[str, Any]:
+        """Record your trust in a tool version you did not register, so running it no longer asks you first."""
         return self._procedure_change('trust', digest, command_id)
 
-    def procedure_verify(self, digest, *, check=None, publication=None, withdraw=None, witnessed=None, reference_run=None, statement=None,
-                         command_id=None):
-        """E165 s1: verify a version against a passed check of a result it produced (`check`, the check record's id), or
-        a published method (`publication`: title, authors, year, link {kind: doi or url, value}), or a run Ophiolite
-        made of it in the project's sandbox (`witnessed`, the run's id; E113 s1), or a finished reference run of it
-        that passed what its case set asks for (`reference_run`, the run's id; E180 s2), or withdraw a verification
-        (`withdraw`, its id); exactly one. Each call is a new command id, resent only by this call's own
-        retry; give `command_id` to resend a call whose answer was lost. The answer is `{record, verification}`, with the
-        server's line in `verification['line']`."""
+    def procedure_verify(self, digest: str, *, check: str | None = None, publication=None, withdraw: str | None = None, witnessed: str | None = None,
+                         reference_run: str | None = None, statement: str | None = None, command_id: str | None = None) -> dict[str, Any]:
+        """Verify a tool version against one piece of evidence, or withdraw a verification.
+
+        Give exactly one: a passed check of a result it produced (`check`, the check record's id), a published method
+        (`publication`: title, authors, year, link {kind: doi or url, value}), a run Ophiolite made of it in the
+        project's sandbox (`witnessed`, the run's id), a finished reference run of it that passed what its case set asks
+        for (`reference_run`, the run's id), or a verification to withdraw (`withdraw`, its id). Each call is a new
+        command id, resent only by this call's own retry; give `command_id` to resend a call whose answer was lost. The
+        answer is `{record, verification}`, with the server's line in `verification['line']`.
+        """
+        # E165 s1; witnessed: E113 s1; reference_run: E180 s2
         given = [(kind, value) for kind, value in (('check', check), ('publication', publication), ('withdrawn', withdraw), ('witnessed', witnessed),
                                                    ('reference-cases', reference_run)) if value is not None]
         if len(given) != 1: raise ValueError('Give exactly one of check, publication, witnessed, reference_run or withdraw.')
@@ -1244,66 +1262,79 @@ class ProcedureClient:
         if statement is not None: body['statement'] = statement
         return self._post('procedures', 'verify', body, retry=True)
 
-    def procedure_verifications(self, digest):
-        """E165 s1: every verification and withdrawal of a version, oldest first, each with its line, and its state."""
+    def procedure_verifications(self, digest: str) -> dict[str, Any]:
+        """Every verification and withdrawal of a tool version, oldest first, each with its line, and its state."""
+        # E165 s1
         return self._post('procedures', 'verifications', {'digest': digest}, retry=True)
 
     # --- E180 s2: reference cases and reference runs ------------------------------------------------------------------
 
-    def reference_cases_declare(self, tool, kind, cases, *, supersedes=None, least=None, command_id=None):
-        """Declare the next version of a tool's reference case set (a person's act): `cases` as declared (each names its
-        inputs, settings, comparison and accepted result `{asset_id, revision, verdict_id}`; the server reads the
-        verdict's author), `supersedes` the current version you read (None for the first), `least` how many cases must
-        pass (None: all). The answer is the stored set version."""
+    def reference_cases_declare(self, tool: str, kind: str, cases, *, supersedes: int | None = None, least: int | None = None,
+                                command_id: str | None = None) -> dict[str, Any]:
+        """Declare the next version of a tool's reference case set, as a person's act.
+
+        `cases` as declared (each names its inputs, settings, comparison and accepted result `{asset_id, revision,
+        verdict_id}`; the server reads the verdict's author), `supersedes` the current version you read (None for the
+        first), `least` how many cases must pass (None: all). The answer is the stored set version.
+        """
         body = {'command_id': command_id or 'reference-declare-' + uuid.uuid4().hex, 'tool': tool, 'supersedes': supersedes, 'kind': kind,
                 'least': least, 'cases': cases}
         return self._post('reference-cases', 'declare', body, retry=True)
 
-    def reference_cases_withdraw(self, tool, supersedes, *, command_id=None):
+    def reference_cases_withdraw(self, tool: str, supersedes: int, *, command_id: str | None = None) -> dict[str, Any]:
         """Withdraw a tool's case set: a withdrawn version after `supersedes`, the current version you read."""
         body = {'command_id': command_id or 'reference-withdraw-' + uuid.uuid4().hex, 'tool': tool, 'supersedes': supersedes}
         return self._post('reference-cases', 'withdraw', body, retry=True)
 
-    def reference_cases_get(self, tool, version=None):
-        """One version of a tool's case set (the newest when `version` is None), with its versions and each case's
-        runs as the server answers them."""
+    def reference_cases_get(self, tool: str, version: int | None = None) -> dict[str, Any]:
+        """One version of a tool's case set (the newest when `version` is None), with its versions and each case's runs.
+
+        The answer is as the server gives it.
+        """
         return self._post('reference-cases', 'get', {'tool': tool, **({'version': version} if version is not None else {})}, retry=True)
 
-    def accepted_results(self, kind, *, limit=50, cursor=None):
+    def accepted_results(self, kind: str, *, limit: int = 50, cursor: str | None = None) -> dict[str, Any]:
         """One page of the results of `kind` accepted by their author's current verdict (`verdicts/accepted`)."""
         return self._post('verdicts', 'accepted', {'kind': kind, 'limit': limit, **({'cursor': cursor} if cursor else {})}, retry=True)
 
-    def reference_run_start(self, digest, *, command_id=None):
+    def reference_run_start(self, digest: str, *, command_id: str | None = None) -> dict[str, Any]:
         """Run one tool version on every case of its tool's newest case set (a person's act; never an assistant's).
         Each call is a new command id; give `command_id` to resend a call whose answer was lost. The answer is the run:
         `run_id`, `state` (queued, running, finished or failed) and, when finished, its `record`."""
         body = {'command_id': command_id or 'reference-start-' + uuid.uuid4().hex, 'digest': digest}
         return self._post('reference-runs', 'start', body, retry=True)
 
-    def reference_run_get(self, run_id):
+    def reference_run_get(self, run_id: str) -> dict[str, Any]:
         """One reference run of the project, as the caller may read it."""
         return self._post('reference-runs', 'get', {'run_id': run_id}, retry=True)
 
-    def reference_run_list(self, *, tool=None, digest=None, limit=50, cursor=None):
+    def reference_run_list(self, *, tool: str | None = None, digest: str | None = None, limit: int = 50, cursor: str | None = None) -> dict[str, Any]:
         """One page of the project's reference runs, newest first; of one tool or one tool version when given."""
         body = {'limit': limit, **({'tool': tool} if tool else {}), **({'digest': digest} if digest else {}), **({'cursor': cursor} if cursor else {})}
         return self._post('reference-runs', 'list', body, retry=True)
 
-    def procedure_sandbox_enable(self, digest, enabled=True, *, command_id=None):
-        """E113 s1: turn sandbox runs of an enabled version on (or, with `enabled=False`, off) in this project; project
-        administrators only. Each change is kept and the newest decides. The answer is the version, with `sandbox`."""
+    def procedure_sandbox_enable(self, digest: str, enabled: bool = True, *, command_id: str | None = None) -> dict[str, Any]:
+        """Turn sandbox runs of an enabled tool version on (or, with `enabled=False`, off) in this project.
+
+        Project administrators only. Each change is kept and the newest decides. The answer is the version, with
+        `sandbox`.
+        """
+        # E113 s1
         body = {'command_id': command_id or 'sandbox-' + uuid.uuid4().hex, 'digest': digest, 'enabled': bool(enabled)}
         return self._post('procedures', 'sandbox-enable', body, retry=True)
 
-    def procedure_sandbox_run(self, digest, inputs, *, settings=None, limits=None, command_id=None, wait=0, interval=2.0,
-                              clock=time.monotonic, sleep=time.sleep):
-        """E113 s1: start a run of an enabled version in the project's sandbox, on exact input versions: `inputs` is
-        `{slot: [(asset_id, revision), ...]}` (or `{asset_id, revision}` items), `settings` the typed values by key (a
-        setting left out takes its default), `limits` lower limits (`memory_mb`, `seconds`, `cpus`). The server runs it,
-        keeps the run and publishes each output. The answer is the job (`runners/job`): its `run_id` names the run.
-        With `wait` (seconds) the job is followed until it is published, failed, killed or cancelled, or the wait ends;
-        the answer is then the job as last seen. Each call is a new command id; give `command_id` to resend a call whose
-        answer was lost (the same id and body answer the same job)."""
+    def procedure_sandbox_run(self, digest: str, inputs, *, settings=None, limits=None, command_id: str | None = None, wait: float = 0,
+                              interval: float = 2.0, clock=time.monotonic, sleep=time.sleep) -> dict[str, Any]:
+        """Start a run of an enabled tool version in the project's sandbox, on exact input versions.
+
+        `inputs` is `{slot: [(asset_id, revision), ...]}` (or `{asset_id, revision}` items), `settings` the typed values
+        by key (a setting left out takes its default), `limits` lower limits (`memory_mb`, `seconds`, `cpus`). The
+        server runs it, keeps the run and publishes each output. The answer is the job (`runners/job`): its `run_id`
+        names the run. With `wait` (seconds) the job is followed until it is published, failed, killed or cancelled, or
+        the wait ends; the answer is then the job as last seen. Each call is a new command id; give `command_id` to
+        resend a call whose answer was lost (the same id and body answer the same job).
+        """
+        # E113 s1
         body = {'command_id': command_id or 'sandbox-' + uuid.uuid4().hex, 'procedure': {'digest': digest}, 'settings': dict(settings or {}),
                 'inputs': {slot: [dict(v) if isinstance(v, dict) else {'asset_id': v[0], 'revision': v[1]} for v in versions]
                            for slot, versions in inputs.items()}}
@@ -1311,9 +1342,13 @@ class ProcedureClient:
         job = self._post('procedures', 'sandbox-run', body, retry=True)
         return self.procedure_sandbox_job(job['id'], wait=wait, interval=interval, clock=clock, sleep=sleep, seen=job) if wait else job
 
-    def procedure_sandbox_job(self, job_id, *, wait=0, interval=2.0, clock=time.monotonic, sleep=time.sleep, seen=None):
-        """E113 s1: a sandbox run's job, as `runners/job` answers it (state, reason, limits, run_id and the published
-        result); with `wait` (seconds), followed until it ends or the wait does."""
+    def procedure_sandbox_job(self, job_id: str, *, wait: float = 0, interval: float = 2.0, clock=time.monotonic, sleep=time.sleep,
+                              seen=None) -> dict[str, Any]:
+        """A sandbox run's job: its state, reason, limits, run_id and the published result.
+
+        The job is as `runners/job` answers it; with `wait` (seconds), it is followed until it ends or the wait does.
+        """
+        # E113 s1
         deadline = clock() + max(0.0, float(wait or 0))
         job = seen or self._post('runners', 'job', {'id': job_id}, retry=True)
         while job['state'] not in SANDBOX_FINAL and clock() < deadline:
@@ -1321,10 +1356,13 @@ class ProcedureClient:
             job = self._post('runners', 'job', {'id': job_id}, retry=True)
         return job
 
-    def procedure_version(self, name, version=None, *, readable=False):
-        """Without `version`: the highest enabled version of `name`. With it: that version, among those you can see
-        (your own private ones included). E108 S1 (B6 rev 5, R4-8): with `readable`, a refusal names a version's readable
-        label or "this procedure", never the catalogue name (which stays in its details)."""
+    def procedure_version(self, name: str, version: int | None = None, *, readable: bool = False) -> dict[str, Any]:
+        """The highest enabled version of a tool, or the version you name among those you can see.
+
+        Your own private versions are among those you can see. With `readable`, a refusal names a version's readable
+        label or "this procedure", never the catalogue name (which stays in its details).
+        """
+        # E108 S1 (B6 rev 5, R4-8): readable
         found = [v for v in self.procedure_list(name) if v['name'] == name]
         chosen = [v for v in found if (v['state'] == 'enabled' if version is None else v['version'] == version)]
         if not chosen:
@@ -1356,11 +1394,14 @@ class ProcedureClient:
         finally: shutil.rmtree(work, ignore_errors=True)
         return folder
 
-    def procedure_run(self, name, destination, inputs=None, *, version=None, prompt=None, yes=False, cache=None, kinds=None, declared=None,
-                      systems=None, settings=None, items=(), reference=None):
-        """Run a catalogue version on this computer. The version is read again before every run (a withdrawal ends
-        it), the local copy is checked by digest, and a version you neither registered nor trust asks `prompt(question)`
-        once (or `yes=True` answers it); the answer is recorded as your trust. Nothing runs before that."""
+    def procedure_run(self, name: str, destination, inputs=None, *, version: int | None = None, prompt=None, yes: bool = False, cache=None,
+                      kinds=None, declared=None, systems=None, settings=None, items=(), reference=None) -> PresentedRun:
+        """Run a tool version of the project's catalogue on this computer.
+
+        The version is read again before every run (a withdrawal ends it), the local copy is checked by digest, and a
+        version you neither registered nor trust asks `prompt(question)` once (or `yes=True` answers it); the answer is
+        recorded as your trust. Nothing runs before that.
+        """
         chosen = self.procedure_version(name, version)
         found = self.procedure_get(chosen['digest'])
         if found['state'] == 'withdrawn': raise NotRun('withdrawn', '', {'digest': found['digest']}, date=_day(found['withdrawn_at']))
@@ -1382,8 +1423,9 @@ class ProcedureClient:
             if scratch is not None: shutil.rmtree(scratch, ignore_errors=True)
 
     def _check_inputs(self, manifest, inputs, items, reference, scratch):
-        """E110 (D9, 2-M4): `--item SLOT=ITEM[@N]` and `--reference FILE|ITEM@N` as exact project versions, read with
+        """`--item SLOT=ITEM[@N]` and `--reference FILE|ITEM@N` as exact project versions, read with
         `read_exact` (the held folder is neither read nor changed), or the reference as a file on this computer."""
+        # E110 (D9, 2-M4)
         wanted = list(_items(manifest, items))
         slot = next((i for i in manifest['inputs'] if i['class'] == 'reference'), None)
         if reference is not None:
@@ -1423,20 +1465,23 @@ class ProcedureClient:
 
     # ------------------------------------------------------------ E108: a source procedure's first run into the project
 
-    def source_run(self, name, systems, *, settings=None, system_label=None, version=None, prompt=None, yes=False, cache=None,
-                   folder=None, attribution=None, audience=None, well_notes='', work=None):
-        """Run a source procedure of the project's catalogue on this computer and add what it made to the project
-        through one upload, each file naming the version, the team's system (in words) and its output role; the server
-        records `sourced_by` from its catalogue. `systems` maps the system slot to its local configuration file, which
-        is never sent. `system_label` names the system as people read it (default: the slot's label). `folder` keeps the
-        run's files (a new folder); without it they are removed after the upload. Returns {sentence, run, report}.
+    def source_run(self, name: str, systems, *, settings=None, system_label: str | None = None, version: int | None = None, prompt=None,
+                   yes: bool = False, cache=None, folder=None, attribution=None, audience=None, well_notes: str = '', work=None) -> dict[str, Any]:
+        """Run a source tool of the project's catalogue on this computer and add what it made to the project in one upload.
 
-        E108 S2: `work` is the folder that holds what earlier runs added (E70's held record, `held.json`): each output's
-        item and version by (procedure name, system, role). A later run whose outputs and declarations equal the held
-        ones sends nothing ("nothing-changed"); otherwise each held output is sent as a new version of its item at the
-        version held, and a newer version added meanwhile is E70's `newer-version-exists`, named from the item's
-        history. The send is saved in `work` before it starts (the outputs copied there), so a run that stops part way
-        is completed by the next one without running the procedure again."""
+        Each file names the version, the team's system (in words) and its output role; the server records `sourced_by`
+        from its catalogue. `systems` maps the system slot to its local configuration file, which is never sent.
+        `system_label` names the system as people read it (default: the slot's label). `folder` keeps the run's files
+        (a new folder); without it they are removed after the upload. Returns {sentence, run, report}.
+
+        `work` is the folder that holds what earlier runs added (the held record, `held.json`): each output's item and
+        version by (procedure name, system, role). A later run whose outputs and declarations equal the held ones sends
+        nothing ("nothing-changed"); otherwise each held output is sent as a new version of its item at the version
+        held, and a newer version added meanwhile is `newer-version-exists`, named from the item's history. The send is
+        saved in `work` before it starts (the outputs copied there), so a run that stops part way is completed by the
+        next one without running the procedure again.
+        """
+        # E108 S2: work; the held record and newer-version-exists are E70's
         import uuid
         from .upload_runs import File, Folder, UploadRun
         if work is not None:
@@ -1521,8 +1566,9 @@ class ProcedureClient:
         return {'sentence': sentence, 'run': record, 'report': report, 'kept': kept}
 
     def _source_send(self, held, record, pending, ran, made):
-        """E108 S2: send a saved source run (its start again under its command id, then each file still waiting) and
-        record what each output became. Newer versions added meanwhile end as E70's `newer-version-exists`."""
+        """Send a saved source run (its start again under its command id, then each file still waiting) and
+        record what each output became. Newer versions added meanwhile end as `newer-version-exists`."""
+        # E108 S2; newer-version-exists is E70's
         from .upload_runs import File, Folder, UploadRun
         area = held.work / 'pending' / pending['body']['command_id']
         files = [File(f['path'], f['bytes'], f['sha256'], lambda p=area / f['file']: p.read_bytes(), str(area / f['file'])) for f in pending['files']]
@@ -1561,33 +1607,35 @@ class ProcedureClient:
     # ------------------------------------------------------------ E109: a send procedure delivers exact versions
 
     def _delivery_reporter(self):
-        """Who reports (the same as a pending send's owner, E70a): the access key's fingerprint or the grant's person."""
+        """Who reports (the same as a pending send's owner): the access key's fingerprint or the grant's person."""
+        # E70a: the pending send's owner
         from .exchange import ClientTransport
         return ClientTransport(self).identity()
 
-    def deliver(self, name, *, systems=None, items=(), settings=None, work='.ophiolite-held', wait=0, prompt=None, yes=False, cache=None,
-                version=None, set_aside=False, as_=None):
-        """Deliver exact versions to a team's system with a send procedure of the project's catalogue, on this computer.
+    def deliver(self, name: str, *, systems=None, items=(), settings=None, work='.ophiolite-held', wait: float = 0, prompt=None, yes: bool = False,
+                cache=None, version: int | None = None, set_aside: bool = False, as_=None) -> dict[str, Any]:
+        """Deliver exact versions to a team's system with a send tool of the project's catalogue, on this computer.
 
         Every refusal before launch (Windows, a delivery already running from `work`, the catalogue's selection, trust and
         withdrawal checks, the settings, an item that cannot be bound or read) leaves no pending record and reports
-        nothing (D12 i). Then the attempt is saved in `work/deliveries/<delivery id>/` (a new uuid4 delivery id, the
+        nothing. Then the attempt is saved in `work/deliveries/<delivery id>/` (a new uuid4 delivery id, the
         pinned procedure copy, the versions, the settings, the configuration's fingerprint, who reports) and the writer
         runs once, in its own process group, holding the folder's attempt lock. Its answer is reported to the project
         (`activity/deliver`, procedure-delivery/1) with the destination's label, never its configuration.
 
-        A later call for the same procedure that finds the attempt still pending never runs the writer again (D8): a
+        A later call for the same procedure that finds the attempt still pending never runs the writer again: a
         saved outcome is reported again under its saved report id. Otherwise, once the writer's process group has
         finished (waiting up to `wait` seconds), the procedure's `reconcile`, when it declares one, runs from the pinned
         copy with the same configuration and says confirmed, not sent (only through the destination's tombstone) or
         unknown; without one the outcome stays unknown. `set_aside=True` records the outcome as unknown and lets this
         folder start a new delivery. Returns {sentence, delivery_id, state, items, destination, reported}.
 
-        `as_` names an outcome (E120 D7): after every check above and before the pending record, the project's gate
-        judges the one delivered version against it and this procedure's destination. A refusal launches nothing and
-        raises its sentence; a claim's delivery id (the gate issues it) is the attempt's. The gate's command is kept in
+        `as_` names an outcome: after every check above and before the pending record, the project's gate judges the
+        one delivered version against it and this procedure's destination. A refusal launches nothing and raises its
+        sentence; a claim's delivery id (the gate issues it) is the attempt's. The gate's command is kept in
         `work/deliveries/intents/` until the attempt is saved, so a delivery interrupted in between asks again with the
         same command and gets the same claim, launching only while the claim is still valid."""
+        # E120 D7: as_
         if _windows(): raise NotRun('windows')  # R5-1: refused before anything is read, locked or launched
         from .exchange import ClientTransport, Exchange, ExchangeRefused
         from .errors import OphioliteError
@@ -1661,12 +1709,13 @@ class ProcedureClient:
         return ProjectInput(str(target), profile, {k: context[k] for k in keys if isinstance(context.get(k), str)}, item['asset_id'], revision)
 
     def _deliver_as_gate(self, work, label, name, digest, destination, ref, reporter):
-        """E120 D7 (2-5, 5-20): the gate's claim for one version, delivered by `digest` to `destination`, as the outcome
+        """The gate's claim for one version, delivered by `digest` to `destination`, as the outcome
         named `label`. The command and the complete request are saved before the gate is asked
         (`deliveries/intents/<command id>.json`, under the folder's attempt lock), so asking again after an interruption
         with the same project, person, procedure, result, outcome and destination replays the same command; anything
         else is a new command, judged afresh (5-23). A refusal, or a replayed claim that is no longer valid, removes the
         intent and raises the gate's sentence. Returns (the claim, the intent's path)."""
+        # E120 D7 (2-5, 5-20)
         outcome = self.outcome_named(label)
         body = {'outcome_id': outcome['outcome_id'], 'asset_id': ref['asset_id'], 'revision': ref['revision'],
                 'send': {'procedure_digest': digest, 'label': destination}}
@@ -1813,8 +1862,9 @@ class ProcedureClient:
     def _project_inputs(self, inputs, manifest=None):
         """Each `@RESULT:REVISION` input downloaded as exactly that version, with its stored type and declarations
         (the typed descriptor's profile, and its context for the declarations the reader takes); other inputs as given.
-        E181 s1b (D-4): a slot that accepts exactly one kind, served as its original alone and declaring nothing, takes
-        that kind without asking for a description (the deployment gives none; the reported run checks the stored kind)."""
+        A slot that accepts exactly one kind, served as its original alone and declaring nothing, takes that kind
+        without asking for a description (the deployment gives none; the reported run checks the stored kind)."""
+        # E181 s1b (D-4): the one-kind slot
         kinds = {i['slot']: i['kinds'] for i in (manifest or {}).get('inputs', []) if i.get('class') == 'version'}
         out, work = {}, None
         try:
@@ -1836,8 +1886,9 @@ class ProcedureClient:
 
     def _download_version(self, asset, revision, stem, profile=None, declared=None, wellbore=None):
         """One exact version for a run: its original, its stored type and declarations (given by the server for a run
-        made again; otherwise read from its typed description). E120 s6 (D-19): a run made again also keeps the
-        wellbore the server recorded for a residual run's tops version."""
+        made again; otherwise read from its typed description). A run made again also keeps the wellbore the server
+        recorded for a residual run's tops version."""
+        # E120 s6 (D-19): the wellbore
         stem.parent.mkdir(parents=True, exist_ok=True)
         if profile is None:
             from urllib.parse import quote
@@ -1854,16 +1905,20 @@ class ProcedureClient:
             keys = [d['key'] for r in contract_readers() if r['profile'] == profile for d in r['declared']]
             declared = {k: context[k] for k in keys if isinstance(context.get(k), str)}
         target = stem.with_suffix(_extension(profile))
-        self.download_original(asset, revision, target)
+        # E212 s1: a profile served as its original alone has no describe to read a notice from: none is asked
+        self._save_original(asset, revision, target, described=not original_only(profile))
         return ProjectInput(str(target), profile, dict(declared or {}), asset, revision, wellbore)
 
-    def procedure_publish(self, folder, *, name=None, again_of=None, for_outcome=None):
-        """Report a run of a catalogue version on project versions, then publish each of its outputs under the run. The
-        report's command id is saved in the run folder (publish.json) before anything is sent, and every output is
+    def procedure_publish(self, folder, *, name: str | None = None, again_of=None, for_outcome=None) -> dict[str, Any]:
+        """Report a run of a tool version on project versions, then publish each of its outputs under the run.
+
+        The report's command id is saved in the run folder (publish.json) before anything is sent, and every output is
         published under a command id derived from the run, so publishing again after a stop or a lost answer resumes:
-        one run, each output once. `for_outcome` (an outcome's name, or {outcome_id, label}; E120) publishes the same
-        result of a run made again for that outcome; it is saved with the command id, so a resume still sends it.
-        Returns {sentence, run, outputs: [{role, outcome, sentence, receipt}]}."""
+        one run, each output once. `for_outcome` (an outcome's name, or {outcome_id, label}) publishes the same result
+        of a run made again for that outcome; it is saved with the command id, so a resume still sends it. Returns
+        {sentence, run, outputs: [{role, outcome, sentence, receipt}]}.
+        """
+        # E120: for_outcome
         folder = Path(folder)
         record, outputs = local_run(folder)
         state_path = folder / 'publish.json'
@@ -1948,25 +2003,32 @@ class ProcedureClient:
     def _run_output(self, raw, profile, declared, name, parents, method, run_id, role, for_outcome=None):
         """publications/derive for one output of a run: the command id is the run's for this role (a retry is the same
         command); the receipt is the published result, or the earlier result for a run made again with the same result
-        (published again for the outcome `for_outcome` names, E120)."""
+        (published again for the outcome `for_outcome` names)."""
+        # E120: for_outcome
         from .writers import WrittenOriginal
         procedure = {'id': run_id, 'role': role, **({'for_outcome': for_outcome} if for_outcome else {})}
         receipt = self._reported(lambda: self.publish_derived(WrittenOriginal(raw, profile, dict(declared or {})), name=name[:160], from_=parents, method=method,
                                                               command_id=output_command(run_id, role), procedure=procedure))
         return receipt.model_dump(mode='json', exclude_none=True)
 
-    def procedure_run_get(self, run_id):
+    def procedure_run_get(self, run_id: str) -> dict[str, Any]:
+        """One reported run of a tool version, by its id, as the server records it."""
         return self._post('procedure-runs', 'get', {'run_id': run_id}, retry=True)
 
-    def procedure_prepare_again(self, asset, revision):
+    def procedure_prepare_again(self, asset: str, revision: str) -> dict[str, Any]:
+        """What running a tool-made result again would use: the tool version, its exact inputs and its settings."""
         return self._reported(lambda: self._post('procedure-runs', 'prepare-again', {'asset_id': asset, 'revision': revision}, retry=True))
 
-    def procedure_again(self, asset, revision, destination, *, version=None, folder=None, prompt=None, yes=False, cache=None, name=None, for_=None):
-        """Run a procedure-made result again on this computer and publish it under the new run: the server says per
-        output whether it is the same result (nothing published) or a new private result made again from the earlier
-        one. `version` runs another catalogue version of the same procedure; `folder` runs a local copy whose digest is
-        a catalogue version. `for_` (an outcome's name, E120) publishes the same result again for that outcome, so its
-        current version evaluates it; the name is resolved before anything runs."""
+    def procedure_again(self, asset: str, revision: str, destination, *, version: int | None = None, folder=None, prompt=None, yes: bool = False,
+                        cache=None, name: str | None = None, for_: str | None = None) -> dict[str, Any]:
+        """Run a tool-made result again on this computer and publish it under the new run.
+
+        The server says per output whether it is the same result (nothing published) or a new private result made
+        again from the earlier one. `version` runs another catalogue version of the same procedure; `folder` runs a
+        local copy whose digest is a catalogue version. `for_` (an outcome's name) publishes the same result again for
+        that outcome, so its current version evaluates it; the name is resolved before anything runs.
+        """
+        # E120: for_
         outcome = None if for_ is None else self.outcome_named(for_)
         prepared = self.procedure_prepare_again(asset, revision)
         words = prepared['procedure']

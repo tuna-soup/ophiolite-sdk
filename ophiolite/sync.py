@@ -159,8 +159,7 @@ class Sync:
         return (self.client.url, self.client.project, principal_id(self.client.credential), capabilities, epoch)
 
     def inventory(self):
-        """E70a: every item this credential may read, at its current version (catalog/inventory, every page). E173 s0b:
-        an item whose first author the page labels carries that name as `by_name`; without a label it has none."""
+        """Every item this credential may read, at its current version (catalog/inventory, every page). An item whose first author the page labels carries that name as `by_name`; without a label it has none."""
         return list(self._inventory().values())
 
     def _inventory(self):

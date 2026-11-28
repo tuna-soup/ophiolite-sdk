@@ -16,16 +16,22 @@ A source row is not a project well: `read()` creates no wells or entities. Wells
 *reference* to the source row they were located from (source_asset_id, source_revision, source_row); a source read
 returns the *fields* of the table itself.
 """
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; nothing below is imported to run
+
 import base64
 import binascii
 import hashlib
 import json
 import re
 import warnings
+from typing import TYPE_CHECKING
 
 from .errors import (Refused, SourceChecksumMismatch, SourceNotFound, SourceNotSupported, SourceRevisionDiffers, VerificationFailed,
                      SOURCE_GUIDE)
 from .models.api import OrgConnectionsPage, SourceBrowsePage, SourceExportAnswer, SourceSelectionsPage
+
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only
+    from typing import Any
 
 SUPPORTED = 'sql-wells/1'
 TABLE = 'table/1'  # E50b1: any approved table, read as a table
@@ -373,9 +379,13 @@ class SourceDescription:
 
 
 class SourceClient:
-    def org_connections(self, organization):
-        """E39: the organisation's database connections you use or administer, each with your own readiness (with an
-        access key, only those you use, in the organisation of its project). Sign-ins and passwords are never answered."""
+    def org_connections(self, organization: str) -> list[dict[str, Any]]:
+        """The organisation's database connections you use or administer, each with your own readiness.
+
+        With an access key, only those you use, in the organisation of its project. Sign-ins and passwords are never
+        answered.
+        """
+        # E39
         from .publish import json_bytes
         if not isinstance(organization, str) or not organization: raise Refused('Name the organisation by its id.')
         answer = self._post_bytes('org-connections', 'list', json_bytes({'organization_id': organization}), retry=True)
@@ -383,23 +393,76 @@ class SourceClient:
         if page['organization_id'] != organization: raise VerificationFailed('The organisation connection listing answered for another organisation.')
         return page['connections']
 
-    def sources(self):
+    def sources(self) -> list[Source]:
         """The source selections you bound in this project (every profile), each with its state and exact revision.
-        Selections other members bound are not listed."""
+
+        Selections other members bound are not listed.
+
+        Returns
+        -------
+        list[Source]
+            Your selections, in the order the server lists them.
+
+        Raises
+        ------
+        VerificationFailed
+            When the listing comes back outside its documented shape.
+        """
         page = _checked(SourceSelectionsPage, self._post('sources', 'list', {}), 'source listing')
         return [Source(self, document) for document in page['selections']]
 
-    def browse(self, connection, prefix=None, cursor=None):
-        """E59: one page of a storage connection's folder (PREFIX, by default the folder the connection may read), listed
-        with your own sign-in to it: `folders`, then `items` (key, name, folder, size, tag, the kind its name suggests and
-        whether it is read in place); `next_cursor` continues the page. The deployment holds your sign-in: no key or secret
-        is given or sent from here."""
+    def browse(self, connection, prefix=None, cursor=None) -> dict[str, Any]:
+        """One page of a storage connection's folder, listed with your own sign-in to it.
+
+        The deployment holds your sign-in: no key or secret is given or sent from here.
+
+        Parameters
+        ----------
+        connection : str
+            The storage connection's id.
+        prefix : optional
+            The folder to list; by default the folder the connection may read.
+        cursor : optional
+            The `next_cursor` of the page before, for the next page.
+
+        Returns
+        -------
+        dict
+            `folders`, then `items` (key, name, folder, size, tag, the kind its name suggests and whether it is read in
+            place); `next_cursor` continues the page.
+
+        Raises
+        ------
+        Refused
+            When no connection id is given.
+        VerificationFailed
+            When the listing comes back outside its documented shape.
+        """
+        # E59
         if not isinstance(connection, str) or not connection: raise Refused('Name the storage connection by its id.')
         body = {'connection_id': connection, **({'prefix': prefix} if prefix is not None else {}), **({'cursor': cursor} if cursor else {})}
         return _checked(SourceBrowsePage, self._post('sources', 'discover', body, retry=True), 'storage listing')
 
-    def source(self, id):
-        """The selection with this stable id (a name never matches); SourceNotFound when you have none with it."""
+    def source(self, id: str) -> Source:
+        """The selection with this stable id (a name never matches).
+
+        Parameters
+        ----------
+        id : str
+            The selection's stable id, as `sources()` lists it.
+
+        Returns
+        -------
+        Source
+            Your selection with that id.
+
+        Raises
+        ------
+        Refused
+            When no id is given.
+        SourceNotFound
+            When you have no selection with it in this project.
+        """
         if not isinstance(id, str) or not id: raise Refused('Give the source selection id (see client.sources()).')
         found = [s for s in self.sources() if s.id == id]
         if not found:

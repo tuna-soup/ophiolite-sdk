@@ -8,13 +8,19 @@ E110 (D7, D9): a check folder that `ophiolite tools run` wrote for a check proce
 check.json (the version checked, the procedure digest, the reference, the settings, the outcome and the counts). `checks
 publish` sends it on purpose, after refusing locally what the server refuses (M5: the counts and outcome rules); the
 server stores it as reported, never checked by the server, and reads its labels from the catalogue."""
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; nothing below is imported to run
+
 import base64
 import datetime
 import hashlib
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from .errors import OphioliteError, PermissionRefused, Refused
+
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only
+    from typing import Any
 
 PERMISSION = 'Publishing checks needs permission. Ask a project administrator.'
 GRANTING = 'Only a project administrator can change who may publish checks.'
@@ -214,7 +220,7 @@ def las_curves(raw):
 class CheckClient:
     """Mixed into `Client` (uses its `_post`)."""
 
-    def check_publish(self, folder):
+    def check_publish(self, folder) -> dict[str, Any]:
         """Publish one check directory (check.json, fixture.*, reference.*, output.json, request.json); the stored record.
         The server repeats the calculation when it runs this implementation and release ("checked by the server");
         otherwise the record is stored as reported. A refusal names its field in `error.details['field']`."""
@@ -226,18 +232,23 @@ class CheckClient:
         try: return self._post('checks', 'publish', body, retry=True)
         except OphioliteError as error: raise in_words(error, PUBLISH_REFUSED, number) from None
 
-    def check_list(self, *, asset=None, revision=None, implementation=None, version=None):
-        """The checks of an exact result version (with your own comparisons) or of an implementation and version:
-        {records, groups}; each group has its latest record, the earlier ones and whether they disagree."""
+    def check_list(self, *, asset: str | None = None, revision: str | None = None, implementation: str | None = None, version=None) -> dict[str, Any]:
+        """The checks of an exact result version (with your own comparisons) or of an implementation and version.
+
+        The answer is {records, groups}; each group has its latest record, the earlier ones and whether they disagree.
+        """
         if (asset is None) == (implementation is None): raise Refused('Name a result (asset and revision) or an implementation.')
         subject = ({'kind': 'result', 'asset_id': asset, 'revision': revision} if asset is not None
                    else {'kind': 'implementation', 'id': implementation, 'version': version})
         return self._post('checks', 'list', {'subject': subject}, retry=True)
 
-    def check_compare(self, asset, revision, file, *, curve=None, tolerance=None, interpretation=None, file_name=None, command_id=None):
-        """Compare an exact result version with a file you trust; the comparison is saved on this result for you (and
-        administrators who read it), never as a check of the method. `tolerance` is a number in the compared unit, a
-        dict ({kind: absolute, value, unit} or {kind: relative, value}) or None for exactly equal."""
+    def check_compare(self, asset: str, revision: str, file, *, curve: str | None = None, tolerance=None, interpretation=None, file_name: str | None = None,
+                      command_id: str | None = None) -> dict[str, Any]:
+        """Compare an exact result version with a file you trust, saved on this result and never as a check of the method.
+
+        The comparison is saved for you (and administrators who read it). `tolerance` is a number in the compared unit,
+        a dict ({kind: absolute, value, unit} or {kind: relative, value}) or None for exactly equal.
+        """
         raw = Path(file).read_bytes() if isinstance(file, (str, Path)) else bytes(file)
         name = file_name or (Path(file).name if isinstance(file, (str, Path)) else None)
         if isinstance(tolerance, (int, float)) and not isinstance(tolerance, bool):
@@ -255,7 +266,7 @@ class CheckClient:
                 raise in_words(error, {'tolerance': 'Not compared: ' + error.server_message[0].lower() + error.server_message[1:]}) from None
             raise in_words(error, COMPARE_REFUSED) from None
 
-    def check_publishers(self, action='list', principal=None, *, kind='person'):
+    def check_publishers(self, action: str = 'list', principal: str | None = None, *, kind: str = 'person') -> dict[str, Any]:
         """Who may publish checks besides the project's administrators: {publishers: [{principal, kind, granted_by, at}]}.
         `grant` and `revoke` (administrators only) name a person or a workload client id."""
         body = {'action': action, **({'principal': principal, 'kind': kind} if action != 'list' else {})}
@@ -363,7 +374,7 @@ def report_lines(report, names=None):
     procedure gave them, then "Ophiolite did not repeat this check."; never "Checked"."""
     who = (names or {}).get((report.get('recorded_by') or {}).get('id')) or 'a project member'
     procedure = report.get('procedure') or {}
-    label = procedure.get('label') if readable(procedure.get('label')) else 'a procedure'
+    label = procedure.get('label') if readable(procedure.get('label')) else 'unnamed code'  # gateway checks_words.A_PROCEDURE
     version = procedure.get('version_label') if readable(procedure.get('version_label')) else procedure.get('version_number')
     lines = ['Reported check by %s with %s version %s: %s.' % (who, label, version, OUTCOME.get(report['outcome'], 'not compared'))]
     counts = report.get('counts')

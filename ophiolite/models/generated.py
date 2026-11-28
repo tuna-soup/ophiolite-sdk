@@ -8,6 +8,18 @@ class Contract(Answer):
     """A contract document as served: an E187 Answer (unknown fields kept, known fields strict)."""
 
 
+class ActivityItem(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    kind: Annotated[str, Field(pattern='^[a-z][a-z0-9-]*$', max_length=64)] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(None)
+    place: ActivityItemPlace = Field(None)
+
+class ActivityItemPlace(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    kind: Literal['wellbore'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
 class Attachment(Contract):
     schema_: Literal['ophiolite.attachment/1'] = Field(..., alias='schema')
     attachment_id: Annotated[str, Field(pattern='^[0-9a-f]{32}$')] = Field(...)
@@ -185,6 +197,64 @@ class Curvewindow(Contract):
     runs: Annotated[list[CurvewindowRunsItem], Field(max_length=2048)] = Field(None)
     blocks: CurvewindowBlocks = Field(None)
     missing: Annotated[list[CurvewindowMissingItem], Field(max_length=2048)] = Field(None)
+
+class Document(Contract):
+    schema_: Literal['ophiolite.document/1'] = Field(..., alias='schema')
+    document_id: Annotated[str, Field(pattern='^[0-9a-f]{32}$')] = Field(...)
+    project_id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    parent: DocumentParent = Field(...)
+    taxonomy: Annotated[list[Annotated[str, Field(pattern='^[A-Za-z0-9_.-]+$', min_length=1, max_length=200)]], Field(min_length=1, max_length=16)] = Field(...)
+    name: Annotated[str, Field(pattern='^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$', min_length=1, max_length=160)] = Field(...)
+    description: Annotated[str, Field(pattern='^[^\\x00-\\x1f\\x7f-\\x9f]*$', max_length=500)] = Field(...)
+    file: DocumentFile = Field(...)
+    added_by: DocumentActor = Field(...)
+    sender: Sender = Field(...)
+    added_at: Annotated[str, Field(pattern='^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$')] = Field(...)
+    described_at: Annotated[str, Field(pattern='^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$')] | None = Field(...)
+
+class DocumentActor(Contract):
+    person: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    agent: Annotated[str, Field(min_length=1, max_length=64)] | None = Field(...)
+    job: Annotated[str, Field(min_length=1, max_length=64)] | None = Field(...)
+
+class DocumentFile(Contract):
+    media_type: Literal['image/png', 'image/jpeg', 'application/pdf'] = Field(...)
+    bytes: Annotated[int, Field(ge=1, le=16777216)] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class DocumentParent(Contract):
+    kind: Literal['well', 'wellbore', 'survey', 'project'] = Field(...)
+    id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+
+class DocumentList(Contract):
+    documents: Annotated[list[Document], Field(max_length=200)] = Field(...)
+    next: Annotated[str, Field(min_length=1, max_length=1024)] | None = Field(...)
+
+class DocumentAddRequest(Contract):
+    project_id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    command_id: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    parent: DocumentParent = Field(...)
+    taxonomy: Annotated[list[Annotated[str, Field(pattern='^[A-Za-z0-9_.-]+$', min_length=1, max_length=200)]], Field(min_length=1, max_length=16)] = Field(...)
+    name: Annotated[str, Field(pattern='^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$', min_length=1, max_length=160)] = Field(...)
+    description: Annotated[str, Field(pattern='^[^\\x00-\\x1f\\x7f-\\x9f]*$', max_length=500)] = Field(...)
+    file_name: Annotated[str, Field(pattern='^[^\\x00-\\x1f\\x7f-\\x9f]*$', max_length=255)] | None = Field(None)
+    content: Annotated[str, Field(pattern='^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$', min_length=4, max_length=22369624)] = Field(...)
+
+class DocumentListRequest(Contract):
+    project_id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    parent: DocumentParent | None = Field(None)
+    limit: Annotated[int, Field(ge=1, le=200)] = Field(50)
+    cursor: Annotated[str, Field(min_length=1, max_length=1024)] | None = Field(None)
+
+class DocumentReadRequest(Contract):
+    project_id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    document_id: Annotated[str, Field(pattern='^[0-9a-f]{32}$')] = Field(...)
+
+class DocumentDescribeRequest(Contract):
+    project_id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    command_id: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    document_id: Annotated[str, Field(pattern='^[0-9a-f]{32}$')] = Field(...)
+    description: Annotated[str, Field(pattern='^[^\\x00-\\x1f\\x7f-\\x9f]*$', max_length=500)] = Field(...)
 
 class FeatureSet(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -611,6 +681,7 @@ class ScientificAsset(Contract):
     manifest: Annotated[RevisionManifest | RevisionManifestV2 | RevisionManifestV3 | RevisionManifestV4, Field(discriminator='schema_')] | None = Field(None)
     derivation: DerivationInfo | None = Field(None)
     public_sources: PublicSources | None = Field(None)
+    public_dataset: PublicDatasetLink | None = Field(None)
     acquisition: Acquisition | None = Field(None)
     relationships: Relationships | None = Field(None)
     display: Display | None = Field(None)
@@ -987,6 +1058,42 @@ class Provenance(Contract):
     environment_reference: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     omissions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=32)] = Field(...)
 
+class PublicDatasetLicence(Contract):
+    spdx: Annotated[str, Field(max_length=64)] | None = Field(...)
+    redistribution: Literal['allowed'] = Field(...)
+    attribution: Literal['required', 'not-required'] = Field(...)
+    share_alike: bool = Field(...)
+
+class PublicDatasetLine(Contract):
+    kind: Literal['public-dataset'] = Field(...)
+    dataset: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    licence: PublicDatasetLicence = Field(...)
+    statements: Annotated[list[Annotated[str, Field(min_length=1, max_length=300)]], Field(max_length=16)] = Field(...)
+    documents: Annotated[list[Annotated[str, Field(pattern='^[0-9a-f]{64}$')]], Field(min_length=1, max_length=64)] = Field(...)
+
+class PublicDatasetLink(Contract):
+    schema_: Literal['ophiolite.public-dataset-link/1'] = Field(..., alias='schema')
+    dataset: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    object_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    member_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    sources: Annotated[list[PublicDatasetSource], Field(min_length=1, max_length=16)] = Field(...)
+    licence: PublicDatasetLicence = Field(...)
+    statements: Annotated[list[Annotated[str, Field(min_length=1, max_length=300)]], Field(max_length=16)] = Field(...)
+    linked_at: float = Field(...)
+    run: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class PublicDatasetRecord(Contract):
+    kind: Literal['public-dataset'] = Field(...)
+    dataset: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    object_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    statements: Annotated[list[Annotated[str, Field(min_length=1, max_length=300)]], Field(max_length=16)] = Field(...)
+    licence: PublicDatasetLicence = Field(...)
+    sources: Annotated[list[PublicDatasetSource], Field(min_length=1, max_length=16)] = Field(...)
+
+class PublicDatasetSource(Contract):
+    osd_record: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    licence: dict[str, Any] = Field(...)
+
 class PublicSourceDocument(Contract):
     upstream_item: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     retained_revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -1006,8 +1113,8 @@ class PublicSourceRecord(Contract):
     retrieved_at: float = Field(...)
 
 class PublicSources(Contract):
-    records: Annotated[list[PublicSourceRecord], Field(min_length=1, max_length=64)] = Field(...)
-    lines: Annotated[list[PublicSourceLine], Field(min_length=1, max_length=64)] = Field(...)
+    records: Annotated[list[PublicSourceRecord | PublicDatasetRecord], Field(min_length=1, max_length=64)] = Field(...)
+    lines: Annotated[list[PublicSourceLine | PublicDatasetLine], Field(min_length=1, max_length=64)] = Field(...)
 
 class PublishedSeismicContext(Contract):
     type: Literal['seismic-volume'] = Field(...)
@@ -2028,7 +2135,7 @@ class BundleAssetV2(Contract):
     stated_parent_visibility: Literal['complete', 'restricted'] = Field(None)
     omissions: list[str] = Field(...)
     losses: list[str] = Field(...)
-    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set'] = Field(...)
+    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set', 'well-table'] = Field(...)
     relationships: BundleAssetV2Relationships = Field(None)
     original: BundleAssetV2Original = Field(None)
     slices: Annotated[list[BundleSliceV2], Field(min_length=1, max_length=64)] = Field(None)
@@ -3445,6 +3552,68 @@ class InterpretationIdentity(Contract):
     parsing_policy: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9._-]*(/[a-z0-9._-]+)*/[0-9]+$')] = Field(...)
     mapping: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9._-]*(/[a-z0-9._-]+)*/[0-9]+$')] = Field(...)
 
+class PublicStore(Contract):
+    schema_: Literal['ophiolite.public-store/1'] = Field(..., alias='schema')
+    datasets: Annotated[list[StoreDataset], Field(max_length=64)] = Field(...)
+    samples: StoreDocument = Field(None)
+
+class SampleAcquisition(Contract):
+    url: Annotated[str, Field(pattern='^[a-z][a-z0-9+.-]*://\\S+$', max_length=2048)] = Field(...)
+
+class SampleCredit(Contract):
+    text: Annotated[str, Field(min_length=1, max_length=300)] = Field(...)
+    kind: Literal['prescribed', 'authored'] = Field(...)
+    evidence: SampleCreditEvidence = Field(None)
+
+class SampleCreditEvidence(Contract):
+    read_on: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')] = Field(...)
+    where: Annotated[str, Field(min_length=1, max_length=300)] = Field(...)
+
+class SampleLicence(Contract):
+    spdx: Annotated[str, Field(max_length=64)] | None = Field(...)
+    redistribution: Literal['allowed'] = Field(...)
+    attribution: Literal['required', 'not-required'] = Field(...)
+    share_alike: bool = Field(...)
+    statements: Annotated[list[Annotated[str, Field(min_length=1, max_length=300)]], Field(max_length=16)] = Field(...)
+
+class SampleOrigin(Contract):
+    url: Annotated[str, Field(pattern='^[a-z][a-z0-9+.-]*://\\S+$', max_length=2048)] = Field(...)
+    access: Literal['anonymous', 'registration', 'api', 'request', 'purchase'] = Field(...)
+    manifest_url: Annotated[str, Field(pattern='^[a-z][a-z0-9+.-]*://\\S+$', max_length=2048)] = Field(None)
+    notes: Annotated[str, Field(max_length=400)] = Field(None)
+
+class SampleReading(Contract):
+    date: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')] = Field(...)
+    commercial_use: Literal['allowed', 'not-allowed', 'unknown'] = Field(...)
+
+class SampleSource(Contract):
+    osd_record: Annotated[str, Field(pattern='^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$', max_length=160)] = Field(...)
+    retrieved: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')] = Field(...)
+    origin: SampleOrigin = Field(...)
+    acquired_from: SampleAcquisition = Field(...)
+    licence: dict[str, Any] = Field(...)
+    reading: SampleReading = Field(...)
+    credit: SampleCredit = Field(None)
+
+class StoreDataset(Contract):
+    id: Annotated[str, Field(pattern='^[a-z0-9]+(-[a-z0-9]+)*$', max_length=40)] = Field(...)
+    title: Annotated[str, Field(min_length=1, max_length=120)] = Field(...)
+    osd_records: Annotated[list[Annotated[str, Field(pattern='^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$', max_length=160)]], Field(min_length=1, max_length=16)] = Field(...)
+    sources: Annotated[list[SampleSource], Field(min_length=1, max_length=16)] = Field(...)
+    licence: SampleLicence = Field(...)
+    objects: Annotated[list[StoreObject], Field(min_length=1, max_length=16)] = Field(...)
+
+class StoreDocument(Contract):
+    key: Literal['samples/index.json'] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=1)] = Field(...)
+
+class StoreObject(Contract):
+    key: Annotated[str, Field(pattern='^([a-z0-9][a-z0-9_-]*(\\.[a-z0-9_-]+)*/)*[A-Za-z0-9][A-Za-z0-9_-]*(\\.[A-Za-z0-9_-]+)*$', max_length=512)] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=1, le=536870912)] = Field(...)
+    published: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')] = Field(...)
+
 class ContractsRegistry(Contract):
     schema_: Literal['ophiolite.contracts-registry/1'] = Field(..., alias='schema')
     version: Annotated[str, Field(pattern='^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$')] = Field(...)
@@ -3591,9 +3760,6 @@ class SampleIndex(Contract):
     schema_: Literal['ophiolite.sample-index/1'] = Field(..., alias='schema')
     samples: Annotated[list[SampleEntry], Field(max_length=64)] = Field(...)
 
-class SampleAcquisition(Contract):
-    url: Annotated[str, Field(pattern='^[a-z][a-z0-9+.-]*://\\S+$', max_length=2048)] = Field(...)
-
 class SampleAsset(Contract):
     type: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
@@ -3615,15 +3781,6 @@ class SampleContents(Contract):
     assets: Annotated[list[SampleAsset], Field(max_length=128)] = Field(...)
     entities: Annotated[list[SampleEntity], Field(max_length=256)] = Field(...)
 
-class SampleCredit(Contract):
-    text: Annotated[str, Field(min_length=1, max_length=300)] = Field(...)
-    kind: Literal['prescribed', 'authored'] = Field(...)
-    evidence: SampleCreditEvidence = Field(None)
-
-class SampleCreditEvidence(Contract):
-    read_on: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')] = Field(...)
-    where: Annotated[str, Field(min_length=1, max_length=300)] = Field(...)
-
 class SampleEntity(Contract):
     kind: Annotated[str, Field(min_length=1, max_length=32)] = Field(...)
     entity_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
@@ -3637,32 +3794,6 @@ class SampleEntry(Contract):
     sources: Annotated[list[SampleSource], Field(min_length=1, max_length=16)] = Field(...)
     licence: SampleLicence = Field(...)
     contents: SampleContents = Field(...)
-
-class SampleLicence(Contract):
-    spdx: Annotated[str, Field(max_length=64)] | None = Field(...)
-    redistribution: Literal['allowed'] = Field(...)
-    attribution: Literal['required', 'not-required'] = Field(...)
-    share_alike: bool = Field(...)
-    statements: Annotated[list[Annotated[str, Field(min_length=1, max_length=300)]], Field(max_length=16)] = Field(...)
-
-class SampleOrigin(Contract):
-    url: Annotated[str, Field(pattern='^[a-z][a-z0-9+.-]*://\\S+$', max_length=2048)] = Field(...)
-    access: Literal['anonymous', 'registration', 'api', 'request', 'purchase'] = Field(...)
-    manifest_url: Annotated[str, Field(pattern='^[a-z][a-z0-9+.-]*://\\S+$', max_length=2048)] = Field(None)
-    notes: Annotated[str, Field(max_length=400)] = Field(None)
-
-class SampleReading(Contract):
-    date: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')] = Field(...)
-    commercial_use: Literal['allowed', 'not-allowed', 'unknown'] = Field(...)
-
-class SampleSource(Contract):
-    osd_record: Annotated[str, Field(pattern='^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$', max_length=160)] = Field(...)
-    retrieved: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')] = Field(...)
-    origin: SampleOrigin = Field(...)
-    acquired_from: SampleAcquisition = Field(...)
-    licence: dict[str, Any] = Field(...)
-    reading: SampleReading = Field(...)
-    credit: SampleCredit = Field(None)
 
 class BasisGrouping(Contract):
     schema_: Literal['ophiolite.basis-groups/1'] = Field(..., alias='schema')
@@ -4862,6 +4993,7 @@ class PortableBundleManifestV2Observations(Contract):
     groups: Annotated[list[BundleGroupV2], Field(max_length=128)] = Field(None)
     groups_omitted: Annotated[str, Field(min_length=1, max_length=200)] = Field(None)
     source_records_omitted: Annotated[str, Field(min_length=1, max_length=160)] = Field(None)
+    entities_omitted: Annotated[str, Field(min_length=1, max_length=200)] = Field(None)
 
 class PortableBundleManifestV2EntitiesItem(Contract):
     entity_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
@@ -4942,6 +5074,7 @@ class PortableBundleManifestV2RelationshipsItemSubject(Contract):
     asset_id: str = Field(None)
     revision: str = Field(None)
     entity_id: str = Field(None)
+    row: Annotated[str, Field(min_length=1, max_length=160)] = Field(None)
 
 class PortableBundleManifestV2RelationshipsItemObject(Contract):
     kind: Literal['revision', 'well', 'wellbore'] = Field(...)
@@ -4950,8 +5083,8 @@ class PortableBundleManifestV2RelationshipsItemObject(Contract):
     entity_id: str = Field(None)
 
 class PortableBundleManifestV2RelationshipsItemEvidence1(Contract):
-    source: PortableBundleManifestV2RelationshipsItemEvidence1Source = Field(None)
-    statement: Annotated[str, Field(max_length=500)] = Field(None)
+    source: PortableBundleManifestV2RelationshipsItemEvidence1Source | None = Field(None)
+    statement: Annotated[str, Field(max_length=500)] | None = Field(None)
 
 class BundleAssetV2RelationshipsWell_Log2(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
@@ -4976,6 +5109,8 @@ WorkEpisode = Annotated[ShapeEpisode | ValuesEpisode, Field(discriminator='mode'
 
 WorkTurn = Annotated[ShapeTurn | ValuesTurn, Field(discriminator='mode')]
 
+ActivityItem.model_rebuild()
+ActivityItemPlace.model_rebuild()
 Attachment.model_rebuild()
 AttachmentActor.model_rebuild()
 AttachmentVersion.model_rebuild()
@@ -4997,6 +5132,15 @@ ResqmlInterpretation.model_rebuild()
 ScientificContext.model_rebuild()
 ApplicationCurve.model_rebuild()
 Curvewindow.model_rebuild()
+Document.model_rebuild()
+DocumentActor.model_rebuild()
+DocumentFile.model_rebuild()
+DocumentParent.model_rebuild()
+DocumentList.model_rebuild()
+DocumentAddRequest.model_rebuild()
+DocumentListRequest.model_rebuild()
+DocumentReadRequest.model_rebuild()
+DocumentDescribeRequest.model_rebuild()
 FeatureSet.model_rebuild()
 Feature.model_rebuild()
 FeatureContext.model_rebuild()
@@ -5095,6 +5239,11 @@ Parameters.model_rebuild()
 Person.model_rebuild()
 ProcedureRunner.model_rebuild()
 Provenance.model_rebuild()
+PublicDatasetLicence.model_rebuild()
+PublicDatasetLine.model_rebuild()
+PublicDatasetLink.model_rebuild()
+PublicDatasetRecord.model_rebuild()
+PublicDatasetSource.model_rebuild()
 PublicSourceDocument.model_rebuild()
 PublicSourceLine.model_rebuild()
 PublicSourceRecord.model_rebuild()
@@ -5439,6 +5588,17 @@ ContractProfile.model_rebuild()
 ConnectorSemantics.model_rebuild()
 RepresentationRules.model_rebuild()
 InterpretationIdentity.model_rebuild()
+PublicStore.model_rebuild()
+SampleAcquisition.model_rebuild()
+SampleCredit.model_rebuild()
+SampleCreditEvidence.model_rebuild()
+SampleLicence.model_rebuild()
+SampleOrigin.model_rebuild()
+SampleReading.model_rebuild()
+SampleSource.model_rebuild()
+StoreDataset.model_rebuild()
+StoreDocument.model_rebuild()
+StoreObject.model_rebuild()
 ContractsRegistry.model_rebuild()
 Lifecycle.model_rebuild()
 SchemaEntry.model_rebuild()
@@ -5456,19 +5616,12 @@ RuleEvidence.model_rebuild()
 ColumnRuleResult.model_rebuild()
 RuleResults.model_rebuild()
 SampleIndex.model_rebuild()
-SampleAcquisition.model_rebuild()
 SampleAsset.model_rebuild()
 SampleBundle.model_rebuild()
 SampleCard.model_rebuild()
 SampleContents.model_rebuild()
-SampleCredit.model_rebuild()
-SampleCreditEvidence.model_rebuild()
 SampleEntity.model_rebuild()
 SampleEntry.model_rebuild()
-SampleLicence.model_rebuild()
-SampleOrigin.model_rebuild()
-SampleReading.model_rebuild()
-SampleSource.model_rebuild()
 BasisGrouping.model_rebuild()
 BasisAnswer.model_rebuild()
 BasisBlock.model_rebuild()

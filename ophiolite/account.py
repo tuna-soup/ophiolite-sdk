@@ -56,7 +56,7 @@ class Account(AccessHistoryAccount):
 
     def projects(self, *, limit=50):
         """Every project this credential reaches (all pages): dicts with id, name, role, can_administer, organization_id
-        and access_ends_at (E67a: the instant, UTC, the reader's access ends; None when it does not end)."""
+        and access_ends_at (the instant, UTC, the reader's access ends; None when it does not end)."""
         out, cursor, seen = [], None, set()
         while True:
             page = self._discover('list', {'limit': limit, **({'cursor': cursor} if cursor else {})})

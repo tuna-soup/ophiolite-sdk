@@ -77,15 +77,21 @@ def test_two_process_folder_transaction_serializes_held_reply(tmp_path,second_ac
     with fixture_server() as server,Client(server.url,'p',Credential.bearer('oph_api_alice')) as client:
         folder=tmp_path/'work';work=client.work_folder(folder);binding=work.configure('synthetic','revision',curve='GR',name='Synthetic')
         run=work.start(binding,application_version='synthetic/1',parameters={});run.input()
+        # The reply is held until the test releases it, and the test waits for the first process's publish while that
+        # process lives: a fresh interpreter's start-up is not a deadline (it took more than 3 s on a loaded host, and a
+        # reply released after 5 s let the second process in). HANG only stops a run that would never end.
+        HANG=120
         first_seen=threading.Event();release=threading.Event();handler=server.handler
         def held(method,path,raw,headers):
             answer=handler(method,path,raw,headers)
-            if path.endswith('/publish') and not first_seen.is_set():first_seen.set();release.wait(5)
+            if path.endswith('/publish') and not first_seen.is_set():first_seen.set();release.wait(HANG)
             return answer
         server.handler=held
         first=subprocess.Popen([sys.executable,'-c',PROCESS,server.url,str(folder),'publish'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
         try:
-            assert first_seen.wait(3)
+            for _ in range(HANG*10):
+                if first_seen.wait(.1) or first.poll() is not None:break
+            assert first_seen.is_set(),'the first process ended before its publish: '+''.join(first.communicate(timeout=5)) if first.poll() is not None else 'no publish in %d s'%HANG
             second=child(PROCESS,server.url,folder,second_action)
             assert second.returncode==9 and second.stdout.strip()=='busy',second.stdout+second.stderr
             assert len([r for r in server.requests if r['path'].endswith('/publish')])==1

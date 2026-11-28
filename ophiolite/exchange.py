@@ -358,7 +358,7 @@ TYPE_WORDS = {
     'deviation survey': ('deviation-csv/1',),
     'well path': ('well-path-positions-csv/1',),
     'time-depth table': ('time-depth-csv/1',),
-    'surface': ('mesh-text/1',),
+    'surface': ('mesh-text/1', 'gocad-ascii/1'),
     'fault sticks': ('petrel-faultsticks/1', 'opendtect-faultsticks/1'),
     'seismic volume': ('segy/1', 'segy/2', 'segy/3'),
     'seismic line': ('segy-line/1',),

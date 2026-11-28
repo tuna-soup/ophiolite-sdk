@@ -34,7 +34,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (geotiff/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -68,7 +68,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (geotiff/1 publish, QGIS 4.2.2)"
       }
     },
@@ -92,7 +92,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (esri-ascii-grid/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -128,8 +128,44 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (mesh-text/1 read, QGIS 4.2.2)"
+      },
+      "reach": {
+        "route": "raster",
+        "asset_kinds": [
+          "triangulated-surface"
+        ],
+        "transport": "map-connection",
+        "slice": null,
+        "client_limits": [
+          "Through the QGIS plug-in, as a mesh"
+        ]
+      }
+    },
+    {
+      "profile": "gocad-ascii/1",
+      "data": "GOCAD triangulated surface",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
+      "losses": [
+        "Opened as a mesh: values are exact at the points and interpolated linearly in each triangle",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a surface from QGIS",
+        "a GOCAD PLine or VSet (they land as fault sticks, map lines or points, which this route does not add)",
+        "a surface whose coordinate system is not stated"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-11-27",
+        "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (gocad-ascii/1 read, QGIS 4.2.2)"
       },
       "reach": {
         "route": "raster",
@@ -162,7 +198,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (well-location/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -200,7 +236,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (well-set/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -239,7 +275,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (well-tops-csv/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -278,7 +314,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (deviation-csv/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -317,7 +353,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (points-csv/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -356,7 +392,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (opendtect-faultsticks/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -396,7 +432,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (petrel-faultsticks/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -436,7 +472,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (geojson/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -476,7 +512,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (petrel-points-attributes/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -514,7 +550,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (petrel-horizon-ilxl/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -552,7 +588,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (opendtect-horizon-ascii/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -592,7 +628,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (esri-shapefile/1 read, QGIS 4.2.2)"
       },
       "reach": {
@@ -634,7 +670,7 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-11-21",
+        "date": "2026-11-27",
         "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (ogc-geopackage/1 read, QGIS 4.2.2)"
       },
       "reach": {

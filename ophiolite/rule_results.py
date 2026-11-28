@@ -7,7 +7,13 @@ cannot read answers as an unknown one. `summary(block)` is the one-line count (D
 `local_lines(block)` words a block `ophiolite.rules.run` made on this computer, from this package's own rule snapshot,
 in the server's form (D10); nothing here edits `ophiolite.rules` (D6).
 """
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; nothing below is imported to run
+
 import re
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only
+    from typing import Any
 
 NO_RESULTS = 'No rule results for this version: it landed before rules ran.'
 NO_RULES = 'No rule reads this kind of file.'
@@ -17,7 +23,7 @@ REASON_WORDS = {'no-column': 'it needs a column this file does not have', 'no-co
 
 
 class RuleResultsClient:
-    def rule_results(self, asset_id, revision):
+    def rule_results(self, asset_id: str, revision: str) -> dict[str, Any]:
         """The rules' results stored with this exact version, and one line per result."""
         return self._post('rule-results', 'get', {'asset_id': asset_id, 'revision': revision}, retry=True)
 

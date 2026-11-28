@@ -14,6 +14,10 @@ TOO_MANY = ('A citation names at most 64 creators; these versions were made by %
 NO_PUBLISHER = 'A citation names its publisher: this project is not in an organisation you belong to. Export without a title.'
 ORGANISATION_ONLY = 'No selected version names a person who made it, so the organisation is the creator.'  # R-3
 DESCRIPTORS = ['ro-crate-metadata.json', 'croissant.json', 'datacite.json']
+PUBLIC_DATASET = 'ophiolite.public-dataset-link/1'  # E212 s1: the link a describe answers as `public_dataset`
+MAX_NOTICE = 1000  # the citation's notice (citation-schema)
+NOTICE_TOO_LONG = ('The credits of the public datasets in this export do not fit in a citation notice (%d of at most 1000 '
+                   'characters). Export fewer datasets at a time, or export without a title.')
 _clock = datetime  # tests freeze it
 
 
@@ -73,13 +77,42 @@ def stories(client, selections):
     return [((asset, revision), client.story(asset, revision, limit=1)) for asset, revision, _ in selections]
 
 
+def _descriptor(read):
+    return read._wire_descriptors[0] if hasattr(read, '_wire_descriptors') else getattr(read, '_wire_descriptor', None)
+
+
+def link_of(descriptor):
+    """E212 s1: the public dataset a revision was restored from (its describe's `public_dataset`), or None."""
+    link = (descriptor or {}).get('public_dataset')
+    return link if isinstance(link, dict) and link.get('schema') == PUBLIC_DATASET else None
+
+
 def licences(items):
-    """Each read's catalogue licence (`acquisition.listed_in.licence`), or None, in item order (D4)."""
+    """Each read's licence in item order (D4): the public dataset's licence as linked (E212 s1), else the catalogue
+    licence (`acquisition.listed_in.licence`), else None."""
     out = []
     for _, read in items:
-        descriptor = read._wire_descriptors[0] if hasattr(read, '_wire_descriptors') else getattr(read, '_wire_descriptor', None)
+        descriptor = _descriptor(read)
+        link = link_of(descriptor)
+        if link is not None:
+            out.append(link['licence']); continue
         listed = ((descriptor or {}).get('acquisition') or {}).get('listed_in')
         out.append(listed.get('licence') if isinstance(listed, dict) else None)
+    return out
+
+
+def credits(items):
+    """E212 s1: what a null-licence notice says first: each linked dataset's statements once (in item order), and for a
+    dataset with no SPDX id the notice its sources' licences state, once each."""
+    out, seen = [], set()
+    for _, read in items:
+        link = link_of(_descriptor(read))
+        if link is None or link['dataset'] in seen: continue
+        seen.add(link['dataset'])
+        said = list(link.get('statements') or [])
+        if (link.get('licence') or {}).get('spdx') is None:
+            said += [s['licence']['notice'] for s in link.get('sources') or [] if isinstance((s.get('licence') or {}).get('notice'), str)]
+        out += [line for line in said if line not in out]
     return out
 
 
@@ -104,6 +137,29 @@ def check(block):
 
 
 def licence_of(items):
+    """(licence, notice): the contract's rule over each file's licence; with a null licence the notice names every
+    linked public dataset's credits first, then the contract's sentence (E212 s1). Over MAX_NOTICE: refused."""
     from .bundle import _descriptors_contract
-    return _descriptors_contract().export_licence(licences(items))
+    licence, notice = _descriptors_contract().export_licence(licences(items))
+    if licence is not None: return licence, notice
+    text = ' '.join(credits(items) + [notice])
+    if len(text) > MAX_NOTICE: raise Refused(NOTICE_TOO_LONG % len(text), code='citation-notice')
+    return licence, text
+
+
+def notice_text(link):
+    """E212 s1: the NOTICE a download of a linked original is saved with: the dataset, its licence as linked, its credits,
+    each source's licence as the store's index stated it, and the digests that tie the file to the dataset."""
+    licence = link['licence']
+    lines = ['This file is from the public dataset %s.' % link['dataset'], '',
+             'Licence: %s' % (licence['spdx'] or "the publisher's own terms (no SPDX identifier); see each source below"),
+             'Redistribution: %s. Attribution: %s. Shared alike: %s.' % (licence['redistribution'], licence['attribution'], 'yes' if licence['share_alike'] else 'no')]
+    if link.get('statements'): lines += ['', 'Credits:'] + ['  ' + s for s in link['statements']]
+    lines += ['', 'Sources:']
+    for s in link['sources']:
+        stated = s.get('licence') or {}
+        words = [stated.get('spdx') or stated.get('name') or 'no licence name', stated.get('url'), stated.get('notice')]
+        lines.append('  %s: %s' % (s['osd_record'], '; '.join(w for w in words if isinstance(w, str) and w)))
+    lines += ['', 'Dataset object SHA-256: %s' % link['object_sha256'], 'This file SHA-256: %s' % link['member_sha256'], '']
+    return '\n'.join(lines)
 

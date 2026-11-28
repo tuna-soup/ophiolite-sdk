@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/activity/v1/item-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.activity-item/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ActivityItemPlace": {
+      "additionalProperties": false,
+      "description": "Where the item sits: the wellbore it is linked to, as named at the action.",
+      "properties": {
+        "id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "wellbore",
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name"
+      ],
+      "title": "ActivityItemPlace",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The item one activity or action row acted on, as it was named at the action; never back-filled.",
+  "else": {
+    "required": [
+      "revision"
+    ]
+  },
+  "if": {
+    "properties": {
+      "kind": {
+        "const": "project"
+      }
+    },
+    "required": [
+      "kind"
+    ]
+  },
+  "properties": {
+    "id": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "description": "The item's kind as it is stored for it (for example external-scalar-map), or project",
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "title": "Kind",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "place": {
+      "$ref": "#/$defs/ActivityItemPlace"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "name"
+  ],
+  "then": {
+    "properties": {
+      "revision": {
+        "type": "null"
+      },
+      "place": {
+        "type": "null"
+      }
+    }
+  },
+  "title": "ActivityItem",
+  "type": "object"
+}

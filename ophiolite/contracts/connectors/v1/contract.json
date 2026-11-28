@@ -40,6 +40,7 @@
     "petrel-scattered-data/1": {"scientific_profile": "regular-grid-surface-source/1", "source_schema": "Petrel/scattered-data/version-6", "mapping_version": "regular-grid-surface/1", "history": "retained-exact-read"},
     "petrel-faultsticks/1": {"scientific_profile": "polyline-set-source/1", "source_schema": "Petrel/fault-sticks/INLINE-x-y-z-fault-stick", "mapping_version": "polyline-set/1", "history": "retained-exact-read"},
     "petrel-well-tops/1": {"scientific_profile": "well-tops-source/1", "source_schema": "Petrel/well-tops/version-2", "mapping_version": "well-tops/1", "history": "retained-exact-read"},
+    "gocad-ascii/1": {"scientific_profile": "triangulated-surface-source/1", "source_schema": "GOCAD-ASCII/TSurf-1", "mapping_version": "triangulated-surface/1", "history": "retained-exact-read"},
     "esri-shapefile/1": {"scientific_profile": "feature-set-source/1", "source_schema": "ESRI-Shapefile", "mapping_version": "feature-set/1", "history": "retained-exact-read"},
     "ogc-geopackage/1": {"scientific_profile": "feature-set-source/1", "source_schema": "OGC-GeoPackage/1.2-1.4", "mapping_version": "feature-set/1", "history": "retained-exact-read"},
     "geojson/1": {"scientific_profile": "feature-set-source/1", "source_schema": "GeoJSON/RFC7946", "mapping_version": "feature-set/1", "history": "retained-exact-read"},

@@ -1,0 +1,401 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/public-store/v1/public-store-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.public-store/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "SampleAcquisition": {
+      "additionalProperties": false,
+      "description": "The input actually fetched to make the bundle (an input address of the OSD record), apart from its origin.",
+      "properties": {
+        "url": {
+          "maxLength": 2048,
+          "pattern": "^[a-z][a-z0-9+.-]*://\\S+$",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "SampleAcquisition",
+      "type": "object"
+    },
+    "SampleCredit": {
+      "additionalProperties": false,
+      "description": "The sentence a person sees for an input: the publisher's own (prescribed) or written by us from the terms.",
+      "properties": {
+        "text": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "prescribed",
+            "authored"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/SampleCreditEvidence"
+        }
+      },
+      "required": [
+        "text",
+        "kind"
+      ],
+      "title": "SampleCredit",
+      "type": "object"
+    },
+    "SampleCreditEvidence": {
+      "additionalProperties": false,
+      "description": "Where an authored credit comes from: the day the terms were read and the rights row or page read.",
+      "properties": {
+        "read_on": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+          "title": "Read On",
+          "type": "string"
+        },
+        "where": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Where",
+          "type": "string"
+        }
+      },
+      "required": [
+        "read_on",
+        "where"
+      ],
+      "title": "SampleCreditEvidence",
+      "type": "object"
+    },
+    "SampleLicence": {
+      "additionalProperties": false,
+      "description": "The licence block computed from the sources (OSD E40 design 4(d)); an entry states it and samples.py compares.",
+      "properties": {
+        "spdx": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spdx"
+        },
+        "redistribution": {
+          "const": "allowed",
+          "title": "Redistribution",
+          "type": "string"
+        },
+        "attribution": {
+          "enum": [
+            "required",
+            "not-required"
+          ],
+          "title": "Attribution",
+          "type": "string"
+        },
+        "share_alike": {
+          "title": "Share Alike",
+          "type": "boolean"
+        },
+        "statements": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Statements",
+          "type": "array"
+        }
+      },
+      "required": [
+        "spdx",
+        "redistribution",
+        "attribution",
+        "share_alike",
+        "statements"
+      ],
+      "title": "SampleLicence",
+      "type": "object"
+    },
+    "SampleOrigin": {
+      "additionalProperties": false,
+      "description": "The catalogue origin of an input as its OSD record states it (the page a person opens), kept verbatim.",
+      "properties": {
+        "url": {
+          "maxLength": 2048,
+          "pattern": "^[a-z][a-z0-9+.-]*://\\S+$",
+          "title": "Url",
+          "type": "string"
+        },
+        "access": {
+          "enum": [
+            "anonymous",
+            "registration",
+            "api",
+            "request",
+            "purchase"
+          ],
+          "title": "Access",
+          "type": "string"
+        },
+        "manifest_url": {
+          "maxLength": 2048,
+          "pattern": "^[a-z][a-z0-9+.-]*://\\S+$",
+          "title": "Manifest Url",
+          "type": "string"
+        },
+        "notes": {
+          "maxLength": 400,
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "access"
+      ],
+      "title": "SampleOrigin",
+      "type": "object"
+    },
+    "SampleReading": {
+      "additionalProperties": false,
+      "description": "The reading of the terms by the person who read them: when, and whether commercial use is allowed.",
+      "properties": {
+        "date": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+          "title": "Date",
+          "type": "string"
+        },
+        "commercial_use": {
+          "enum": [
+            "allowed",
+            "not-allowed",
+            "unknown"
+          ],
+          "title": "Commercial Use",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "commercial_use"
+      ],
+      "title": "SampleReading",
+      "type": "object"
+    },
+    "SampleSource": {
+      "additionalProperties": false,
+      "description": "One input of the sample: its OSD record, the day it was fetched, its origin and acquisition, its licence object\nkept whole (free: its fields are read in samples.py), the reading of the terms and the credit.",
+      "properties": {
+        "osd_record": {
+          "description": "The Open Subsurface Data record id of the input",
+          "maxLength": 160,
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Osd Record",
+          "type": "string"
+        },
+        "retrieved": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+          "title": "Retrieved",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/SampleOrigin"
+        },
+        "acquired_from": {
+          "$ref": "#/$defs/SampleAcquisition"
+        },
+        "licence": {
+          "additionalProperties": true,
+          "description": "The OSD record's licence object, whole and unchanged",
+          "title": "Licence",
+          "type": "object"
+        },
+        "reading": {
+          "$ref": "#/$defs/SampleReading"
+        },
+        "credit": {
+          "$ref": "#/$defs/SampleCredit"
+        }
+      },
+      "required": [
+        "osd_record",
+        "retrieved",
+        "origin",
+        "acquired_from",
+        "licence",
+        "reading"
+      ],
+      "title": "SampleSource",
+      "type": "object"
+    },
+    "StoreDataset": {
+      "additionalProperties": false,
+      "description": "One dataset: its id and title, its sources and the licence computed from them, and every object published.",
+      "properties": {
+        "id": {
+          "description": "URL-safe and never reused; the address a card and a public page name",
+          "maxLength": 40,
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "osd_records": {
+          "description": "The unique OSD records of the sources, in first-appearance order",
+          "items": {
+            "description": "The Open Subsurface Data record id of the input",
+            "maxLength": 160,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$",
+            "type": "string"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Osd Records",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SampleSource"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "licence": {
+          "$ref": "#/$defs/SampleLicence"
+        },
+        "objects": {
+          "description": "Every object ever published for the dataset (append-only)",
+          "items": {
+            "$ref": "#/$defs/StoreObject"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Objects",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "osd_records",
+        "sources",
+        "licence",
+        "objects"
+      ],
+      "title": "StoreDataset",
+      "type": "object"
+    },
+    "StoreDocument": {
+      "additionalProperties": false,
+      "description": "The sample index (E211 `ophiolite.sample-index/1`) the store holds at its fixed key, by its digest and bytes.",
+      "properties": {
+        "key": {
+          "const": "samples/index.json",
+          "title": "Key",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 1,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "sha256",
+        "bytes"
+      ],
+      "title": "StoreDocument",
+      "type": "object"
+    },
+    "StoreObject": {
+      "additionalProperties": false,
+      "description": "One immutable object of a dataset: its content-addressed key, its digest and bytes, and the day it was published.",
+      "properties": {
+        "key": {
+          "description": "Relative to the public store; resolved against its address in slice 1",
+          "maxLength": 512,
+          "pattern": "^([a-z0-9][a-z0-9_-]*(\\.[a-z0-9_-]+)*/)*[A-Za-z0-9][A-Za-z0-9_-]*(\\.[A-Za-z0-9_-]+)*$",
+          "title": "Key",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "maximum": 536870912,
+          "minimum": 1,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "published": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",
+          "title": "Published",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "sha256",
+        "bytes",
+        "published"
+      ],
+      "title": "StoreObject",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The public store's index (`index.json` at the store's root): its datasets, and the sample index it names.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.public-store/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "datasets": {
+      "items": {
+        "$ref": "#/$defs/StoreDataset"
+      },
+      "maxItems": 64,
+      "title": "Datasets",
+      "type": "array"
+    },
+    "samples": {
+      "$ref": "#/$defs/StoreDocument"
+    }
+  },
+  "required": [
+    "schema",
+    "datasets"
+  ],
+  "title": "PublicStore",
+  "type": "object"
+}

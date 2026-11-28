@@ -1,0 +1,68 @@
+{
+ "schema": "ophiolite.public-store/1",
+ "datasets": [
+  {
+   "id": "synthetic-a",
+   "title": "Synthetic dataset A",
+   "osd_records": ["synthetic/source-a"],
+   "sources": [
+    {
+     "osd_record": "synthetic/source-a",
+     "retrieved": "2026-11-25",
+     "origin": {"url": "https://example.org/synthetic/source-a", "access": "anonymous"},
+     "acquired_from": {"url": "https://example.org/synthetic/source-a/wells"},
+     "licence": {"name": "Synthetic terms A (no SPDX identifier)", "spdx": null, "url": "https://example.org/synthetic/terms-a", "redistribution": "allowed", "attribution": "required"},
+     "reading": {"date": "2026-11-25", "commercial_use": "allowed"},
+     "credit": {"text": "Contains synthetic wells A, used under synthetic terms A.", "kind": "authored", "evidence": {"read_on": "2026-11-25", "where": "The synthetic rights row A, read for the fixtures."}}
+    },
+    {
+     "osd_record": "synthetic/source-a",
+     "retrieved": "2026-11-25",
+     "origin": {"url": "https://example.org/synthetic/source-a", "access": "anonymous"},
+     "acquired_from": {"url": "https://example.org/synthetic/source-a/horizons"},
+     "licence": {"name": "Synthetic terms A (no SPDX identifier)", "spdx": null, "url": "https://example.org/synthetic/terms-a", "redistribution": "allowed", "attribution": "required"},
+     "reading": {"date": "2026-11-25", "commercial_use": "allowed"},
+     "credit": {"text": "Contains synthetic horizons A, delivered with synthetic source A.", "kind": "authored", "evidence": {"read_on": "2026-11-25", "where": "The synthetic rights row A, read for the fixtures."}}
+    }
+   ],
+   "licence": {
+    "spdx": null,
+    "redistribution": "allowed",
+    "attribution": "required",
+    "share_alike": false,
+    "statements": ["Contains synthetic wells A, used under synthetic terms A.", "Contains synthetic horizons A, delivered with synthetic source A."]
+   },
+   "objects": [
+    {"key": "datasets/synthetic-a/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/synthetic-a.zip", "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bytes": 2048, "published": "2026-11-25"},
+    {"key": "datasets/synthetic-a/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/synthetic-a.zip", "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "bytes": 3072, "published": "2026-11-26"}
+   ]
+  },
+  {
+   "id": "synthetic-b",
+   "title": "Synthetic dataset B, shared alike",
+   "osd_records": ["synthetic/source-b"],
+   "sources": [
+    {
+     "osd_record": "synthetic/source-b",
+     "retrieved": "2026-11-25",
+     "origin": {"url": "https://example.org/synthetic/source-b", "access": "anonymous"},
+     "acquired_from": {"url": "https://example.org/synthetic/source-b/input"},
+     "licence": {"name": "Synthetic share-alike terms B", "spdx": "CC-BY-SA-4.0", "url": "https://example.org/synthetic/terms-b", "redistribution": "allowed", "attribution": "required", "share_alike": true},
+     "reading": {"date": "2026-11-25", "commercial_use": "allowed"},
+     "credit": {"text": "Contains synthetic data B, shared alike under synthetic terms B.", "kind": "authored", "evidence": {"read_on": "2026-11-25", "where": "The synthetic rights row B, read for the fixtures."}}
+    }
+   ],
+   "licence": {
+    "spdx": "CC-BY-SA-4.0",
+    "redistribution": "allowed",
+    "attribution": "required",
+    "share_alike": true,
+    "statements": ["Contains synthetic data B, shared alike under synthetic terms B."]
+   },
+   "objects": [
+    {"key": "datasets/synthetic-b/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc/synthetic-b.zip", "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "bytes": 1024, "published": "2026-11-25"}
+   ]
+  }
+ ],
+ "samples": {"key": "samples/index.json", "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "bytes": 4096}
+}

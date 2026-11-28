@@ -76,7 +76,7 @@ def test_the_registrant_runs_her_own_version_and_a_member_is_asked_once_per_vers
     assert (tmp_path / 'out-tina/shifted.csv').read_bytes() == SHIFTED and mine['run']['procedure']['digest'] == v1['digest']
     with pytest.raises(NotRun) as caught: run(bob, tmp_path, 'out-early', who='bob', prompt=never)
     assert caught.value.code == 'no-enabled-version' and str(caught.value) == ('Not run: depth-shift has no enabled version in this project. '  # E121 B5: the way
-                                                                                       'A project administrator enables one in Settings → Tools or with ophiolite tools enable.')
+                                                                                       'A project administrator enables one with ophiolite tools enable.')
     alice.procedure_enable(v1['digest'])
     asked = Asked(tmp_path)
     run(bob, tmp_path, 'out-bob-1', who='bob', prompt=asked)

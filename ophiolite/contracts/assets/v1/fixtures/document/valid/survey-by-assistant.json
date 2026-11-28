@@ -1,0 +1,37 @@
+{
+  "schema": "ophiolite.document/1",
+  "document_id": "d0c00000000000000000000000000003",
+  "project_id": "p-documents",
+  "parent": {
+    "kind": "survey",
+    "id": "00000000-0000-4000-8000-000000000001"
+  },
+  "taxonomy": [
+    "GEOPHYSICS.SeismicSection"
+  ],
+  "name": "Inline 1200 section",
+  "description": "A synthetic section picture an assistant added for a person.",
+  "file": {
+    "media_type": "image/png",
+    "bytes": 40090,
+    "sha256": "159669b7fdf136e0e3e054a869fed0b99372f762999b32393adc5079cde14a04"
+  },
+  "added_by": {
+    "person": "a.person",
+    "agent": "assistant-1",
+    "job": "job-0042"
+  },
+  "sender": {
+    "schema": "ophiolite.sender/1",
+    "state": "reported",
+    "client": {
+      "product": "an-assistant",
+      "version": "2.1"
+    },
+    "host": null,
+    "transport": "mcp",
+    "accepted_as": null
+  },
+  "added_at": "2026-11-26T09:10:00Z",
+  "described_at": null
+}

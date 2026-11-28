@@ -35,12 +35,12 @@ def test_a_kept_copy_is_downloaded_for_a_run_as_json_with_its_kind(tmp_path, mon
     client = Client('https://ophiolite.test', 'p', Credential.bearer('oph_api_alice'))
     asked = []
 
-    def original(asset, revision, destination, **_):
-        asked.append((asset, revision, destination.name))
+    def original(asset, revision, destination, *_, described=True):  # E212 s1: download_original's body, the describe for its notice skipped or not
+        asked.append((asset, revision, destination.name, described))
         destination.write_bytes(RAW)
-    monkeypatch.setattr(client, 'download_original', original)
+    monkeypatch.setattr(client, '_save_original', original)
     given = client._download_version(ASSET, REVISION, tmp_path / 'inputs' / 'wells-0', profile=KIND, declared={})
-    assert asked == [(ASSET, REVISION, 'wells-0.json')]
+    assert asked == [(ASSET, REVISION, 'wells-0.json', False)]  # E212 s1: a kept copy has no describe to read a notice from
     assert (given.path, given.kind, given.asset_id, given.revision) == (str(tmp_path / 'inputs/wells-0.json'), KIND, ASSET, REVISION)
     assert (tmp_path / 'inputs/wells-0.json').read_bytes() == RAW
 
@@ -53,13 +53,14 @@ def _spied(monkeypatch, raw=RAW, describe=None):
     client = Client('https://ophiolite.test', 'p', Credential.bearer('oph_api_alice'))
     seen = {'described': [], 'saved': []}
 
-    def original(asset, revision, destination, **_):
+    def original(asset, revision, destination, *_, described=True):  # E212 s1: download_original's body; a notice's describe is a 'described' entry
         seen['saved'].append(destination.name); destination.write_bytes(raw)
+        if described: seen['described'].append('notice')
 
     def described(path, *_args, **_kw):
         seen['described'].append(path)
         raise describe or Described(path)
-    monkeypatch.setattr(client, 'download_original', original)
+    monkeypatch.setattr(client, '_save_original', original)
     monkeypatch.setattr(client, '_json', described)
     return client, seen
 

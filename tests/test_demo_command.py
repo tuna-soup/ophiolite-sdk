@@ -140,22 +140,152 @@ def test_a_support_module_an_earlier_demo_wrote_is_replaced_and_an_edited_one_ke
 
 
 def test_which_bundle_is_named_by_its_digest(tmp_path, monkeypatch):
-    """Mutation: compare file names → a renamed pinned file is 'yours'. A bare call refuses with the exact sentence while
-    nothing is published; a download whose digest is not the pinned one is deleted."""
+    """Mutation: compare file names → a renamed pinned file is 'yours'."""
     bundle = bundle_for(tmp_path)
     renamed = tmp_path / 'renamed.zip'; renamed.write_bytes(bundle.read_bytes())
     assert demo.examine(bundle)['which'] == 'yours'
     monkeypatch.setattr(demo, 'BUNDLE_SHA256', hashlib.sha256(bundle.read_bytes()).hexdigest())
     assert demo.examine(renamed)['which'] == 'f3-block'
+
+
+# ---- E212 s0 C5: the bundle comes from the public store (ophiolite.public-store/1), found by the pinned digest -------
+# A synthetic store: one dataset `synthetic-demo` (approved by a copy of the production source rules written for the
+# test), a made-up source on example.org, and the objects the test names. No real store, no network beyond 127.0.0.1.
+
+SOURCE = {'osd_record': 'synthetic/demo-source', 'retrieved': '2026-11-25',
+          'origin': {'url': 'https://example.org/synthetic/demo-source', 'access': 'anonymous'},
+          'acquired_from': {'url': 'https://example.org/synthetic/demo-source/bundle'},
+          'licence': {'name': 'Synthetic demo terms', 'spdx': None, 'url': 'https://example.org/synthetic/demo-terms', 'redistribution': 'allowed', 'attribution': 'required'},
+          'reading': {'date': '2026-11-25', 'commercial_use': 'allowed'},
+          'credit': {'text': 'Contains synthetic demo data, used under synthetic demo terms.', 'kind': 'authored',
+                     'evidence': {'read_on': '2026-11-25', 'where': 'The synthetic demo rights row, read for this test.'}}}
+
+
+def store_index(*contents, sizes=None):
+    """The index of a store holding `contents` (bytes) as objects of `synthetic-demo`, in that order."""
+    objects = []
+    for i, body in enumerate(contents):
+        sha = hashlib.sha256(body).hexdigest()
+        objects.append({'key': 'datasets/synthetic-demo/%s/synthetic-demo-%d.zip' % (sha, i), 'sha256': sha,
+                        'bytes': (sizes or {}).get(i, len(body)), 'published': '2026-11-25'})
+    return {'schema': 'ophiolite.public-store/1', 'datasets': [{
+        'id': 'synthetic-demo', 'title': 'Synthetic demo dataset', 'osd_records': ['synthetic/demo-source'], 'sources': [SOURCE],
+        'licence': {'spdx': None, 'redistribution': 'allowed', 'attribution': 'required', 'share_alike': False, 'statements': [SOURCE['credit']['text']]},
+        'objects': objects}]}
+
+
+@pytest.fixture
+def store(tmp_path, monkeypatch):
+    """The production source rules with `synthetic-demo` as the approved sample; no store set anywhere yet."""
+    rules = json.loads(demo.SOURCE_RULES.read_text(encoding='utf-8'))
+    rules['approved_samples'] = ['synthetic-demo']
+    written = tmp_path / 'source-rules.json'; written.write_text(json.dumps(rules), encoding='utf-8')
+    monkeypatch.setattr(demo, 'SOURCE_RULES', written)
+    monkeypatch.delenv(demo.STORE_VARIABLE, raising=False)
     folder = tmp_path / 'ophiolite-demo'; demo.claim(folder)
-    assert demo.BUNDLE_URL is None
-    with pytest.raises(Refused) as bare: demo.locate(None, folder)
-    assert str(bare.value) == 'The demo bundle is not yet published for download; use --bundle PATH.'
+    return folder
+
+
+def serving(files):
+    """A FixtureServer answering GET /<key> from `files` ({key: bytes}) and 403 otherwise, as the public store does."""
     from ophiolite.testing import FixtureServer
-    with FixtureServer(lambda method, path, raw, headers: (200, b'not the bundle')) as server:
-        monkeypatch.setattr(demo, 'BUNDLE_URL', server.url + '/f3-block.zip')
-        with pytest.raises(Refused, match='does not match its published checksum'): demo.locate(None, folder)
-    assert sorted(p.name for p in folder.iterdir()) == ['.ophiolite-demo']
+    return FixtureServer(lambda method, path, raw, headers: (200, files[path[1:]]) if method == 'GET' and path[1:] in files else (403, b''))
+
+
+def test_t5a_the_bundle_is_found_in_the_store_by_its_digest(tmp_path, store, monkeypatch):
+    """Mutations: take the dataset's first object (not the pinned digest's) → the older object is fetched; skip the size
+    the index gives → (see t5f). The demo reads the index, then exactly the pinned object's key, and keeps it."""
+    bundle = bundle_for(tmp_path).read_bytes()
+    monkeypatch.setattr(demo, 'BUNDLE_SHA256', hashlib.sha256(bundle).hexdigest())
+    index = store_index(b'an older synthetic bundle', bundle)
+    key = index['datasets'][0]['objects'][1]['key']
+    with serving({'index.json': json.dumps(index).encode(), key: bundle, index['datasets'][0]['objects'][0]['key']: b'an older synthetic bundle'}) as server:
+        monkeypatch.setenv(demo.STORE_VARIABLE, server.url)
+        kept = demo.locate(None, store)
+    assert [(r['method'], r['path']) for r in server.requests] == [('GET', '/index.json'), ('GET', '/' + key)]
+    assert kept == store / demo.BUNDLE_NAME and kept.read_bytes() == bundle
+    assert demo.examine(kept)['which'] == 'f3-block'
+    assert sorted(p.name for p in store.iterdir()) == ['.ophiolite-demo', demo.BUNDLE_NAME]
+
+
+def test_t5b_a_changed_byte_is_refused_and_nothing_is_kept(tmp_path, store, monkeypatch):
+    """Mutation: drop the digest check → the changed bundle is kept."""
+    bundle = bundle_for(tmp_path).read_bytes()
+    monkeypatch.setattr(demo, 'BUNDLE_SHA256', hashlib.sha256(bundle).hexdigest())
+    index = store_index(bundle); key = index['datasets'][0]['objects'][0]['key']
+    changed = bytes([bundle[0] ^ 1]) + bundle[1:]
+    with serving({'index.json': json.dumps(index).encode(), key: changed}) as server:
+        monkeypatch.setenv(demo.STORE_VARIABLE, server.url)
+        with pytest.raises(Refused) as refused: demo.locate(None, store)
+    assert str(refused.value) == 'The downloaded demo bundle does not match its published checksum; it was deleted.'
+    assert sorted(p.name for p in store.iterdir()) == ['.ophiolite-demo']
+
+
+def test_t5c_the_index_refusals_are_three_exact_sentences(tmp_path, store, monkeypatch):
+    """Mutations: accept an index with problems, or one above 1 MiB → no refusal; say a problem code or the store's key
+    → the sentence differs. Each refusal leaves the demo folder as it was."""
+    bundle = bundle_for(tmp_path).read_bytes()
+    monkeypatch.setattr(demo, 'BUNDLE_SHA256', hashlib.sha256(bundle).hexdigest())
+    outside = store_index(bundle); outside['datasets'][0]['objects'][0]['key'] = 'datasets/synthetic-other/' + 'e' * 64 + '/x.zip'
+    unapproved = store_index(bundle); unapproved['datasets'][0]['id'] = 'synthetic-unapproved'
+    for o in unapproved['datasets'][0]['objects']: o['key'] = o['key'].replace('synthetic-demo/', 'synthetic-unapproved/', 1)
+    cases = [(None, "The public store's index could not be read (HTTP 403)."),
+             (b'{"schema": ', "The public store's index is not valid."),
+             (json.dumps(outside).encode(), "The public store's index is not valid."),
+             (json.dumps(unapproved).encode(), "The public store's index is not valid."),
+             (b' ' * (1024 * 1024) + json.dumps(store_index(bundle)).encode(), "The public store's index is not valid."),
+             (json.dumps(store_index(b'another synthetic bundle')).encode(), "The public store does not hold this version's demo bundle; use --bundle PATH.")]
+    for body, sentence in cases:
+        with serving({} if body is None else {'index.json': body}) as server:
+            monkeypatch.setenv(demo.STORE_VARIABLE, server.url)
+            with pytest.raises(Refused) as refused: demo.locate(None, store)
+        assert str(refused.value) == sentence
+        assert [r['path'] for r in server.requests] == ['/index.json']
+        assert sorted(p.name for p in store.iterdir()) == ['.ophiolite-demo']
+
+
+def test_t5d_the_environment_store_wins_over_the_built_in_one(tmp_path, store, monkeypatch):
+    """Mutations: prefer the built-in address → store A is asked; ignore both → no request. E212 C6: the built-in
+    address is the published store; with it cleared and no environment store, the bare refusal is the unchanged
+    sentence, with no request."""
+    assert demo.PUBLIC_STORE == 'https://ophiolite-public-data.nbg1.your-objectstorage.com'
+    monkeypatch.setattr(demo, 'PUBLIC_STORE', None); monkeypatch.delenv(demo.STORE_VARIABLE, raising=False)
+    with pytest.raises(Refused) as bare: demo.locate(None, store)
+    assert str(bare.value) == 'The demo bundle is not yet published for download; use --bundle PATH.'
+    bundle = bundle_for(tmp_path).read_bytes()
+    monkeypatch.setattr(demo, 'BUNDLE_SHA256', hashlib.sha256(bundle).hexdigest())
+    index = store_index(bundle); key = index['datasets'][0]['objects'][0]['key']
+    files = {'index.json': json.dumps(index).encode(), key: bundle}
+    with serving(files) as a, serving(files) as b:
+        monkeypatch.setattr(demo, 'PUBLIC_STORE', a.url)
+        monkeypatch.setenv(demo.STORE_VARIABLE, b.url + '/')
+        assert demo.locate(None, store).read_bytes() == bundle
+        assert a.requests == [] and [r['path'] for r in b.requests] == ['/index.json', '/' + key]
+        (store / demo.BUNDLE_NAME).unlink()
+        monkeypatch.delenv(demo.STORE_VARIABLE)
+        assert demo.locate(None, store).read_bytes() == bundle
+        assert [r['path'] for r in a.requests] == ['/index.json', '/' + key]
+
+
+def test_t5f_a_body_of_another_size_is_refused(tmp_path, store, monkeypatch):
+    """Mutations: skip the final size check → the shorter body gets the checksum sentence; stream without the cap of
+    MAX_TOTAL_BYTES → a bundle the index names above that cap is kept. Neither is kept."""
+    bundle = bundle_for(tmp_path).read_bytes()
+    monkeypatch.setattr(demo, 'BUNDLE_SHA256', hashlib.sha256(bundle).hexdigest())
+    index = store_index(bundle); key = index['datasets'][0]['objects'][0]['key']
+    for body in (bundle + b'x', bundle[:-1]):
+        with serving({'index.json': json.dumps(index).encode(), key: body}) as server:
+            monkeypatch.setenv(demo.STORE_VARIABLE, server.url)
+            with pytest.raises(Refused) as refused: demo.locate(None, store)
+        assert str(refused.value) == 'The downloaded demo bundle has the wrong size; it was deleted.'
+        assert sorted(p.name for p in store.iterdir()) == ['.ophiolite-demo']
+    import ophiolite.bundle
+    monkeypatch.setattr(ophiolite.bundle, 'MAX_TOTAL_BYTES', len(bundle) - 1)
+    with serving({'index.json': json.dumps(index).encode(), key: bundle}) as server:
+        monkeypatch.setenv(demo.STORE_VARIABLE, server.url)
+        with pytest.raises(Refused) as refused: demo.locate(None, store)
+    assert str(refused.value) == 'The downloaded demo bundle has the wrong size; it was deleted.'
+    assert sorted(p.name for p in store.iterdir()) == ['.ophiolite-demo']
 
 
 def test_the_attribution_is_printed_as_recorded_an_import_record_too(tmp_path):
@@ -188,7 +318,11 @@ def test_a_stale_state_is_replaced(place, tmp_path):
         s.bind(('127.0.0.1', 0)); closed = s.getsockname()[1]
     demo.write_private(place / 'ophiolite-demo' / 'state.json', json.dumps({'pid': 1, 'port': closed, 'digest': 'x', 'token': 't', 'key': 'k'}).encode())
     done, _ = started(place, bundle)
-    assert done.stdout.startswith('Serving') and state(place)['port'] != closed
+    # The new server is told by its own state (pid, token) answering, not by its port: the system may hand the closed
+    # port out again (about 1 in 11,000 binds here), which once failed `port != closed` (adhoc-flaky-waits).
+    replaced = state(place)
+    assert done.stdout.startswith('Serving') and (replaced['pid'], replaced['token']) != (1, 't')
+    assert demo.running(place / 'ophiolite-demo') == replaced
 
 
 def test_two_starts_at_once_make_one_server(place, tmp_path):

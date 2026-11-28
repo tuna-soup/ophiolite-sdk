@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "description": "One public API for every project operation. Four credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), a project access key or a service account's key (Bearer oph_key_..., one project, read or read and write, never compute; every request re-checks the key and its owner's current access, so it needs no browser session and nothing to refresh), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Each operation states its stability in x-ophiolite-stability: a supported operation changes only additively or by a transition with a deprecation and a sunset (/api/v1/contracts/docs/api-versioning.md); a pilot operation is tested and documented but is not yet a supported, unattended service contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.150.0",
+      "registry_version": "1.158.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -20,6 +20,7 @@
         "petrel-scattered-data/1",
         "petrel-faultsticks/1",
         "petrel-well-tops/1",
+        "gocad-ascii/1",
         "opendtect-horizon-ascii/1",
         "opendtect-faultsticks/1",
         "segy/1",
@@ -30548,6 +30549,914 @@
         "x-ophiolite-stability": "pilot"
       }
     },
+    "/api/v1/projects/{project}/documents/add": {
+      "post": {
+        "summary": "E222: Add one document (a PDF, PNG or JPEG, base64) to a well, a wellbore, a survey or the project, with its type from OSDU's list, a name and a short description",
+        "description": "Scope write; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "tool",
+          "admitted": "proposable",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.document/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "additionalProperties": false,
+                  "description": "One document kept with one parent: a file served under the parent's access only, never as a page.",
+                  "else": {
+                    "properties": {
+                      "sender": {
+                        "properties": {
+                          "accepted_as": {
+                            "type": "null"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "properties": {
+                      "described_at": {
+                        "type": "null"
+                      }
+                    },
+                    "required": [
+                      "described_at"
+                    ]
+                  },
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.document/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "document_id": {
+                      "description": "Minted by the server at random; never derived from the bytes",
+                      "pattern": "^[0-9a-f]{32}$",
+                      "title": "Document Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "parent": {
+                      "$ref": "#/components/schemas/DocumentParent"
+                    },
+                    "taxonomy": {
+                      "description": "The document's types from OSDU's list (TaxonomyIDs), at least one",
+                      "items": {
+                        "description": "A code of OSDU's document type list, as OSDU spells it (the last part of a TaxonomyIDs id)",
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "pattern": "^[A-Za-z0-9_.-]+$",
+                        "type": "string"
+                      },
+                      "maxItems": 16,
+                      "minItems": 1,
+                      "title": "Taxonomy",
+                      "type": "array",
+                      "uniqueItems": true
+                    },
+                    "name": {
+                      "description": "As people name the document (OSDU's Name)",
+                      "maxLength": 160,
+                      "minLength": 1,
+                      "pattern": "^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$",
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "description": {
+                      "description": "A short description, possibly empty (OSDU's Description)",
+                      "maxLength": 500,
+                      "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+                      "title": "Description",
+                      "type": "string"
+                    },
+                    "file": {
+                      "$ref": "#/components/schemas/DocumentFile"
+                    },
+                    "added_by": {
+                      "$ref": "#/components/schemas/DocumentActor"
+                    },
+                    "sender": {
+                      "$ref": "#/components/schemas/Sender",
+                      "description": "What the request that added the document said sent it (ophiolite.sender/1); accepted_as is always null"
+                    },
+                    "added_at": {
+                      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+                      "title": "Added At",
+                      "type": "string"
+                    },
+                    "described_at": {
+                      "anyOf": [
+                        {
+                          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When the description was last changed; null until then",
+                      "title": "Described At"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "document_id",
+                    "project_id",
+                    "parent",
+                    "taxonomy",
+                    "name",
+                    "description",
+                    "file",
+                    "added_by",
+                    "sender",
+                    "added_at",
+                    "described_at"
+                  ],
+                  "then": {
+                    "properties": {
+                      "sender": {
+                        "properties": {
+                          "accepted_as": {
+                            "type": "null"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "title": "Document",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "`documents/add`: one file, base64, with its type, name and description, for a parent the caller may read.\n`command_id` is E191's: the same command and body answer the first answer again; another body is refused.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "parent": {
+                    "$ref": "#/components/schemas/DocumentParent"
+                  },
+                  "taxonomy": {
+                    "items": {
+                      "description": "A code of OSDU's document type list, as OSDU spells it (the last part of a TaxonomyIDs id)",
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "pattern": "^[A-Za-z0-9_.-]+$",
+                      "type": "string"
+                    },
+                    "maxItems": 16,
+                    "minItems": 1,
+                    "title": "Taxonomy",
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "name": {
+                    "description": "As people name the document (OSDU's Name)",
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "pattern": "^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$",
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "description": {
+                    "description": "A short description, possibly empty (OSDU's Description)",
+                    "maxLength": 500,
+                    "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+                    "title": "Description",
+                    "type": "string"
+                  },
+                  "file_name": {
+                    "anyOf": [
+                      {
+                        "description": "The name the sender gave, kept as text; never placed in a header",
+                        "maxLength": 255,
+                        "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "File Name"
+                  },
+                  "content": {
+                    "description": "The file's bytes, base64 (RFC 4648, padded)",
+                    "maxLength": 22369624,
+                    "minLength": 4,
+                    "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$",
+                    "title": "Content",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "parent",
+                  "taxonomy",
+                  "name",
+                  "description",
+                  "content"
+                ],
+                "title": "DocumentAddRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/projects/{project}/documents/describe": {
+      "post": {
+        "summary": "E222: Replace a document's short description (a person's act)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "write-not-admitted",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.document/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "additionalProperties": false,
+                  "description": "One document kept with one parent: a file served under the parent's access only, never as a page.",
+                  "else": {
+                    "properties": {
+                      "sender": {
+                        "properties": {
+                          "accepted_as": {
+                            "type": "null"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "properties": {
+                      "described_at": {
+                        "type": "null"
+                      }
+                    },
+                    "required": [
+                      "described_at"
+                    ]
+                  },
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.document/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "document_id": {
+                      "description": "Minted by the server at random; never derived from the bytes",
+                      "pattern": "^[0-9a-f]{32}$",
+                      "title": "Document Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "parent": {
+                      "$ref": "#/components/schemas/DocumentParent"
+                    },
+                    "taxonomy": {
+                      "description": "The document's types from OSDU's list (TaxonomyIDs), at least one",
+                      "items": {
+                        "description": "A code of OSDU's document type list, as OSDU spells it (the last part of a TaxonomyIDs id)",
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "pattern": "^[A-Za-z0-9_.-]+$",
+                        "type": "string"
+                      },
+                      "maxItems": 16,
+                      "minItems": 1,
+                      "title": "Taxonomy",
+                      "type": "array",
+                      "uniqueItems": true
+                    },
+                    "name": {
+                      "description": "As people name the document (OSDU's Name)",
+                      "maxLength": 160,
+                      "minLength": 1,
+                      "pattern": "^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$",
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "description": {
+                      "description": "A short description, possibly empty (OSDU's Description)",
+                      "maxLength": 500,
+                      "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+                      "title": "Description",
+                      "type": "string"
+                    },
+                    "file": {
+                      "$ref": "#/components/schemas/DocumentFile"
+                    },
+                    "added_by": {
+                      "$ref": "#/components/schemas/DocumentActor"
+                    },
+                    "sender": {
+                      "$ref": "#/components/schemas/Sender",
+                      "description": "What the request that added the document said sent it (ophiolite.sender/1); accepted_as is always null"
+                    },
+                    "added_at": {
+                      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+                      "title": "Added At",
+                      "type": "string"
+                    },
+                    "described_at": {
+                      "anyOf": [
+                        {
+                          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "When the description was last changed; null until then",
+                      "title": "Described At"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "document_id",
+                    "project_id",
+                    "parent",
+                    "taxonomy",
+                    "name",
+                    "description",
+                    "file",
+                    "added_by",
+                    "sender",
+                    "added_at",
+                    "described_at"
+                  ],
+                  "then": {
+                    "properties": {
+                      "sender": {
+                        "properties": {
+                          "accepted_as": {
+                            "type": "null"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "title": "Document",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "`documents/describe`: the description, replaced; the record keeps everything else. `command_id` as add's.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "document_id": {
+                    "description": "Minted by the server at random; never derived from the bytes",
+                    "pattern": "^[0-9a-f]{32}$",
+                    "title": "Document Id",
+                    "type": "string"
+                  },
+                  "description": {
+                    "description": "A short description, possibly empty (OSDU's Description)",
+                    "maxLength": 500,
+                    "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+                    "title": "Description",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "document_id",
+                  "description"
+                ],
+                "title": "DocumentDescribeRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/projects/{project}/documents/list": {
+      "post": {
+        "summary": "E222: The project's documents, or one parent's, newest first (follow `next` as `cursor`)",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "tool",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "A project's documents, or one parent's, newest first in the order they were added (no two tie).",
+                  "properties": {
+                    "documents": {
+                      "items": {
+                        "$ref": "#/components/schemas/Document"
+                      },
+                      "maxItems": 200,
+                      "title": "Documents",
+                      "type": "array"
+                    },
+                    "next": {
+                      "anyOf": [
+                        {
+                          "maxLength": 1024,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Next"
+                    }
+                  },
+                  "required": [
+                    "documents",
+                    "next"
+                  ],
+                  "title": "DocumentList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "parent": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/DocumentParent"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "limit": {
+                    "default": 50,
+                    "maximum": 200,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Cursor"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "DocumentListRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/projects/{project}/documents/read": {
+      "post": {
+        "summary": "E222: One document's bytes, as the type it was kept as (image/png, image/jpeg or application/pdf)",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "call",
+          "reason": "unbounded-answer",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "document_id": {
+                    "description": "Minted by the server at random; never derived from the bytes",
+                    "pattern": "^[0-9a-f]{32}$",
+                    "title": "Document Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "document_id"
+                ],
+                "title": "DocumentReadRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
     "/api/v1/projects/{project}/entities/assets": {
       "post": {
         "summary": "The exact revisions associated with a well or wellbore that you may read",
@@ -37523,7 +38432,8 @@
                       "petrel-well-tops/1",
                       "segy-line/1",
                       "segy/2",
-                      "segy/3"
+                      "segy/3",
+                      "gocad-ascii/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -40756,7 +41666,8 @@
                       "petrel-well-tops/1",
                       "segy-line/1",
                       "segy/2",
-                      "segy/3"
+                      "segy/3",
+                      "gocad-ascii/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -58791,6 +59702,193 @@
                   "organization_id"
                 ],
                 "title": "OrganizationOnly",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/organizations/usage": {
+      "post": {
+        "summary": "E215 s0: one month of the organisation's usage record, counts only (its administrators only)",
+        "description": "Scope read; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "credential-kinds",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One month of the usage record. While this gateway does not record, only `recording: false`.",
+                  "properties": {
+                    "recording": {
+                      "title": "Recording",
+                      "type": "boolean"
+                    },
+                    "month": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Month"
+                    },
+                    "through": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The read time for the current month, else the end of the month.",
+                      "title": "Through"
+                    },
+                    "policies": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/UsagePolicy"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Policies"
+                    },
+                    "computing": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/UsageComputing"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "periods": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/UsagePeriod"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Periods"
+                    }
+                  },
+                  "required": [
+                    "recording"
+                  ],
+                  "title": "UsageMonth",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "One calendar month (UTC) of one organisation's usage record (its administrators only).",
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "month": {
+                    "description": "YYYY-MM, a UTC calendar month up to the current one.",
+                    "maxLength": 7,
+                    "minLength": 1,
+                    "title": "Month",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "organization_id",
+                  "month"
+                ],
+                "title": "UsageMonthRequest",
                 "type": "object"
               }
             }
@@ -80887,6 +81985,593 @@
                   "command_id"
                 ],
                 "title": "RunnerSubmit",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/sample-projects/list": {
+      "post": {
+        "summary": "E211: The sample projects the public store offers now (any signed-in person): card words, licence, credits and what each holds; or why none is offered",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "credential-kinds",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "cards": {
+                      "items": {
+                        "$ref": "#/components/schemas/SampleCard"
+                      },
+                      "title": "Cards",
+                      "type": "array"
+                    },
+                    "not_offered": {
+                      "description": "{id, sentence} of each listed sample that is not offered",
+                      "items": {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      "title": "Not Offered",
+                      "type": "array"
+                    },
+                    "store": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The store's own sentence when nothing could be read from it (then no card)",
+                      "title": "Store"
+                    }
+                  },
+                  "required": [
+                    "cards",
+                    "not_offered",
+                    "store"
+                  ],
+                  "title": "SampleCards",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "No field: the offered cards are the same for every signed-in person.",
+                "properties": {},
+                "title": "SampleList",
+                "type": "object",
+                "x-ophiolite-no-fields": true
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/sample-projects/prepare": {
+      "post": {
+        "summary": "E211: Download one offered sample and check it before any project exists (organisation owners; command_id); answers a handle for 30 minutes",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "credential-kinds",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "handle": {
+                      "title": "Handle",
+                      "type": "string"
+                    },
+                    "sample": {
+                      "title": "Sample",
+                      "type": "string"
+                    },
+                    "title": {
+                      "title": "Title",
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "title": "Expires At",
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "handle",
+                    "sample",
+                    "title",
+                    "expires_at"
+                  ],
+                  "title": "SampleHandle",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "sample_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+                    "title": "Sample Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z0-9._:-]+$",
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "organization_id",
+                  "sample_id",
+                  "command_id"
+                ],
+                "title": "SamplePrepare",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/sample-projects/start": {
+      "post": {
+        "summary": "E211: Fill a new project with a prepared sample (the project administrator; handle and command_id); the restore runs as you, with a key for this project only",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "credential-kinds",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "operation_id": {
+                      "title": "Operation Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "sample": {
+                      "title": "Sample",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "restoring, complete, incomplete, refused or failed",
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "sentence": {
+                      "title": "Sentence",
+                      "type": "string"
+                    },
+                    "technical": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The restore's own output, for an operator (status only, never in the sentence)",
+                      "title": "Technical"
+                    }
+                  },
+                  "required": [
+                    "operation_id",
+                    "project_id",
+                    "sample",
+                    "state",
+                    "sentence"
+                  ],
+                  "title": "SampleOperation",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "pattern": "^[a-zA-Z0-9_-]+$",
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "handle": {
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]+$",
+                    "title": "Handle",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z0-9._:-]+$",
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "handle",
+                  "command_id"
+                ],
+                "title": "SampleBegin",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/sample-projects/status": {
+      "post": {
+        "summary": "E211: One sample addition of yours: its state and the sentence to show",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "credential-kinds",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "operation_id": {
+                      "title": "Operation Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "sample": {
+                      "title": "Sample",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "restoring, complete, incomplete, refused or failed",
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "sentence": {
+                      "title": "Sentence",
+                      "type": "string"
+                    },
+                    "technical": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The restore's own output, for an operator (status only, never in the sentence)",
+                      "title": "Technical"
+                    }
+                  },
+                  "required": [
+                    "operation_id",
+                    "project_id",
+                    "sample",
+                    "state",
+                    "sentence"
+                  ],
+                  "title": "SampleOperation",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "pattern": "^[a-zA-Z0-9_-]+$",
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "operation_id": {
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]+$",
+                    "title": "Operation Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "operation_id"
+                ],
+                "title": "SampleStatus",
                 "type": "object"
               }
             }
@@ -120236,7 +121921,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.39.0",
+                    "version": "1.40.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -122991,67 +124676,185 @@
                       "anyOf": [
                         {
                           "additionalProperties": false,
-                          "description": "1.23.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from.",
+                          "description": "1.23.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from. 1.40.0 (E212\ns1): a record or line may name a public dataset.",
                           "properties": {
                             "records": {
                               "items": {
-                                "additionalProperties": false,
-                                "description": "1.23.0 (E60 C5d): one public repository's document a derived revision was made from, stored when the revision was\n(C5b): structured, catalogue-built, never acquisition text.",
-                                "properties": {
-                                  "service_id": {
-                                    "maxLength": 512,
-                                    "minLength": 1,
-                                    "title": "Service Id",
-                                    "type": "string"
-                                  },
-                                  "licence_id": {
-                                    "maxLength": 512,
-                                    "minLength": 1,
-                                    "title": "Licence Id",
-                                    "type": "string"
-                                  },
-                                  "terms_url": {
-                                    "maxLength": 512,
-                                    "minLength": 1,
-                                    "title": "Terms Url",
-                                    "type": "string"
-                                  },
-                                  "document": {
+                                "anyOf": [
+                                  {
                                     "additionalProperties": false,
+                                    "description": "1.23.0 (E60 C5d): one public repository's document a derived revision was made from, stored when the revision was\n(C5b): structured, catalogue-built, never acquisition text.",
                                     "properties": {
-                                      "upstream_item": {
+                                      "service_id": {
                                         "maxLength": 512,
                                         "minLength": 1,
-                                        "title": "Upstream Item",
+                                        "title": "Service Id",
                                         "type": "string"
                                       },
-                                      "retained_revision": {
-                                        "pattern": "^[0-9a-f]{64}$",
-                                        "title": "Retained Revision",
+                                      "licence_id": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Licence Id",
                                         "type": "string"
+                                      },
+                                      "terms_url": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Terms Url",
+                                        "type": "string"
+                                      },
+                                      "document": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "upstream_item": {
+                                            "maxLength": 512,
+                                            "minLength": 1,
+                                            "title": "Upstream Item",
+                                            "type": "string"
+                                          },
+                                          "retained_revision": {
+                                            "pattern": "^[0-9a-f]{64}$",
+                                            "title": "Retained Revision",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "upstream_item",
+                                          "retained_revision"
+                                        ],
+                                        "title": "PublicSourceDocument",
+                                        "type": "object"
+                                      },
+                                      "retrieved_at": {
+                                        "title": "Retrieved At",
+                                        "type": "number"
                                       }
                                     },
                                     "required": [
-                                      "upstream_item",
-                                      "retained_revision"
+                                      "service_id",
+                                      "licence_id",
+                                      "terms_url",
+                                      "document",
+                                      "retrieved_at"
                                     ],
-                                    "title": "PublicSourceDocument",
+                                    "title": "PublicSourceRecord",
                                     "type": "object"
                                   },
-                                  "retrieved_at": {
-                                    "title": "Retrieved At",
-                                    "type": "number"
+                                  {
+                                    "additionalProperties": false,
+                                    "description": "1.40.0 (E212 s1): the record a result made from a linked item keeps (not a link: not an unchanged copy).",
+                                    "properties": {
+                                      "kind": {
+                                        "const": "public-dataset",
+                                        "title": "Kind",
+                                        "type": "string"
+                                      },
+                                      "dataset": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Dataset",
+                                        "type": "string"
+                                      },
+                                      "object_sha256": {
+                                        "pattern": "^[0-9a-f]{64}$",
+                                        "title": "Object Sha256",
+                                        "type": "string"
+                                      },
+                                      "statements": {
+                                        "items": {
+                                          "maxLength": 300,
+                                          "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        "maxItems": 16,
+                                        "title": "Statements",
+                                        "type": "array"
+                                      },
+                                      "licence": {
+                                        "additionalProperties": false,
+                                        "description": "The dataset's licence as the index computed it from its sources.",
+                                        "properties": {
+                                          "spdx": {
+                                            "anyOf": [
+                                              {
+                                                "maxLength": 64,
+                                                "type": "string"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ],
+                                            "title": "Spdx"
+                                          },
+                                          "redistribution": {
+                                            "const": "allowed",
+                                            "title": "Redistribution",
+                                            "type": "string"
+                                          },
+                                          "attribution": {
+                                            "enum": [
+                                              "required",
+                                              "not-required"
+                                            ],
+                                            "title": "Attribution",
+                                            "type": "string"
+                                          },
+                                          "share_alike": {
+                                            "title": "Share Alike",
+                                            "type": "boolean"
+                                          }
+                                        },
+                                        "required": [
+                                          "spdx",
+                                          "redistribution",
+                                          "attribution",
+                                          "share_alike"
+                                        ],
+                                        "title": "PublicDatasetLicence",
+                                        "type": "object"
+                                      },
+                                      "sources": {
+                                        "items": {
+                                          "additionalProperties": false,
+                                          "description": "One input of a public dataset as the store's index stated it when the item was restored: its OSD record and its\nlicence object whole (a null SPDX id with the publisher's own terms is kept as written).",
+                                          "properties": {
+                                            "osd_record": {
+                                              "maxLength": 512,
+                                              "minLength": 1,
+                                              "title": "Osd Record",
+                                              "type": "string"
+                                            },
+                                            "licence": {
+                                              "additionalProperties": true,
+                                              "title": "Licence",
+                                              "type": "object"
+                                            }
+                                          },
+                                          "required": [
+                                            "osd_record",
+                                            "licence"
+                                          ],
+                                          "title": "PublicDatasetSource",
+                                          "type": "object"
+                                        },
+                                        "maxItems": 16,
+                                        "minItems": 1,
+                                        "title": "Sources",
+                                        "type": "array"
+                                      }
+                                    },
+                                    "required": [
+                                      "kind",
+                                      "dataset",
+                                      "object_sha256",
+                                      "statements",
+                                      "licence",
+                                      "sources"
+                                    ],
+                                    "title": "PublicDatasetRecord",
+                                    "type": "object"
                                   }
-                                },
-                                "required": [
-                                  "service_id",
-                                  "licence_id",
-                                  "terms_url",
-                                  "document",
-                                  "retrieved_at"
-                                ],
-                                "title": "PublicSourceRecord",
-                                "type": "object"
+                                ]
                               },
                               "maxItems": 64,
                               "minItems": 1,
@@ -123060,59 +124863,152 @@
                             },
                             "lines": {
                               "items": {
-                                "additionalProperties": false,
-                                "description": "The sentence a page shows, rendered from the deployment's catalogue at read time, per (service, licence, terms).",
-                                "properties": {
-                                  "service_id": {
-                                    "maxLength": 512,
-                                    "minLength": 1,
-                                    "title": "Service Id",
-                                    "type": "string"
-                                  },
-                                  "licence_id": {
-                                    "maxLength": 512,
-                                    "minLength": 1,
-                                    "title": "Licence Id",
-                                    "type": "string"
-                                  },
-                                  "terms_url": {
-                                    "maxLength": 512,
-                                    "minLength": 1,
-                                    "title": "Terms Url",
-                                    "type": "string"
-                                  },
-                                  "sentence": {
-                                    "anyOf": [
-                                      {
-                                        "maxLength": 1000,
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "description": "The sentence a page shows, rendered from the deployment's catalogue at read time, per (service, licence, terms).",
+                                    "properties": {
+                                      "service_id": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Service Id",
                                         "type": "string"
                                       },
-                                      {
-                                        "type": "null"
+                                      "licence_id": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Licence Id",
+                                        "type": "string"
+                                      },
+                                      "terms_url": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Terms Url",
+                                        "type": "string"
+                                      },
+                                      "sentence": {
+                                        "anyOf": [
+                                          {
+                                            "maxLength": 1000,
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "title": "Sentence"
+                                      },
+                                      "documents": {
+                                        "items": {
+                                          "maxLength": 512,
+                                          "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        "maxItems": 64,
+                                        "title": "Documents",
+                                        "type": "array"
                                       }
-                                    ],
-                                    "title": "Sentence"
-                                  },
-                                  "documents": {
-                                    "items": {
-                                      "maxLength": 512,
-                                      "minLength": 1,
-                                      "type": "string"
                                     },
-                                    "maxItems": 64,
-                                    "title": "Documents",
-                                    "type": "array"
+                                    "required": [
+                                      "service_id",
+                                      "licence_id",
+                                      "terms_url",
+                                      "sentence",
+                                      "documents"
+                                    ],
+                                    "title": "PublicSourceLine",
+                                    "type": "object"
+                                  },
+                                  {
+                                    "additionalProperties": false,
+                                    "description": "1.40.0 (E212 s1): one line per public dataset, with its own statements and licence as recorded (no catalogue\nsentence is made for it); `documents` are the dataset objects.",
+                                    "properties": {
+                                      "kind": {
+                                        "const": "public-dataset",
+                                        "title": "Kind",
+                                        "type": "string"
+                                      },
+                                      "dataset": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Dataset",
+                                        "type": "string"
+                                      },
+                                      "licence": {
+                                        "additionalProperties": false,
+                                        "description": "The dataset's licence as the index computed it from its sources.",
+                                        "properties": {
+                                          "spdx": {
+                                            "anyOf": [
+                                              {
+                                                "maxLength": 64,
+                                                "type": "string"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ],
+                                            "title": "Spdx"
+                                          },
+                                          "redistribution": {
+                                            "const": "allowed",
+                                            "title": "Redistribution",
+                                            "type": "string"
+                                          },
+                                          "attribution": {
+                                            "enum": [
+                                              "required",
+                                              "not-required"
+                                            ],
+                                            "title": "Attribution",
+                                            "type": "string"
+                                          },
+                                          "share_alike": {
+                                            "title": "Share Alike",
+                                            "type": "boolean"
+                                          }
+                                        },
+                                        "required": [
+                                          "spdx",
+                                          "redistribution",
+                                          "attribution",
+                                          "share_alike"
+                                        ],
+                                        "title": "PublicDatasetLicence",
+                                        "type": "object"
+                                      },
+                                      "statements": {
+                                        "items": {
+                                          "maxLength": 300,
+                                          "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        "maxItems": 16,
+                                        "title": "Statements",
+                                        "type": "array"
+                                      },
+                                      "documents": {
+                                        "items": {
+                                          "pattern": "^[0-9a-f]{64}$",
+                                          "type": "string"
+                                        },
+                                        "maxItems": 64,
+                                        "minItems": 1,
+                                        "title": "Documents",
+                                        "type": "array"
+                                      }
+                                    },
+                                    "required": [
+                                      "kind",
+                                      "dataset",
+                                      "licence",
+                                      "statements",
+                                      "documents"
+                                    ],
+                                    "title": "PublicDatasetLine",
+                                    "type": "object"
                                   }
-                                },
-                                "required": [
-                                  "service_id",
-                                  "licence_id",
-                                  "terms_url",
-                                  "sentence",
-                                  "documents"
-                                ],
-                                "title": "PublicSourceLine",
-                                "type": "object"
+                                ]
                               },
                               "maxItems": 64,
                               "minItems": 1,
@@ -123125,6 +125021,146 @@
                             "lines"
                           ],
                           "title": "PublicSources",
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "public_dataset": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "1.40.0 (E212 s1): the public dataset an original was restored from, written by the gateway inside the insert that\nstored the revision (the sample start's key, its listed digest); it never changes. `object_sha256` is the dataset\nobject (the bundle), `member_sha256` this original's digest as the bundle's manifest lists it.",
+                          "properties": {
+                            "schema": {
+                              "const": "ophiolite.public-dataset-link/1",
+                              "title": "Schema",
+                              "type": "string"
+                            },
+                            "dataset": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Dataset",
+                              "type": "string"
+                            },
+                            "object_sha256": {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "title": "Object Sha256",
+                              "type": "string"
+                            },
+                            "member_sha256": {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "title": "Member Sha256",
+                              "type": "string"
+                            },
+                            "sources": {
+                              "items": {
+                                "additionalProperties": false,
+                                "description": "One input of a public dataset as the store's index stated it when the item was restored: its OSD record and its\nlicence object whole (a null SPDX id with the publisher's own terms is kept as written).",
+                                "properties": {
+                                  "osd_record": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "title": "Osd Record",
+                                    "type": "string"
+                                  },
+                                  "licence": {
+                                    "additionalProperties": true,
+                                    "title": "Licence",
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "osd_record",
+                                  "licence"
+                                ],
+                                "title": "PublicDatasetSource",
+                                "type": "object"
+                              },
+                              "maxItems": 16,
+                              "minItems": 1,
+                              "title": "Sources",
+                              "type": "array"
+                            },
+                            "licence": {
+                              "additionalProperties": false,
+                              "description": "The dataset's licence as the index computed it from its sources.",
+                              "properties": {
+                                "spdx": {
+                                  "anyOf": [
+                                    {
+                                      "maxLength": 64,
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "title": "Spdx"
+                                },
+                                "redistribution": {
+                                  "const": "allowed",
+                                  "title": "Redistribution",
+                                  "type": "string"
+                                },
+                                "attribution": {
+                                  "enum": [
+                                    "required",
+                                    "not-required"
+                                  ],
+                                  "title": "Attribution",
+                                  "type": "string"
+                                },
+                                "share_alike": {
+                                  "title": "Share Alike",
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "spdx",
+                                "redistribution",
+                                "attribution",
+                                "share_alike"
+                              ],
+                              "title": "PublicDatasetLicence",
+                              "type": "object"
+                            },
+                            "statements": {
+                              "items": {
+                                "maxLength": 300,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "maxItems": 16,
+                              "title": "Statements",
+                              "type": "array"
+                            },
+                            "linked_at": {
+                              "title": "Linked At",
+                              "type": "number"
+                            },
+                            "run": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Run",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "schema",
+                            "dataset",
+                            "object_sha256",
+                            "member_sha256",
+                            "sources",
+                            "licence",
+                            "statements",
+                            "linked_at",
+                            "run"
+                          ],
+                          "title": "PublicDatasetLink",
                           "type": "object"
                         },
                         {
@@ -149223,6 +151259,535 @@
         "title": "Display",
         "type": "object"
       },
+      "Document": {
+        "additionalProperties": false,
+        "description": "One document kept with one parent: a file served under the parent's access only, never as a page.",
+        "else": {
+          "properties": {
+            "sender": {
+              "properties": {
+                "accepted_as": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "described_at": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "described_at"
+          ]
+        },
+        "properties": {
+          "schema": {
+            "const": "ophiolite.document/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "document_id": {
+            "description": "Minted by the server at random; never derived from the bytes",
+            "pattern": "^[0-9a-f]{32}$",
+            "title": "Document Id",
+            "type": "string"
+          },
+          "project_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/DocumentParent"
+          },
+          "taxonomy": {
+            "description": "The document's types from OSDU's list (TaxonomyIDs), at least one",
+            "items": {
+              "description": "A code of OSDU's document type list, as OSDU spells it (the last part of a TaxonomyIDs id)",
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_.-]+$",
+              "type": "string"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Taxonomy",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "name": {
+            "description": "As people name the document (OSDU's Name)",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$",
+            "title": "Name",
+            "type": "string"
+          },
+          "description": {
+            "description": "A short description, possibly empty (OSDU's Description)",
+            "maxLength": 500,
+            "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+            "title": "Description",
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/DocumentFile"
+          },
+          "added_by": {
+            "$ref": "#/components/schemas/DocumentActor"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/Sender",
+            "description": "What the request that added the document said sent it (ophiolite.sender/1); accepted_as is always null"
+          },
+          "added_at": {
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+            "title": "Added At",
+            "type": "string"
+          },
+          "described_at": {
+            "anyOf": [
+              {
+                "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the description was last changed; null until then",
+            "title": "Described At"
+          }
+        },
+        "required": [
+          "schema",
+          "document_id",
+          "project_id",
+          "parent",
+          "taxonomy",
+          "name",
+          "description",
+          "file",
+          "added_by",
+          "sender",
+          "added_at",
+          "described_at"
+        ],
+        "then": {
+          "properties": {
+            "sender": {
+              "properties": {
+                "accepted_as": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        },
+        "title": "Document",
+        "type": "object"
+      },
+      "DocumentActor": {
+        "additionalProperties": false,
+        "else": {
+          "properties": {
+            "job": {
+              "type": "string"
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "agent": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "agent"
+          ]
+        },
+        "properties": {
+          "person": {
+            "description": "The person who acted, always",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Person",
+            "type": "string"
+          },
+          "agent": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The assistant that acted for the person under an approved job; null for the person's own act",
+            "title": "Agent"
+          },
+          "job": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The approved job the assistant acted under; null exactly when agent is",
+            "title": "Job"
+          }
+        },
+        "required": [
+          "person",
+          "agent",
+          "job"
+        ],
+        "then": {
+          "properties": {
+            "job": {
+              "type": "null"
+            }
+          }
+        },
+        "title": "DocumentActor",
+        "type": "object"
+      },
+      "DocumentAddRequest": {
+        "additionalProperties": false,
+        "description": "`documents/add`: one file, base64, with its type, name and description, for a parent the caller may read.\n`command_id` is E191's: the same command and body answer the first answer again; another body is refused.",
+        "properties": {
+          "project_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "command_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Command Id",
+            "type": "string"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/DocumentParent"
+          },
+          "taxonomy": {
+            "items": {
+              "description": "A code of OSDU's document type list, as OSDU spells it (the last part of a TaxonomyIDs id)",
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_.-]+$",
+              "type": "string"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Taxonomy",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "name": {
+            "description": "As people name the document (OSDU's Name)",
+            "maxLength": 160,
+            "minLength": 1,
+            "pattern": "^[^\\s\\x00-\\x1f\\x7f-\\x9f](?:[^\\x00-\\x1f\\x7f-\\x9f]*[^\\s\\x00-\\x1f\\x7f-\\x9f])?$",
+            "title": "Name",
+            "type": "string"
+          },
+          "description": {
+            "description": "A short description, possibly empty (OSDU's Description)",
+            "maxLength": 500,
+            "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+            "title": "Description",
+            "type": "string"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "description": "The name the sender gave, kept as text; never placed in a header",
+                "maxLength": 255,
+                "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "content": {
+            "description": "The file's bytes, base64 (RFC 4648, padded)",
+            "maxLength": 22369624,
+            "minLength": 4,
+            "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$",
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id",
+          "command_id",
+          "parent",
+          "taxonomy",
+          "name",
+          "description",
+          "content"
+        ],
+        "title": "DocumentAddRequest",
+        "type": "object"
+      },
+      "DocumentDescribeRequest": {
+        "additionalProperties": false,
+        "description": "`documents/describe`: the description, replaced; the record keeps everything else. `command_id` as add's.",
+        "properties": {
+          "project_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "command_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Command Id",
+            "type": "string"
+          },
+          "document_id": {
+            "description": "Minted by the server at random; never derived from the bytes",
+            "pattern": "^[0-9a-f]{32}$",
+            "title": "Document Id",
+            "type": "string"
+          },
+          "description": {
+            "description": "A short description, possibly empty (OSDU's Description)",
+            "maxLength": 500,
+            "pattern": "^[^\\x00-\\x1f\\x7f-\\x9f]*$",
+            "title": "Description",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id",
+          "command_id",
+          "document_id",
+          "description"
+        ],
+        "title": "DocumentDescribeRequest",
+        "type": "object"
+      },
+      "DocumentFile": {
+        "additionalProperties": false,
+        "properties": {
+          "media_type": {
+            "description": "Decided from the bytes, never from the name",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "application/pdf"
+            ],
+            "title": "Media Type",
+            "type": "string"
+          },
+          "bytes": {
+            "description": "The stored length; the deployment's bound is at most E191's ceiling",
+            "maximum": 16777216,
+            "minimum": 1,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "media_type",
+          "bytes",
+          "sha256"
+        ],
+        "title": "DocumentFile",
+        "type": "object"
+      },
+      "DocumentList": {
+        "additionalProperties": false,
+        "description": "A project's documents, or one parent's, newest first in the order they were added (no two tie).",
+        "properties": {
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            },
+            "maxItems": 200,
+            "title": "Documents",
+            "type": "array"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next"
+          }
+        },
+        "required": [
+          "documents",
+          "next"
+        ],
+        "title": "DocumentList",
+        "type": "object"
+      },
+      "DocumentListRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentParent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit": {
+            "default": 50,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cursor"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "title": "DocumentListRequest",
+        "type": "object"
+      },
+      "DocumentParent": {
+        "additionalProperties": false,
+        "description": "What the document belongs to; it never changes.",
+        "else": {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "well",
+                  "wellbore"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "id": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "kind": {
+              "const": "survey"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        "properties": {
+          "kind": {
+            "enum": [
+              "well",
+              "wellbore",
+              "survey",
+              "project"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "description": "The entity id of a well or wellbore, a survey's id, or the project's own id",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "then": {
+          "properties": {
+            "id": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            }
+          }
+        },
+        "title": "DocumentParent",
+        "type": "object"
+      },
+      "DocumentReadRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "document_id": {
+            "description": "Minted by the server at random; never derived from the bytes",
+            "pattern": "^[0-9a-f]{32}$",
+            "title": "Document Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id",
+          "document_id"
+        ],
+        "title": "DocumentReadRequest",
+        "type": "object"
+      },
       "DraftRef": {
         "additionalProperties": false,
         "properties": {
@@ -150500,9 +153065,15 @@
               "declaration-refused",
               "digest-differs",
               "command-reused",
-              "too-many-kinds"
+              "too-many-kinds",
+              "not-a-document",
+              "text-file",
+              "spreadsheet",
+              "archive",
+              "type-not-listed",
+              "parent-unavailable"
             ],
-            "description": "E105b: only with code procedure-refused: why the catalogue refused; E106: with code procedure-run-refused: which claim of a run was refused; E107a: with code conversion-refused: why a conversion or one output was refused; E120: with code outcome-refused: why an outcome was refused; E141: with code window-refused: why a volume window or piece was refused, nothing read; E178: with code chain-refused: why a chain write or read was refused; E191: with code attachment-refused: why a figure was refused; E203: with code table-kind-refused: why a request about a kind of table was refused (closed lists)"
+            "description": "E105b: only with code procedure-refused: why the catalogue refused; E106: with code procedure-run-refused: which claim of a run was refused; E107a: with code conversion-refused: why a conversion or one output was refused; E120: with code outcome-refused: why an outcome was refused; E141: with code window-refused: why a volume window or piece was refused, nothing read; E178: with code chain-refused: why a chain write or read was refused; E191: with code attachment-refused: why a figure was refused; E222: with code document-refused: why a document was refused;E203: with code table-kind-refused: why a request about a kind of table was refused (closed lists)"
           },
           "rule": {
             "type": "string",
@@ -162075,6 +164646,175 @@
         "title": "ProvenanceRef",
         "type": "object"
       },
+      "PublicDatasetLicence": {
+        "additionalProperties": false,
+        "description": "The dataset's licence as the index computed it from its sources.",
+        "properties": {
+          "spdx": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spdx"
+          },
+          "redistribution": {
+            "const": "allowed",
+            "title": "Redistribution",
+            "type": "string"
+          },
+          "attribution": {
+            "enum": [
+              "required",
+              "not-required"
+            ],
+            "title": "Attribution",
+            "type": "string"
+          },
+          "share_alike": {
+            "title": "Share Alike",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "spdx",
+          "redistribution",
+          "attribution",
+          "share_alike"
+        ],
+        "title": "PublicDatasetLicence",
+        "type": "object"
+      },
+      "PublicDatasetLine": {
+        "additionalProperties": false,
+        "description": "1.40.0 (E212 s1): one line per public dataset, with its own statements and licence as recorded (no catalogue\nsentence is made for it); `documents` are the dataset objects.",
+        "properties": {
+          "kind": {
+            "const": "public-dataset",
+            "title": "Kind",
+            "type": "string"
+          },
+          "dataset": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Dataset",
+            "type": "string"
+          },
+          "licence": {
+            "$ref": "#/components/schemas/PublicDatasetLicence"
+          },
+          "statements": {
+            "items": {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 16,
+            "title": "Statements",
+            "type": "array"
+          },
+          "documents": {
+            "items": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Documents",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind",
+          "dataset",
+          "licence",
+          "statements",
+          "documents"
+        ],
+        "title": "PublicDatasetLine",
+        "type": "object"
+      },
+      "PublicDatasetRecord": {
+        "additionalProperties": false,
+        "description": "1.40.0 (E212 s1): the record a result made from a linked item keeps (not a link: not an unchanged copy).",
+        "properties": {
+          "kind": {
+            "const": "public-dataset",
+            "title": "Kind",
+            "type": "string"
+          },
+          "dataset": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Dataset",
+            "type": "string"
+          },
+          "object_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Object Sha256",
+            "type": "string"
+          },
+          "statements": {
+            "items": {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 16,
+            "title": "Statements",
+            "type": "array"
+          },
+          "licence": {
+            "$ref": "#/components/schemas/PublicDatasetLicence"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/PublicDatasetSource"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Sources",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind",
+          "dataset",
+          "object_sha256",
+          "statements",
+          "licence",
+          "sources"
+        ],
+        "title": "PublicDatasetRecord",
+        "type": "object"
+      },
+      "PublicDatasetSource": {
+        "additionalProperties": false,
+        "description": "One input of a public dataset as the store's index stated it when the item was restored: its OSD record and its\nlicence object whole (a null SPDX id with the publisher's own terms is kept as written).",
+        "properties": {
+          "osd_record": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Osd Record",
+            "type": "string"
+          },
+          "licence": {
+            "additionalProperties": true,
+            "title": "Licence",
+            "type": "object"
+          }
+        },
+        "required": [
+          "osd_record",
+          "licence"
+        ],
+        "title": "PublicDatasetSource",
+        "type": "object"
+      },
       "PublicSourceDocument": {
         "additionalProperties": false,
         "properties": {
@@ -162194,11 +164934,18 @@
       },
       "PublicSources": {
         "additionalProperties": false,
-        "description": "1.23.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from.",
+        "description": "1.23.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from. 1.40.0 (E212\ns1): a record or line may name a public dataset.",
         "properties": {
           "records": {
             "items": {
-              "$ref": "#/components/schemas/PublicSourceRecord"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PublicSourceRecord"
+                },
+                {
+                  "$ref": "#/components/schemas/PublicDatasetRecord"
+                }
+              ]
             },
             "maxItems": 64,
             "minItems": 1,
@@ -162207,7 +164954,14 @@
           },
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/PublicSourceLine"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PublicSourceLine"
+                },
+                {
+                  "$ref": "#/components/schemas/PublicDatasetLine"
+                }
+              ]
             },
             "maxItems": 64,
             "minItems": 1,
@@ -166992,6 +169746,63 @@
           "after"
         ],
         "title": "Sample",
+        "type": "object"
+      },
+      "SampleCard": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "card": {
+            "additionalProperties": true,
+            "description": "title, place and holds, in the words the store states",
+            "title": "Card",
+            "type": "object"
+          },
+          "licence": {
+            "description": "Readable licence words (never SPDX or share-alike values as such)",
+            "items": {
+              "type": "string"
+            },
+            "title": "Licence",
+            "type": "array"
+          },
+          "credits": {
+            "description": "The credit sentences shown before the press",
+            "items": {
+              "type": "string"
+            },
+            "title": "Credits",
+            "type": "array"
+          },
+          "holds": {
+            "description": "What the sample holds, by kind name, never a count",
+            "items": {
+              "type": "string"
+            },
+            "title": "Holds",
+            "type": "array"
+          },
+          "entry_sha256": {
+            "title": "Entry Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "card",
+          "licence",
+          "credits",
+          "holds",
+          "entry_sha256"
+        ],
+        "title": "SampleCard",
         "type": "object"
       },
       "SandboxLimitsRequest": {
@@ -178451,6 +181262,176 @@
           "asset_id"
         ],
         "title": "UploadSessionState",
+        "type": "object"
+      },
+      "UsageComputing": {
+        "additionalProperties": false,
+        "description": "Seconds of attempts that ended in the month (an attempt across the 1st is split there); `running` counts the\nattempts begun and not yet ended, whose seconds are counted when they end.",
+        "properties": {
+          "actual_seconds": {
+            "title": "Actual Seconds",
+            "type": "number"
+          },
+          "billable_seconds": {
+            "title": "Billable Seconds",
+            "type": "number"
+          },
+          "running": {
+            "title": "Running",
+            "type": "integer"
+          },
+          "by_policy": {
+            "items": {
+              "$ref": "#/components/schemas/UsagePolicyTotal"
+            },
+            "title": "By Policy",
+            "type": "array"
+          },
+          "by_path": {
+            "items": {
+              "$ref": "#/components/schemas/UsagePathTotal"
+            },
+            "title": "By Path",
+            "type": "array"
+          }
+        },
+        "required": [
+          "actual_seconds",
+          "billable_seconds",
+          "running",
+          "by_policy",
+          "by_path"
+        ],
+        "title": "UsageComputing",
+        "type": "object"
+      },
+      "UsageDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "sentence"
+        ],
+        "title": "UsageDefinition",
+        "type": "object"
+      },
+      "UsagePathTotal": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "policy": {
+            "title": "Policy",
+            "type": "string"
+          },
+          "class": {
+            "enum": [
+              "billable",
+              "ours",
+              "public"
+            ],
+            "title": "Class",
+            "type": "string"
+          },
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "seconds": {
+            "title": "Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "path",
+          "policy",
+          "class",
+          "attempts",
+          "seconds"
+        ],
+        "title": "UsagePathTotal",
+        "type": "object"
+      },
+      "UsagePeriod": {
+        "additionalProperties": false,
+        "description": "A change of the deployment's recording setting, read at a gateway start.",
+        "properties": {
+          "state": {
+            "enum": [
+              "on",
+              "off"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "at"
+        ],
+        "title": "UsagePeriod",
+        "type": "object"
+      },
+      "UsagePolicy": {
+        "additionalProperties": false,
+        "description": "A policy version the month's rows were recorded under, with its definitions in words.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "definitions": {
+            "items": {
+              "$ref": "#/components/schemas/UsageDefinition"
+            },
+            "title": "Definitions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "definitions"
+        ],
+        "title": "UsagePolicy",
+        "type": "object"
+      },
+      "UsagePolicyTotal": {
+        "additionalProperties": false,
+        "properties": {
+          "policy": {
+            "title": "Policy",
+            "type": "string"
+          },
+          "actual_seconds": {
+            "title": "Actual Seconds",
+            "type": "number"
+          },
+          "billable_seconds": {
+            "title": "Billable Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "policy",
+          "actual_seconds",
+          "billable_seconds"
+        ],
+        "title": "UsagePolicyTotal",
         "type": "object"
       },
       "UsedEvidence": {

@@ -153,7 +153,7 @@ def test_a_source_made_version_exported_verified_offline_and_imported_keeps_its_
 
 
 SHARED = ('Someone in this project already added the same file from this system and shared it with you. Use that file; adding '
-          'your own copy from this tool is not available on this deployment yet.')
+          'your own copy from this version is not available on this deployment yet.')
 
 
 def test_case_6_refuses_keeps_the_outputs_and_the_printed_fallback_adds_them_once_bob_stops_sharing(world, tmp_path, capsys, monkeypatch):

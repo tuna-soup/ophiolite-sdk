@@ -287,3 +287,35 @@ A figure has no lifetime of its own:
   with the bytes under `payloads/`. Who added or withdrew a figure is mapped like every other person; an assistant
   and its job keep the ids they had. A package missing a figure's file is refused before anything is written; a
   package from before figures imports with none. Figure command replays stay behind.
+
+## Documents (`ophiolite.document/1` 1.0.0, E222)
+
+A document is one file, a PDF or a picture (PNG or JPEG), kept with a well, a
+wellbore, a survey or the project (`document-schema.json`), as OSDU defines a
+document (`work-product-component--Document:2.0.0`). The record gives its types
+from OSDU's document type list (`taxonomy`, OSDU's `TaxonomyIDs`, at least one),
+its name and short description, the file's type, byte count and SHA-256, who added
+it (a person, or an assistant for a person under an approved job), what the request
+said sent it (`ophiolite.sender/1`, `accepted_as` always null), when, and when the
+description last changed. It is not an item and not a representation.
+
+- **The type list is OSDU's.** `vocabulary/v1/osdu-document-types.json` holds every
+  active row of OSDU's DocumentTaxonomy at the pinned data-definitions commit, as
+  OSDU spells it, with the source file's digest; `contracts/tools/osdu-vocabulary.py`
+  writes it and `--check` proves it. A type outside that list, or an inactive one, is
+  refused. There is no default type and no type guessed from the file.
+- **Files.** Exactly E191's three types under E191's checks and ceiling. Spreadsheets,
+  archives and text files are refused with their own sentence
+  (`vocabulary/v1/document-reasons.json`); the checks read bytes, never the name.
+- **Who may read.** A document is read only through `documents/*`, by a member of
+  the project who may read its parent: a well or wellbore by its owner or a person it
+  is shared with, a survey as the survey is read, the project by membership.
+- **Writes are retried safely.** `documents/add` and `documents/describe` carry a
+  `command_id`; the same command with the same body answers the first answer again.
+
+The add, list, read and describe request bodies are in the schema's `$defs`. In
+this release the four operations are declared and answer that documents are not
+added on this deployment yet. Fixtures: `fixtures/document/` holds valid records,
+the cases the schema refuses, and those only the model refuses (a type not in the
+list, an inactive type, a project parent that is another project, Unicode normal
+form C).

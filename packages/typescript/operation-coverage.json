@@ -492,6 +492,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/organizations/usage",
+    "function": "postOrganizationsUsage",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/agent-policy",
     "function": "postProjectsAgentPolicy",
     "request": "schema",
@@ -1300,6 +1306,30 @@
     "function": "postProjectsProjectDetailsRename",
     "request": "schema",
     "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/documents/add",
+    "function": "postProjectsProjectDocumentsAdd",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/documents/describe",
+    "function": "postProjectsProjectDocumentsDescribe",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/documents/list",
+    "function": "postProjectsProjectDocumentsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/documents/read",
+    "function": "postProjectsProjectDocumentsRead",
+    "request": "schema",
+    "response": "explicitly-untyped"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/assets",
@@ -3243,6 +3273,30 @@
     "operation": "GET /api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows",
     "function": "getProjectsProjectWellsWellVersionsVersionCurveAssetsAssetRevisionsRevisionWindows",
     "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/sample-projects/list",
+    "function": "postSampleProjectsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/sample-projects/prepare",
+    "function": "postSampleProjectsPrepare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/sample-projects/start",
+    "function": "postSampleProjectsStart",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/sample-projects/status",
+    "function": "postSampleProjectsStatus",
+    "request": "schema",
     "response": "schema"
   }
 ]

@@ -176,3 +176,20 @@ carry `media_type`; a manifest with a citation needs bundle 2.15 or later and a 
 must hold from the manifest and refuses one that disagrees (`descriptor-disagrees`, naming the file and the place).
 Readers before 2.15 report the descriptors and `prov.json` as files the manifest does not list, and their `pack`
 refuses them. Nothing writes a citation yet.
+
+## 2.20 — what the SDK writer already wrote (E211 s1, additive)
+
+The schema now admits what the SDK writer (`ophiolite/bundle.py` `write_bundle`, with `client.export`'s graph)
+already wrote but 2.19 refused. They were found when the F3 sample's 2.17 bundle was checked against the schema
+(ruling 26 Nov, named scope):
+
+- the `well-table` asset type, the accepted rows a wells import kept (bundle 2.17, E162 s2a);
+- `row` on a relationship's subject, the row of a table of wells an association names (E29);
+- `null` for a relationship evidence's `source` and `statement`, as `entities/v1` serves an association's evidence
+  and the writer copies it;
+- `observations.entities_omitted`, why no wells and wellbores travel (E22b), for example "not requested".
+
+Every change only widens: nothing becomes required, nothing is renamed or tightened, and every manifest that 2.19
+admitted is still admitted. The v1 schema is unchanged (a 1.x manifest's `observations.entities_omitted` is still
+refused there). A writer still names the lowest minor its content needs, so a bundle with a wells table stays 2.17.0.
+`test_bundle_contract.py` removes each widening and compares the result with 2.19 byte for byte.

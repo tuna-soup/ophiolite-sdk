@@ -650,6 +650,35 @@
           ]
         },
         {
+          "profile": "gocad-ascii/1",
+          "noun": "GOCAD surfaces",
+          "asset_kind": "triangulated-surface",
+          "routes": [
+            {
+              "route": "raster",
+              "state": "open",
+              "transport": "map-connection",
+              "asset_kinds": [
+                "triangulated-surface"
+              ],
+              "slice": null,
+              "evidence": "integration:ophiolite-connectors/scalar_maps/qgis_plugin/host-qualification.json (gocad-ascii/1 read, QGIS 4.2.2)",
+              "client": {
+                "name": "QGIS",
+                "versions": [
+                  "4.2.2"
+                ],
+                "platforms": [
+                  "linux"
+                ],
+                "limits": [
+                  "Through the QGIS plug-in, as a mesh"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "profile": "opendtect-horizon-ascii/1",
           "noun": "horizons",
           "asset_kind": "point-set",

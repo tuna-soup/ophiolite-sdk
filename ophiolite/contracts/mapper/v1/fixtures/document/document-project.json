@@ -1,0 +1,18 @@
+{
+  "id": "{{NAMESPACE}}:work-product-component--Document:document-d0c00000000000000000000000000001",
+  "kind": "osdu:wks:work-product-component--Document:2.0.0",
+  "acl": {
+    "owners": ["data.default.owners@{{DATA_PARTITION}}"],
+    "viewers": ["data.default.viewers@{{DATA_PARTITION}}"]
+  },
+  "legal": {
+    "legaltags": ["{{LEGAL_TAG}}"],
+    "otherRelevantDataCountries": []
+  },
+  "data": {
+    "Name": "End of well report, wellbore A",
+    "Description": "Synthetic two-page report: formation tops and lessons learned.",
+    "Datasets": ["{{NAMESPACE}}:dataset--File.Generic:document-d0c00000000000000000000000000001:"],
+    "TaxonomyIDs": ["{{NAMESPACE}}:reference-data--DocumentTaxonomy:GEOLOGY.EndOfWellReportGeological:"]
+  }
+}

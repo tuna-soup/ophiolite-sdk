@@ -3,8 +3,17 @@ newest source you may read; Client.extent() is their extent in one CRS. Coordina
 location is in the CRS you asked the server for, or as stored when you asked for none, and to_geojson() needs a
 fetch in OGC:CRS84 (GeoJSON's CRS) rather than converting locally.
 """
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; nothing below is imported to run
+
+from typing import TYPE_CHECKING
+
 from .errors import Refused, VerificationFailed
 from .models.api import EntityExtent, EntityPage
+
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only
+    from typing import Any
+
+    import pandas as pd
 
 
 def checked(model, answer):
@@ -20,7 +29,12 @@ CRSS = ('OGC:CRS84', 'EPSG:4326', 'EPSG:3857', 'EPSG:28992', 'EPSG:32631', 'EPSG
 
 class Well:
     """One well and, when a source you may read locates it, its location (x, y, crs, source, provenance)."""
-    def __init__(self, document):
+    document: dict[str, Any]
+    entity_id: str
+    name: str
+    location: dict[str, Any] | None
+
+    def __init__(self, document: dict[str, Any]) -> None:
         self.document = document
         self.entity_id, self.name, self.location = document['entity_id'], document['name'], document.get('location')
 
@@ -29,14 +43,17 @@ class Well:
         return 'Well(%r, %s)' % (self.name, where)
 
 
-class Wells(list):
+class Wells(list[Well]):
     """The wells of one fetch, with the CRS they were fetched in (None: as stored) and how many could not be converted."""
-    def __init__(self, wells, crs, untransformed, client=None):
+    crs: str | None
+    untransformed: int
+
+    def __init__(self, wells, crs, untransformed, client=None) -> None:
         super().__init__(wells)
         self.crs, self.untransformed = crs, untransformed
         self._client = client  # E50c: with_source reads the kept copies with the client that fetched these wells
 
-    def to_frame(self):
+    def to_frame(self) -> pd.DataFrame:
         """One row per well: its name and location (x, y and crs as fetched; missing when it has none)."""
         try: import pandas as pd
         except ImportError: raise Refused('Install ophiolite[pandas] for DataFrames.') from None
@@ -51,7 +68,7 @@ class Wells(list):
         frame[['x', 'y']] = frame[['x', 'y']].astype('Float64')
         return frame
 
-    def with_source(self, columns=None):
+    def with_source(self, columns=None) -> pd.DataFrame:
         """E50c: to_frame() plus, per well, the original columns of the source row it was located from, read from the
         copy its import kept under that copy's own permission check. Every well stays, marked in source_state:
         'joined', 'no origin' (no source row you may read locates it) or 'not readable' (source_reason says why).
@@ -60,7 +77,7 @@ class Wells(list):
         from .well_sources import with_source
         return with_source(self, self._client, columns)
 
-    def to_geojson(self):
+    def to_geojson(self) -> dict[str, Any]:
         """A GeoJSON FeatureCollection (well names in properties). GeoJSON is longitude, latitude in CRS84, so this
         needs the wells fetched with crs='OGC:CRS84'; nothing is converted locally."""
         if self.crs != 'OGC:CRS84':
@@ -75,10 +92,32 @@ class Wells(list):
 
 
 class LocationClient:
-    def wells(self, bbox=None, bbox_crs=None, crs=None, limit=None):
-        """The wells you may read, each with its location when a source you may read locates it. With `bbox`
-        ([minx, miny, maxx, maxy], which needs `bbox_crs`), only the wells located inside it. `crs` converts each
-        location on the server (omitted: as stored). `limit` stops after that many wells."""
+    def wells(self, bbox=None, bbox_crs: str | None = None, crs: str | None = None, limit: int | None = None) -> Wells:
+        """The wells you may read, each with its location when a source you may read locates it.
+
+        Parameters
+        ----------
+        bbox : optional
+            [minx, miny, maxx, maxy]: only the wells located inside it. It needs `bbox_crs`.
+        bbox_crs : str, optional
+            The coordinate system the box is in.
+        crs : str, optional
+            Convert each location to this coordinate system on the server; as stored when None.
+        limit : int, optional
+            Stop after this many wells.
+
+        Returns
+        -------
+        Wells
+            The wells, with the coordinate system asked for and how many locations could not be converted.
+
+        Raises
+        ------
+        Refused
+            When `bbox` has no `bbox_crs`, or a coordinate system is not one the SDK offers.
+        VerificationFailed
+            When a location comes back in another coordinate system, or the server names a page it already gave.
+        """
         if bbox is not None and bbox_crs is None: raise Refused('Give bbox_crs with bbox: the box is read in no CRS by default.')
         for name, value in (('bbox_crs', bbox_crs), ('crs', crs)):
             if value is not None and value not in CRSS: raise Refused('Choose %s from: %s' % (name, ', '.join(CRSS)))
@@ -98,9 +137,27 @@ class LocationClient:
             if cursor in seen: raise VerificationFailed('Repeated well cursor.')
             seen.add(cursor)
 
-    def extent(self, crs='OGC:CRS84'):
-        """The extent of the wells you may see located: {'crs', 'bbox' ([minx, miny, maxx, maxy] or None), 'count',
-        'untransformed'}; wells whose stored CRS cannot be converted to `crs` are left out and counted."""
+    def extent(self, crs='OGC:CRS84') -> dict[str, Any]:
+        """The extent of the wells you may see located, in one coordinate system.
+
+        Parameters
+        ----------
+        crs : str
+            The coordinate system of the extent (OGC:CRS84 by default).
+
+        Returns
+        -------
+        dict
+            {'crs', 'bbox' ([minx, miny, maxx, maxy] or None), 'count', 'untransformed'}; wells whose stored coordinate
+            system cannot be converted to `crs` are left out and counted.
+
+        Raises
+        ------
+        Refused
+            When `crs` is not one the SDK offers.
+        VerificationFailed
+            When the extent comes back in another coordinate system.
+        """
         if crs not in CRSS: raise Refused('Choose crs from: ' + ', '.join(CRSS))
         answer = checked(EntityExtent, self._post('entities', 'extent', {'crs': crs}))
         if answer.get('crs') != crs: raise VerificationFailed('The extent came back in another CRS.')

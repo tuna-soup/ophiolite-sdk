@@ -1,0 +1,20 @@
+{
+  "schema": "ophiolite.document-reasons/1",
+  "id": "ophiolite.document-reasons/1",
+  "description": "E222. `reasons`: why a document was not added, listed, served or described, one closed key each, one sentence each, no codes; nothing was stored. The file checks are byte tests, never the file name, applied in this order: E191's checks first (a PNG, JPEG or PDF is decided there), then spreadsheet, archive and text for a file that is none of the three, then not-a-document. `{bound}` is the bound that applied, as a person reads it; `{tag}` is the OSDU data-definitions tag of the served type list. A parent the reader may not read and an unknown parent are refused with the same sentence.",
+  "reasons": {
+    "not-a-document": "This file is not a PDF or a picture (PNG or JPEG), so it was not added.",
+    "text-file": "This is a text file. Documents are PDFs or pictures (PNG or JPEG); save it as a PDF to add it.",
+    "spreadsheet": "This is a spreadsheet. Tables are added as data, not as documents.",
+    "archive": "This is an archive. Add the documents it holds one by one.",
+    "two-types": "This file can also be read as a web page, so it was not added.",
+    "active-content": "This PDF carries scripts, launch actions or embedded files, so it was not added.",
+    "damaged": "This file says it is a PNG, JPEG or PDF but its structure cannot be read, so it was not added.",
+    "empty": "This file is empty, so it was not added.",
+    "too-large": "This file is larger than this deployment adds ({bound}), so it was not added.",
+    "type-not-listed": "This type is not in OSDU's document type list ({tag}).",
+    "type-missing": "A document needs its type from OSDU's list.",
+    "parent-unavailable": "The well, wellbore, survey or project this document belongs to is not available to you.",
+    "unavailable": "Documents are not added on this deployment yet."
+  }
+}

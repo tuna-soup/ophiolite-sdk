@@ -81,9 +81,10 @@ def test_every_post_route_is_typed_both_ways():
     coverage = json.loads((ROOT / 'packages/typescript/operation-coverage.json').read_text())
     untyped = [c['operation'] for c in coverage if c['operation'].startswith('POST') and (c['request'] == 'explicitly-untyped' or c['response'] == 'explicitly-untyped')]
     # the connector proxy carries the named operation's own body; a job step answers with its step row's own answer (E151 s0);
-    # a figure answers its bytes as one of three types (E191 s0: PNG, JPEG or PDF, each binary), so no one schema names it
+    # a figure answers its bytes as one of three types (E191 s0: PNG, JPEG or PDF, each binary), so no one schema names it;
+    # a document's bytes the same way (E222 s0)
     assert untyped == ['POST /api/v1/connector/{operation}', 'POST /api/v1/projects/{project}/attachments/read',
-                       'POST /api/v1/projects/{project}/jobs/step'], untyped
+                       'POST /api/v1/projects/{project}/documents/read', 'POST /api/v1/projects/{project}/jobs/step'], untyped
 
 
 def test_a_project_entry_mirrors_its_synced_component_and_refuses_a_number_for_the_end():

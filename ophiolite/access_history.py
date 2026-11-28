@@ -6,15 +6,21 @@
 session's delegate): the deployment refuses an application you signed in to (`HISTORY_GRANT_REFUSED`) and an agent
 (`HISTORY_AGENT_REFUSED`), so a saved sign-in is not sent at all. Nothing here changes a team or an access.
 """
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; nothing below is imported to run
+
 import os
 import uuid
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import quote
 
 import httpx
 
 from . import _client_header
 from .errors import PermissionRefused, Refused, Unavailable
+
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only
+    from typing import Any
 
 ACCESS_KEY_NEEDED = ('Teams and the access history are read with an access key; a saved sign-in is refused. '
                      'Create an access key on your account page and use it instead.')
@@ -94,18 +100,22 @@ class AccessHistoryClient:
         return _post(self.http, self.url, path, {'project_id': self.project, **body}, _headers(self.credential, self.url, self.project, self._sender), raw=raw,
                      notifier=getattr(self, '_notifier', None))
 
-    def access_history(self, *, kinds=None, person=None, actor=None, since=None, until=None, limit=100):
-        """Every entry of the project's access history, newest first (all pages): dicts with id, at, kind, parts, actor,
-        on_behalf_of, credential_kind, through, subject, project, from, to, role and details."""
+    def access_history(self, *, kinds=None, person=None, actor=None, since=None, until=None, limit: int = 100) -> list[dict[str, Any]]:
+        """Every entry of the project's access history, newest first, read across all pages.
+
+        Each entry is a dict with id, at, kind, parts, actor, on_behalf_of, credential_kind, through, subject, project,
+        from, to, role and details.
+        """
         body = {'filters': history_filters(kinds, person, actor, since, until)}
         return _pages(lambda sent: self._access_read('history', sent), body, limit)
 
-    def export_access_history(self, format, dest, *, kinds=None, person=None, actor=None, since=None, until=None):
+    def export_access_history(self, format: str, dest: str | os.PathLike[str], *, kinds=None, person=None, actor=None, since=None,
+                              until=None) -> Path:
         """The project's access history as one CSV or JSON Lines file at DEST (the bytes the deployment sends)."""
         body = {'filters': history_filters(kinds, person, actor, since, until)}
         return _export(lambda sent: self._access_read('history', sent, raw=True), body, format, dest)
 
-    def access_teams(self):
+    def access_teams(self) -> list[dict[str, Any]]:
         """The teams this project can use (its organisation's) and every team granted on it: id, name, role, can_compute, stranded."""
         page = self._access_read('teams', {})
         if not isinstance(page, dict) or not isinstance(page.get('teams'), list): raise Unavailable('Invalid teams response.')

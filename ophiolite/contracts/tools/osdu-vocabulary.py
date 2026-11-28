@@ -26,6 +26,12 @@ rule of each FAMILY_ROWS row of quantities.json (`family_rules`, `family_units`)
 PropertyType.1.json of the same checkout, pinned apart in FAMILY_PIN (PIN and osdu-vocabulary.json do not change) and
 recorded in quantities.json's `osdu.family_files`. A row's `family_from.ruled` entries (a supervisor's or owner's ruling,
 each with its source) are data, never generated: kept as they are when writing, and not compared by --check.
+
+E222 s0 (§3.1, D-7): Document 2.0.0 is a ninth kind in PIN (its $ref closure was already vendored). Run on the
+repository's own document it also writes, and --check regenerates, contracts/vocabulary/v1/osdu-document-types.json
+(ophiolite.osdu-document-types/1): the active rows of DocumentTaxonomy.1.json, the list Document 2.0.0's TaxonomyIDs
+name, read from the same checkout and pinned apart in DOCUMENT_PIN. A file of another digest is refused before anything
+is parsed or written; --check names the first row that differs.
 """
 import collections
 import contextlib
@@ -54,6 +60,7 @@ REFERENCE = 'ReferenceValues/Manifests/reference-data/'
 UNITS, QUANTITIES = REFERENCE + 'OPEN/UnitOfMeasure.1.json', REFERENCE + 'OPEN/UnitQuantity.1.json'
 FAMILIES, CRS = REFERENCE + 'LOCAL/LogCurveFamily.1.json', REFERENCE + 'LOCAL/CoordinateReferenceSystem.1.json'
 SAMPLING = REFERENCE + 'OPEN/WellLogSamplingDomainType.1.json'
+DOCUMENT_TAXONOMY = REFERENCE + 'OPEN/DocumentTaxonomy.1.json'
 NOTICE = '''OSDU data-definitions schemas, vendored unmodified (E116 s3).
 
 Repository: {repository}
@@ -61,8 +68,8 @@ Tag: {tag}
 Commit: {commit}
 Licence: {licence} (LICENSE beside this file)
 
-The files under Generated/ are the data-definitions files of these paths, byte for byte: the eight kinds ophiolite-mapper
-writes or names and every schema their $ref reach. Each is listed with its sha256 and size in ../../osdu-vocabulary.json
+The files under Generated/ are the data-definitions files of these paths, byte for byte: the nine kinds ophiolite-mapper
+writes or names (Document 2.0.0 since E222) and every schema their $ref reach. Each is listed with its sha256 and size in ../../osdu-vocabulary.json
 (source.files), written by contracts/tools/osdu-vocabulary.py, whose --check proves the bytes.
 '''
 PIN = {
@@ -75,6 +82,7 @@ PIN = {
         'Generated/work-product-component/WellboreMarkerSet.1.5.1.json': ('1406fe4eb2202b0dda8c2cb4f99d2d04cd349874626edb57145878a7fc3ad741', 19825),
         'Generated/work-product-component/WellboreTrajectory.1.4.0.json': ('38e2136ccdac9119d6320a979a8e53f2e3bdb5bfb24c8ca8396730329d00fbc9', 34890),
         'Generated/work-product-component/SeismicHorizon.2.1.0.json': ('ebf28da8e3e7e76c83f40f6da77915dd12fb871f5f3142aae0be37ae0964984c', 19108),
+        'Generated/work-product-component/Document.2.0.0.json': ('32e12db36594e094c45122171b8255fbde1c8c087ac2e1bbe4eb8b3a0a201db6', 11708),
         'Generated/dataset/File.Generic.1.1.0.json': ('908cdf2888d87b20832b66328b14d74a8c9d7312657de40db7947599cd7ecaae', 5752),
         'Generated/manifest/Manifest.1.0.0.json': ('15e69c5fb2fa25dd057e3bd99a46c63500de3b9cc263c3a38c254bb79d4a3b16', 4033),
         UNITS: ('330ebce827cce16695dcec961c6c508f3f0d5fdb7a4821c20ef2262ee03bbd3c', 3022637),
@@ -161,6 +169,10 @@ FAMILY_SOURCE = ("Ophiolite's rule over PWLS-3 and the PWLS property tree, not a
 # Spontaneous Potential in MV would be scaled by 1e9 by change_units on a request to mV. Left out, SP in MV suggests nothing.
 # The grep that found no other such symbol is in the lane's logs/c2b-collisions.txt.
 FAMILY_UNITS_LEFT_OUT = {'Spontaneous Potential': ('MV',)}
+# E222 s0 (§3.1): the document type list, at PIN's commit, pinned apart so PIN's reference lists and
+# osdu-vocabulary.json's source block are not widened by a list the mapper does not read.
+DOCUMENT_PIN = {DOCUMENT_TAXONOMY: ('c700055b6a5ba8dc5fe3732994fc65a71d6cf9fb8f20859ec12387dc8ff0fa2b', 160118)}
+DOCUMENTS = {'pin': DOCUMENT_PIN, 'out': CONTRACTS / 'vocabulary/v1/osdu-document-types.json'}
 
 
 class Refused(Exception):
@@ -434,13 +446,71 @@ def write_families(checkout, companions):
     path.write_text(quantities_text(doc), encoding='utf-8')
 
 
-def main(argv, pin=PIN, out=OUT, systems=None, companions=None):
+# ---- E222 s0: the document type list ------------------------------------------------------------------------------
+
+def read_documents(checkout, document_pin):
+    """DOCUMENT_PIN's bytes, each digest confirmed before any is parsed (read() has confirmed the commit)."""
+    raw = {}
+    for path, (digest, _) in sorted(document_pin.items()):
+        file = Path(checkout) / path
+        if not file.is_file(): raise Refused(f'{path} is missing from the checkout')
+        raw[path] = file.read_bytes()
+        if hashlib.sha256(raw[path]).hexdigest() != digest: raise Refused(f'{path} does not have the pinned sha256')
+    return raw
+
+
+def document_types(raw, pin, document_pin):
+    """ophiolite.osdu-document-types/1: every active row, as OSDU spells it; the inactive ones named."""
+    (path, (digest, size)), = document_pin.items()
+    rows = json.loads(raw[path])['ReferenceData']
+    kinds = sorted({r['kind'] for r in rows})
+    if len(kinds) != 1: raise Refused(f'{path} holds {len(kinds)} kinds, not one')
+    types = sorted(({'code': d['Code'], 'name': d['Name'], 'description': d.get('Description', ''),
+                     'discipline': d['Code'].split('.', 1)[0]} for d in (r['data'] for r in rows) if not d.get('InactiveIndicator')),
+                   key=lambda r: r['code'])
+    inactive = sorted(({'code': r['data']['Code'], 'reason': 'InactiveIndicator'} for r in rows if r['data'].get('InactiveIndicator')),
+                      key=lambda r: r['code'])
+    source = {'repository': pin['repository'], 'tag': pin['tag'], 'commit': pin['commit'], 'path': path, 'sha256': digest,
+              'bytes': size, 'licence': pin['licence'], 'governance': path[len(REFERENCE):].split('/', 1)[0]}
+    return {'schema': 'ophiolite.osdu-document-types/1', 'source': source, 'osdu_kind': kinds[0], 'types': types,
+            'inactive': inactive}
+
+
+def document_types_text(doc):
+    """One row per line, so a review sees each changed row."""
+    out = ['{', f' "schema": {json.dumps(doc["schema"])},', f' "source": {json.dumps(doc["source"], ensure_ascii=False)},',
+           f' "osdu_kind": {json.dumps(doc["osdu_kind"])},']
+    for i, key in enumerate(('types', 'inactive')):
+        rows = ',\n'.join('  ' + json.dumps(v, ensure_ascii=False, sort_keys=True) for v in doc[key])
+        out.append(f' "{key}": ' + (f'[\n{rows}\n ]' if doc[key] else '[]') + (',' if i == 0 else ''))
+    return '\n'.join(out) + '\n}\n'
+
+
+def document_types_difference(path, doc):
+    """The first way the committed list differs from the generator's, the row named."""
+    if not Path(path).exists(): return f'{Path(path).name} is missing'
+    committed = json.loads(Path(path).read_text(encoding='utf-8'))
+    for key in ('schema', 'source', 'osdu_kind'):
+        if committed.get(key) != doc[key]: return f'{Path(path).name} {key} differs from the generator'
+    for key in ('types', 'inactive'):
+        have, want = {r['code']: r for r in committed.get(key, [])}, {r['code']: r for r in doc[key]}
+        for code in sorted(set(have) | set(want)):
+            if code not in have: return f'{Path(path).name} {key} lacks {code}'
+            if code not in want: return f'{Path(path).name} {key} has {code}, which the list does not give'
+            if have[code] != want[code]: return f'{Path(path).name} {key} row {code} differs from the generator'
+    return f'{Path(path).name} layout differs' if Path(path).read_text(encoding='utf-8') != document_types_text(doc) else None
+
+
+def main(argv, pin=PIN, out=OUT, systems=None, companions=None, documents=None):
     if companions is None and Path(out) == OUT: companions = COMPANIONS
+    if documents is None and Path(out) == OUT: documents = DOCUMENTS
     args = [a for a in argv if not a.startswith('--')]
     if len(args) != 1:
         print(__doc__.strip().splitlines()[3].strip(), file=sys.stderr); return 2
     if systems is None: systems = [s['code'] for s in json.loads(SYSTEMS.read_text())['systems']]
-    try: raw = read(Path(args[0]), pin)
+    try:
+        raw = read(Path(args[0]), pin)
+        types = document_types(read_documents(Path(args[0]), documents['pin']), pin, documents['pin']) if documents else None
     except Refused as error:
         print(f'osdu-vocabulary: refused: {error}', file=sys.stderr); return 1
     doc = document(raw, pin, systems)
@@ -450,6 +520,7 @@ def main(argv, pin=PIN, out=OUT, systems=None, companions=None):
         committed = json.loads(Path(out).read_text(encoding='utf-8')) if Path(out).exists() else {}
         found = difference(committed, doc) or (None if Path(out).read_text(encoding='utf-8') == text(doc) else 'layout differs')
         found = found or vendor_difference(folder, files)
+        found = found or (document_types_difference(documents['out'], types) if documents else None)
         try: found = found or (companion_difference(Path(args[0]), doc, pin, companions) if companions else None)
         except Refused as error:
             print(f'osdu-vocabulary: refused: {error}', file=sys.stderr); return 1
@@ -463,6 +534,7 @@ def main(argv, pin=PIN, out=OUT, systems=None, companions=None):
     for name, body in files.items():
         (folder / name).parent.mkdir(parents=True, exist_ok=True); (folder / name).write_bytes(body)
     for extra in sorted(set(_present(folder)) - set(files)): (folder / extra).unlink()
+    if documents: Path(documents['out']).write_text(document_types_text(types), encoding='utf-8')
     Path(out).write_text(text(doc), encoding='utf-8'); print(f'wrote {out} and {len(files)} files under {folder}'); return 0
 
 

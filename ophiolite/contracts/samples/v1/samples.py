@@ -251,18 +251,25 @@ def computed_licence(sources):
             'share_alike': any(s['licence'].get('share_alike') is True for s in sources), 'statements': statements}
 
 
-def _rules_problems(entry, rules):
-    """(code, path) of each policy and licence rule a well-formed entry breaks."""
+def licence_problems(sample_id, sources, licence, rules):
+    """(code, path) of each policy and licence rule a well-formed sample id, source list and licence block break, paths
+    rooted as in an entry (`$.id`, `$.sources[i]...`, `$.licence...`). Public for the public store (E212 s0), whose
+    datasets carry the same sources and licence block."""
     if not isinstance(rules, dict) or rules.get('schema') != SOURCE_RULES: raise ValueError('the source rules are not ' + SOURCE_RULES)
     out = []
-    if entry['id'] not in rules['approved_samples'] or entry['id'] in rules['refused_samples']: out.append(('sample-not-approved', '$.id'))
-    for i, source in enumerate(entry['sources']): out.extend(_source_problems(source, f'$.sources[{i}]', rules))
+    if sample_id not in rules['approved_samples'] or sample_id in rules['refused_samples']: out.append(('sample-not-approved', '$.id'))
+    for i, source in enumerate(sources): out.extend(_source_problems(source, f'$.sources[{i}]', rules))
     if any(code != 'sample-not-approved' for code, _ in out): return out
-    block = computed_licence(entry['sources'])
+    block = computed_licence(sources)
     if block is None: return out + [('unsupported-combination', '$.sources')]
     for key in ('spdx', 'redistribution', 'attribution', 'share_alike', 'statements'):
-        if not _same(block[key], entry['licence'][key]): return out + [('licence-block-differs', '$.licence.' + key)]
+        if not _same(block[key], licence[key]): return out + [('licence-block-differs', '$.licence.' + key)]
     return out
+
+
+def _rules_problems(entry, rules):
+    """(code, path) of each policy and licence rule a well-formed entry breaks."""
+    return licence_problems(entry['id'], entry['sources'], entry['licence'], rules)
 
 
 # ---- C3: contents from the bundle manifest ----------------------------------------------------------------------------

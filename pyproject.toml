@@ -34,6 +34,7 @@ pack = ["segyio==1.9.14", "lasio>=0.32", "numpy", "matplotlib"]  # E129 (e): the
 dev = ["pytest>=8", "build>=1", "jsonschema>=4.26", "lasio>=0.32", "pyproj>=3.6", "opentelemetry-sdk>=1.37", "segyio==1.9.14",
        "pyarrow>=18", "geopandas>=1",  # E117 s1 (D5): write_folder's tests and their GeoParquet reader
        'tomli>=2; python_version < "3.11"',  # E148 S-11: the tests read pyproject.toml with tomllib, which 3.10 lacks
+       "mypy==2.4.1",  # E217 s0 (D5): checks the typing examples against the installed wheel; test-only, never a runtime dependency
        # E123 SZ (D7): the ZGY decoding tests (segyio, above, is their SEG-Y oracle); pyzgy is installed where segyio has a wheel
        'pyzgy==0.1.1; sys_platform == "linux" and platform_machine == "x86_64"']
 
@@ -44,7 +45,7 @@ version = {attr = "ophiolite._version.__version__"}
 include = ["ophiolite*"]
 
 [tool.setuptools.package-data]
-ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md", "templates/*", "templates/**/*", "reference/*", "reference/**/*", "procedure_templates/*", "procedure_templates/**/*", "schemas/*", "table_kind_units.json"]  # E203 s1: the offline check's unit table; E31: ophiolite init copies the packaged templates; E119b: the reference procedures
+ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md", "templates/*", "templates/**/*", "reference/*", "reference/**/*", "procedure_templates/*", "procedure_templates/**/*", "schemas/*", "table_kind_units.json", "py.typed"]  # E217 s0: PEP 561 marker; E203 s1: the offline check's unit table; E31: ophiolite init copies the packaged templates; E119b: the reference procedures
 
 [tool.setuptools.exclude-package-data]
 ophiolite = ["templates/*/node_modules/**/*", "templates/*/node_modules/*", "templates/*/dist/**/*", "templates/**/__pycache__/*", "reference/**/__pycache__/*"]

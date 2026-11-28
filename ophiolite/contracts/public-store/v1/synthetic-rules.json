@@ -1,0 +1,16 @@
+{
+ "schema": "ophiolite.sample-source-rules/1",
+ "id": "ophiolite.sample-source-rules/1",
+ "description": "E212 s0, tests only: a synthetic source-rules document (E211's format) approving the two synthetic store datasets, so the store's fixtures never need a real dataset id. It refuses one synthetic dataset id and one synthetic record, binds one synthetic record to one host, and lists E211's SPDX identifiers. Production readers use samples/v1/source-rules.json.",
+ "approved_samples": ["synthetic-a", "synthetic-b"],
+ "refused_samples": {
+  "synthetic-refused": "A synthetic dataset refused for the tests."
+ },
+ "refused_records": {
+  "synthetic/refused-source": "A synthetic record refused for the tests."
+ },
+ "acquisition_hosts": {
+  "synthetic/host-bound": ["bound.example.org"]
+ },
+ "spdx": ["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-3.0", "CC-BY-SA-4.0", "PDDL-1.0", "ODC-By-1.0"]
+}

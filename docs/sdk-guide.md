@@ -210,8 +210,11 @@ and `~Curve` lines are not written. `lasio_bytes` re-reads those entries and ret
 nothing if lasio wrote one otherwise (lasio writes an empty value that has a unit
 as 0).
 
-`AsyncClient` exposes the same methods with `await`; its work-folder methods are
-also awaited. Credential and folder transactions run off the event loop. Cancellation
+`AsyncClient` exposes the reading, publishing and finding methods with `await`
+(`read`, `describe`, `assets`, `find`, `find_all` as a list, `find_log`, `search`, ...);
+its work-folder methods are also awaited. A method it does not offer yet (`wells`,
+`entities`, `upload`, `templates`, ...) raises `TypeError` naming the `Client`
+method to use instead, before anything is sent. Credential and folder transactions run off the event loop. Cancellation
 drains the active transaction before releasing its lock; it does not undo a server
 mutation. Recover from the saved folder after an uncertain interruption.
 

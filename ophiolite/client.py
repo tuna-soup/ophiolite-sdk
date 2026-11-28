@@ -1,4 +1,6 @@
 """Bounded reads of exact scientific revisions. No implicit login or cache access."""
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; nothing below is imported to run
+
 import gc
 import hashlib
 import json
@@ -6,6 +8,7 @@ import math
 import os
 import time
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import quote, urlencode
 import httpx
 from . import _client_header  # E93
@@ -34,8 +37,57 @@ from .auth import Credential
 from .entities import EntityClient
 from .navigation import Navigation
 
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only; `import ophiolite.client` loads none of these
+    from collections.abc import Iterator, Mapping, Sequence
+    from typing import Any
+
+    import numpy as np
+    import numpy.typing as npt
+    import pandas as pd
+
+    from .bundle import Bundle
+    from .imports import Imports
+    from .layouts import Layouts
+    from .models.api import (Binding, Grants, History, PublicationReceipt, Receipt, RestrictedReceipt, RestrictedResultPreview,
+                             RestrictedResultSummary, RestrictedRun, ResultDiff, ResultGroup, ResultPreview, ResultSummary, Run,
+                             UploadResult)
+    from .models.generated import ApplicationCurve, ScientificAsset, SearchAnswer, SearchAnswerByMeaning, SearchRow, SurveyPage
+    from .models.items import AssetItem
+    from .presentation import PresentedExchange, PresentedReceipt
+    from .public_repositories import PublicRepositories
+    from .publish import WorkFolder
+    from .scientific import Descriptor, WellLog, WellLogDescriptor
+    from .surveys import Survey
+    from .sync import Sync
+    from .table_kinds import TableKindClient
+    from .table_templates import Template
+    from .typed import SeismicSlice, TypedData
+    from .upload_runs import Report, UploadRuns
+    from .volume_windows import VolumeWindowResult, WindowReader
+    from .well_imports import WellImports
+    from .well_names import WellNames
+    from .well_sets import WellSets
+    from .windows import CurveWindow
+
 
 class CurveSet:
+    """The curves you read from one exact version, each checked against what the server stored.
+
+    `descriptors` holds each curve's description, `curves` its values with the depth axis, `artifact` the original
+    file's bytes, and `url` and `project` where it was read.
+
+    Example
+    -------
+    curves = client.read('log-id', 'revision-id', ['GR'])
+    gamma_ray = curves.curves[0]
+    print(gamma_ray.axis[0], gamma_ray.values[0])
+    """
+    descriptors: list[ScientificAsset]
+    curves: list[ApplicationCurve]
+    artifact: bytes
+    url: str
+    project: str
+
     def __init__(self,descriptors,curves,artifact,*,url='',project='',wire_descriptors=None,wire_curves=None,wire_curve_bytes=None):
         self.descriptors,self.curves,self.artifact=descriptors,curves,artifact
         self.url,self.project=url,project
@@ -43,19 +95,26 @@ class CurveSet:
         self._wire_curve_bytes=wire_curve_bytes  # exact served bytes; their digest is in the descriptor
 
     @property
-    def evidence(self):
-        """SDK compatibility status, preserving absent older wire evidence."""
+    def evidence(self) -> dict[str, str]:
+        """How each curve's reading of the file compares with the one recorded at upload, by curve mnemonic.
+
+        Each value is 'recorded', 'recorded-differs', 'live', 'not-recorded' or 'not-available' (an older server
+        that states none).
+        """
         return {asset.scientific.curve:_core.rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True)) for asset in self.descriptors}
 
-    def to_numpy(self):
+    def to_numpy(self) -> tuple[npt.NDArray[np.float64], Descriptor]:
+        """The curves as one array, one column per curve, with what describes them (needs numpy)."""
         from .scientific import to_numpy
         return to_numpy(self)
 
-    def to_frame(self):
+    def to_frame(self) -> tuple[pd.DataFrame, Descriptor]:
+        """The curves as one table indexed by depth, with what describes them (needs pandas)."""
         from .scientific import to_frame
         return to_frame(self)
 
-    def workspace_url(self):
+    def workspace_url(self) -> str | None:
+        """The address of this version's page in the Workspace, or None when the read has no server address."""
         from .scientific import workspace_url
         return workspace_url(self)
 
@@ -63,7 +122,11 @@ class CurveSet:
         from .repr import curve_set_html
         return curve_set_html(self)
 
-    def save(self,path,*,legacy_order=False):
+    def save(self,path:str|os.PathLike[str],*,legacy_order:bool=False) -> None:
+        """Save the original file and each curve with its description into a new private folder.
+
+        The folder must not exist yet; `legacy_order=True` writes the JSON files in the order the server sent them.
+        """
         path=Path(path)
         try:path.mkdir(mode=0o700,parents=True,exist_ok=False)
         except FileExistsError:raise Refused('Output already exists. Choose a new folder.') from None
@@ -85,12 +148,13 @@ class WellLogSet(CurveSet):
     `ophiolite.scientific.WellLog`. `to_numpy` and `to_frame` combine them only when depth, depth unit, depth kind,
     datum, well and source agree (else AxisMismatch); the frame's index is named by the declared depth kind."""
     form=WELL_LOG_FORM
+    curves: list[WellLog]  # type: ignore[assignment]  # E217 s0: a well log read holds WellLog views, not application curves
 
-    def to_numpy(self):
+    def to_numpy(self) -> tuple[npt.NDArray[np.float64], WellLogDescriptor]:  # type: ignore[override]
         from .scientific import well_logs_numpy
         return well_logs_numpy(self)
 
-    def to_frame(self):
+    def to_frame(self) -> tuple[pd.DataFrame, WellLogDescriptor]:  # type: ignore[override]
         from .scientific import well_logs_frame
         return well_logs_frame(self)
 
@@ -176,6 +240,7 @@ from .access_history import AccessHistoryClient  # noqa: E402  (E67b)
 from .outcomes import OutcomeClient  # noqa: E402  (E120)
 from .chains import ChainClient  # noqa: E402  (E178 s2c)
 from .figures import FigureClient  # noqa: E402  (E191 s1)
+from .documents import DocumentClient  # noqa: E402  (E222 s1)
 from .verdicts import VerdictClient  # noqa: E402  (E132)
 from .trajectories import TrajectoryClient  # noqa: E402  (E134)
 from .rule_results import RuleResultsClient  # noqa: E402  (E144 s3)
@@ -194,9 +259,30 @@ def affected_whole(pages):
 
 
 class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient, ProcedureClient, ToolClient, AccessHistoryClient, OutcomeClient, VerdictClient, TrajectoryClient, RuleResultsClient):  # E29: wells() and extent(); E50a: sources(); E96: checks; E105b: procedures; E131 s1: tools; E67b: access history and teams; E120: outcomes; E132: verdicts; E134: export_trajectories; E144 s3: rule_results
+    """One project on an Ophiolite deployment, read and written with your own sign-in.
+
+    Parameters
+    ----------
+    url
+        The deployment's address.
+    project
+        The project's id.
+    credential
+        Your sign-in; `from_configuration` finds the one saved for this deployment when none is given.
+    http
+        An httpx client to send requests through; without one the client makes and closes its own.
+    application, host
+        (name, version) of the program that sends the requests and of the application it runs in; each request
+        reports them. Without them the requests report this library.
+
+    Example
+    -------
+    with ophiolite.Client.from_configuration('configuration.json') as connected:
+        wells = connected.wells()
+    """
     _sender=None  # E182 s1: what this client says sent its requests; None is this library's own report
 
-    def __init__(self,url,project,credential=None,http=None,*,application=None,host=None):
+    def __init__(self,url:str,project:str,credential:Credential|None=None,http:httpx.Client|None=None,*,application:tuple[str,str]|None=None,host:tuple[str,str]|None=None) -> None:
         sender=_client_header.sender(application,host)  # refused before a transport exists
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
@@ -207,7 +293,12 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         self._notifier=_deprecation.Notifier()  # E148: this client's once-set; nothing is installed on http
 
     @classmethod
-    def from_configuration(cls,path='configuration.json',*,credential=None,http=None,application=None,host=None):
+    def from_configuration(cls,path:str|os.PathLike[str]='configuration.json',*,credential:Credential|None=None,http:httpx.Client|None=None,application:tuple[str,str]|None=None,host:tuple[str,str]|None=None) -> Client:
+        """Connect to the deployment and project named in the configuration file you downloaded from Connect.
+
+        Without `credential`, the sign-in `ophiolite account login` saved for them is used, or the file
+        OPHIOLITE_CREDENTIAL names, or OPHIOLITE_ACCESS_KEY.
+        """
         try:value=json.loads(Path(path).read_text())
         except (OSError,ValueError):raise Refused('Cannot read configuration. Download it again from Connect.') from None
         if not isinstance(value,dict) or value.get('schema') not in ('ophiolite.read-configuration/1','ophiolite.local-configuration/1'):
@@ -219,158 +310,428 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if credential is None:client.credential=_environment_credential(client.url,client.project)  # first-run defect 9
         return client
 
-    def sync(self,checkpoint=None):
-        """E28: a local copy of this project kept current from its event log (ophiolite.sync.Sync)."""
+    def sync(self,checkpoint=None) -> Sync:
+        """A local copy of this project, kept current from what changed in it.
+
+        Parameters
+        ----------
+        checkpoint
+            The file (or ophiolite.sync.Checkpoint) that remembers how far a copy has read; None starts afresh.
+
+        Returns
+        -------
+        Sync
+            The local copy (ophiolite.sync.Sync).
+        """
+        # E28
         from .sync import Sync
         return Sync(self,checkpoint=checkpoint)
 
     @property
-    def upload_runs(self):
-        """E55: upload a folder or a .zip with one report (ophiolite.upload_runs.UploadRuns)."""
+    def upload_runs(self) -> UploadRuns:
+        """Upload a folder or a .zip with one report (ophiolite.upload_runs.UploadRuns)."""
+        # E55
         from .upload_runs import UploadRuns
         return UploadRuns(self)
 
     def upload(self,path_or_address,*,attribution=None,rights_confirmed,audience=None,well_notes='',declare=None,skip_decisions=False,link_wellbore=False,new=False,progress=None,
-               use_project_defaults=False):
-        """E85: add a file, a folder, a .zip or an https address in one upload and return its report
-        (ophiolite.upload_runs.Report). `declare` {kind: {field: value}} answers what the files of that kind leave open;
-        `link_wellbore` links each file to the one wellbore whose name its header names. An address is fetched by the
-        gateway: no file bytes are sent from here. E90: an omitted `attribution` or `audience` is the project's New data
-        setting ('me' is only you, 'project' everyone when that is the setting, a list names people); a declared value
-        'project-default', or `use_project_defaults`, keeps the project's default for a field a file leaves open."""
+               use_project_defaults=False) -> Report:
+        """Add a file, a folder, a .zip or an https address to the project in one upload.
+
+        An address is fetched by the server: no file bytes are sent from here.
+
+        Parameters
+        ----------
+        path_or_address
+            The path of a file, a folder or a .zip, or an https address.
+        attribution
+            Who the files are attributed to; None takes the project's New data setting.
+        rights_confirmed
+            True: you confirm that you may keep these files, make results from them and share them with the audience.
+        audience
+            Who may see the files: 'me' (only you), 'project' (everyone, when that is the project's setting) or a
+            list of people; None takes the project's New data setting.
+        well_notes
+            A note kept with the wells the files name.
+        declare
+            {kind: {field: value}}: what the files of that kind leave open; the value 'project-default' keeps the
+            project's default for that field.
+        skip_decisions
+            True skips every file that needs a decision `declare` does not give.
+        link_wellbore
+            True links each file to the one wellbore whose name its header names.
+        new
+            True starts a new upload even when an unfinished upload of the same files exists; otherwise that one
+            continues.
+        progress
+            Called with the report after each file.
+        use_project_defaults
+            True keeps the project's default for every field a file leaves open.
+
+        Returns
+        -------
+        Report
+            What happened to each file (ophiolite.upload_runs.Report).
+
+        Raises
+        ------
+        ValidationFailed
+            When `rights_confirmed` is not True.
+        Refused
+            When the path is not a path or an address, or a `declare` entry is not one the files can take.
+        """
+        # E85; E90: attribution, audience and the project-default declarations
         return self.upload_runs.upload(path_or_address,attribution=attribution,rights_confirmed=rights_confirmed,audience=audience,well_notes=well_notes,
                                        declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress,
                                        use_project_defaults=use_project_defaults)
 
-    def templates(self):
-        """E91: the table targets with a template (ophiolite.table_templates): target, display name, lengths, formats and
-        whether a coordinate system must be chosen."""
+    def templates(self) -> list[dict[str, Any]]:
+        """The kinds of table you can fill in from a template.
+
+        Returns
+        -------
+        list[dict[str, Any]]
+            One row per kind of table as the server lists it: target, display name, lengths, formats and whether a
+            coordinate system must be chosen.
+
+        Raises
+        ------
+        VerificationFailed
+            When the list does not have its documented shape.
+        """
+        # E91
         from . import table_templates
         return table_templates.listing(self)
 
-    def template(self,target,format='csv',*,length='m',crs=None,reference=None):
-        """E91: the template the deployment renders for `target` ('csv' or 'xlsx'), with `.bytes`, `.filename`, `.save(path)`."""
+    def template(self,target:str,format:str='csv',*,length:str='m',crs:str|None=None,reference=None) -> Template:
+        """An empty table to fill in for one kind of table, as the server writes it.
+
+        Parameters
+        ----------
+        target
+            The kind of table, as `templates()` names it.
+        format
+            'csv' or 'xlsx'.
+        length
+            The length unit of the columns.
+        crs
+            The coordinate system, for a kind of table that needs one.
+        reference
+            The depth reference the wells table names in its depth column.
+
+        Returns
+        -------
+        Template
+            The file with `.bytes`, `.filename` and `.save(path)`.
+
+        Raises
+        ------
+        Refused
+            When `format` is neither 'csv' nor 'xlsx'.
+        VerificationFailed
+            When the file arrives empty.
+        """
+        # E91
         from . import table_templates
         return table_templates.template(self,target,format,length,crs,reference)
 
-    def start_sample(self,*,command_id=None,progress=None):
-        """E91: add the NLOG start sample (a project administrator): the gamma-ray log through an upload run and the
-        2,222 wells through a table import, stepped here to the end; the same command_id answers the same run."""
+    def start_sample(self,*,command_id=None,progress=None) -> dict[str, Any]:
+        """Add the start sample from NLOG to the project, a gamma-ray log and 2,222 wells.
+
+        Only a project administrator may. The log arrives through an upload and the wells through a table import,
+        each followed here to its end.
+
+        Parameters
+        ----------
+        command_id
+            The same id answers the same run again; None makes a new one.
+        progress
+            Called with the wells import's status while it is still importing.
+
+        Returns
+        -------
+        dict[str, Any]
+            {run_id, log, wells, statement}: the log as the upload report shows it and the wells import's final status.
+
+        Raises
+        ------
+        VerificationFailed
+            When the answer does not have its documented shape.
+        """
+        # E91
         from . import table_templates
         return table_templates.start_sample(self,command_id,progress)
 
-    def new_data_defaults(self):
-        """E90: what new files start with in this project (ophiolite.new_data): the five settings and their `revision`."""
+    def new_data_defaults(self) -> dict[str, Any]:
+        """What new files start with in this project: who sees them, their depth reference, coordinate system, units and attribution.
+
+        Returns
+        -------
+        dict[str, Any]
+            The five settings, their `revision`, `legacy` and whether you may change them (`administrator`); pass it
+            to `set_new_data_defaults` to change them.
+        """
+        # E90
         from . import new_data
         return new_data.defaults(self)
 
-    def set_new_data_defaults(self,snap,**fields):
-        """E90: an administrator's change of the settings reviewed in `snap`; refused, never refetched, when they changed since."""
+    def set_new_data_defaults(self,snap,**fields) -> dict[str, Any]:
+        """Change what new files start with in this project, as a project administrator.
+
+        Parameters
+        ----------
+        snap
+            The settings you read with `new_data_defaults()`; the change is refused when they changed since, and
+            nothing is read again here.
+        **fields
+            The settings to change, by name.
+
+        Returns
+        -------
+        dict[str, Any]
+            The settings as saved, in the form `new_data_defaults()` returns.
+        """
+        # E90
         from . import new_data
         return new_data.set_defaults(self,snap,**fields)
 
-    def audience(self,asset):
-        """E90: who can see an uploaded original and who can build on it, with both generations (ophiolite.new_data)."""
+    def audience(self,asset) -> dict[str, Any]:
+        """Who can see a file you uploaded and who can build on it.
+
+        Parameters
+        ----------
+        asset
+            The uploaded original.
+
+        Returns
+        -------
+        dict[str, Any]
+            `state` (me, people or project), `people` with what each may do, and both generations; pass it to
+            `set_audience` to change them.
+        """
+        # E90
         from . import new_data
         return new_data.audience(self,asset)
 
-    def set_audience(self,snap,*,state=None,people=None,build_on=None,reason=None,command_id=None):
-        """E90: change who can see the original reviewed in `snap` (both of its generations are sent; nothing is refetched).
-        A narrower change needs a `reason`; the deployment's refusal says so."""
+    def set_audience(self,snap,*,state=None,people=None,build_on=None,reason=None,command_id=None) -> dict[str, Any]:
+        """Change who can see a file you uploaded and who can build on it.
+
+        Both generations of `snap` are sent and nothing is read again: a change made since is refused.
+
+        Parameters
+        ----------
+        snap
+            What `audience()` returned.
+        state
+            'me', 'people' or 'project'; None keeps it.
+        people
+            The ids of the people who can see it; None keeps them.
+        build_on
+            The ids of the people who can build on it; None keeps them.
+        reason
+            Why; a narrower audience needs one, and the server's refusal says so.
+        command_id
+            The same id makes a retry return the first answer; None makes a new one.
+
+        Returns
+        -------
+        dict[str, Any]
+            Who can see it and build on it now, in the form `audience()` returns.
+        """
+        # E90
         from . import new_data
         return new_data.save(self,new_data.change(snap,state,people,build_on),reason,command_id)
 
-    def rights(self,kind,ref,*,key=None):
-        """E35a: the rights to use an original ('upload'), a release ('release') or a connection target ('connection', with
-        its key): what they permit, their last day, and whether you may change them ({'basis': None, ...} when none)."""
+    def rights(self,kind:str,ref:str,*,key:str|None=None) -> dict[str, Any]:
+        """The recorded rights to use an uploaded file, a release or a connection target.
+
+        `kind` is 'upload', 'release' or 'connection' (with its `key`). The answer says what they permit, their last
+        day, and whether you may change them ({'basis': None, ...} when none are recorded).
+        """
+        # E35a
         return self._post('rights','get',_rights_target(kind,ref,key))
 
-    def attach_rights(self,kind,ref,*,uses,last_day,key=None,delete_on_end=False):
-        """E35a: record the rights to use data (project administrators, or the person who added the original). `uses` from
-        'read', 'derive', 'export', 'model-use'; `last_day` the last permitted day (a date or YYYY-MM-DD, UTC)."""
+    def attach_rights(self,kind:str,ref:str,*,uses,last_day,key:str|None=None,delete_on_end:bool=False) -> dict[str, Any]:
+        """Record the rights to use data, as a project administrator or the person who added the file.
+
+        `uses` from 'read', 'derive', 'export', 'model-use'; `last_day` the last permitted day (a date or YYYY-MM-DD,
+        UTC).
+        """
+        # E35a
         return self._post('rights','attach',{**_rights_target(kind,ref,key),'uses':list(uses),'last_day':str(last_day),'delete_on_end':bool(delete_on_end)})
 
-    def renew_rights(self,kind,ref,*,uses,last_day,expected_generation,key=None,delete_on_end=False):
-        """E35a: a new version of recorded rights, against the generation you read (rights(...)['basis']['generation']);
-        everything they govern is judged by it from then on. A changed generation raises RightsConflict."""
+    def renew_rights(self,kind:str,ref:str,*,uses,last_day,expected_generation,key:str|None=None,delete_on_end:bool=False) -> dict[str, Any]:
+        """Record a new version of the rights you read, which everything they govern follows from then on.
+
+        `expected_generation` is the generation you read (rights(...)['basis']['generation']); a changed generation
+        raises RightsConflict.
+        """
+        # E35a
         return self._post('rights','renew',{**_rights_target(kind,ref,key),'uses':list(uses),'last_day':str(last_day),'delete_on_end':bool(delete_on_end),
                                             'expected_generation':expected_generation})
 
-    def layouts(self):
-        """E89: the project's layouts: list, match, save, rename, retire, use again, keep, update, reconnect, export and
-        import, by name (ophiolite.layouts.Layouts)."""
+    def layouts(self) -> Layouts:
+        """The project's layouts, by name.
+
+        Returns
+        -------
+        Layouts
+            List, match, save, rename, retire, use again, keep, update, reconnect, export and import
+            (ophiolite.layouts.Layouts).
+        """
+        # E89
         from .layouts import Layouts
         return Layouts(self)
 
     @property
-    def public_repositories(self):
-        """E60: public repositories (NLOG) as sources: search, preview, bring_in, check and a derived result's attribution
-        (ophiolite.public_repositories.PublicRepositories)."""
+    def public_repositories(self) -> PublicRepositories:
+        """Public repositories such as NLOG, to search, preview and bring data in from.
+
+        It offers search, preview, bring_in, check and a derived result's attribution
+        (ophiolite.public_repositories.PublicRepositories).
+        """
+        # E60
         from .public_repositories import PublicRepositories
         return PublicRepositories(self)
 
     @property
-    def well_names(self):
-        """E88: the wells your uploads and imports name: proposals, accept, aliases and go back (ophiolite.well_names.WellNames)."""
+    def well_names(self) -> WellNames:
+        """The wells your uploads and imports name: proposals, accept, aliases and go back (ophiolite.well_names.WellNames)."""
+        # E88
         from .well_names import WellNames
         return WellNames(self)
 
     @property
-    def well_sets(self):
-        """E119a: your private well sets: save, new_version, list, read, and from_list with the trajectory version
-        named by its label (ophiolite.well_sets.WellSets)."""
+    def well_sets(self) -> WellSets:
+        """Your private well sets: save, new_version, list and read.
+
+        `from_list` makes one with the trajectory version named by its label (ophiolite.well_sets.WellSets).
+        """
+        # E119a
         from .well_sets import WellSets
         return WellSets(self)
 
     @property
-    def chains(self):
-        """E178 s2c: the project's chains and their runs: declare, revise, enable, disable, withdraw, list, get, due,
-        dismiss and run_start, run_attach, run_choose, run_acknowledge, run_decide, run_continue, run_get, run_list
-        (ophiolite.chains.ChainClient)."""
+    def chains(self) -> ChainClient:
+        """The project's chains and their runs (ophiolite.chains.ChainClient).
+
+        Chains: declare, revise, enable, disable, withdraw, list, get, due and dismiss. Runs: run_start, run_attach,
+        run_choose, run_acknowledge, run_decide, run_continue, run_get and run_list.
+        """
+        # E178 s2c
         return ChainClient(self)
 
     @property
-    def figures(self):
-        """E191 s1: the figures kept with item versions: attach, list, read, withdraw (ophiolite.figures.FigureClient)."""
+    def figures(self) -> FigureClient:
+        """The figures kept with item versions: attach, list, read, withdraw (ophiolite.figures.FigureClient)."""
+        # E191 s1
         return FigureClient(self)
 
     @property
-    def table_kinds(self):
-        """E203 s1: the project's kinds of table: declare, list, show (ophiolite.table_kinds.TableKindClient). A file
-        exported from a version published as one is checked without the server by ophiolite.table_kinds.check."""
+    def documents(self) -> DocumentClient:
+        """The documents kept with wells, wellbores, surveys and the project (ophiolite.documents.DocumentClient).
+
+        Add, list, read and describe; the server checks every file and every right."""
+        # E222 s1
+        return DocumentClient(self)
+
+    @property
+    def table_kinds(self) -> TableKindClient:
+        """The project's kinds of table: declare, list, show (ophiolite.table_kinds.TableKindClient).
+
+        A file exported from a version published as one is checked without the server by ophiolite.table_kinds.check.
+        """
+        # E203 s1
         from .table_kinds import TableKindClient
         return TableKindClient(self)
 
     def import_storage(self,connection,prefix=None,*,keep_copy=False,attribution,rights_confirmed,audience=(),well_notes='',declare=None,skip_decisions=False,
-                       link_wellbore=False,new=False,progress=None):
-        """E59: add every file below PREFIX of a storage connection in one upload and return its report
-        (ophiolite.upload_runs.Report): read from your storage each time, or with `keep_copy` added as a copy (when the
-        organisation allows copies). The gateway reads each object with your own sign-in; no key is given here."""
+                       link_wellbore=False,new=False,progress=None) -> Report:
+        """Add every file below a folder of a storage connection to the project in one upload.
+
+        The server reads each file with your own sign-in; no key is given here.
+
+        Parameters
+        ----------
+        connection
+            The storage connection's id.
+        prefix
+            The folder in that storage; None is all of it.
+        keep_copy
+            False reads each file from your storage each time; True adds it as a copy, when the organisation
+            allows copies.
+        attribution
+            Who the files are attributed to.
+        rights_confirmed
+            True: you confirm that you may keep these files, make results from them and share them with the audience.
+        audience
+            The people who may see the files besides you; empty is no one else.
+        well_notes, declare, skip_decisions, link_wellbore, new, progress
+            As `upload` takes them.
+
+        Returns
+        -------
+        Report
+            What happened to each file; files the server does not read are in `left_out`
+            (ophiolite.upload_runs.Report).
+
+        Raises
+        ------
+        ValidationFailed
+            When `rights_confirmed` is not True.
+        """
+        # E59
         return self.upload_runs.import_storage(connection,prefix,keep_copy=keep_copy,attribution=attribution,rights_confirmed=rights_confirmed,audience=audience,
                                                well_notes=well_notes,declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress)
 
-    def well_imports(self):
-        """E42a: import a copy of an approved well table as wells (ophiolite.well_imports.WellImports)."""
+    def well_imports(self) -> WellImports:
+        """Import a copy of an approved well table as wells.
+
+        Returns
+        -------
+        WellImports
+            The imports of this project (ophiolite.well_imports.WellImports).
+        """
+        # E42a
         from .well_imports import WellImports
         return WellImports(self)
 
     @property
-    def imports(self):
-        """E87: a table file to wells, well tops, deviation surveys, point sets or time-depth pairs in one call:
-        `client.imports.from_table(path, target, mapping, dry_run=...)` (ophiolite.imports.Imports)."""
+    def imports(self) -> Imports:
+        """Turn a table file into wells, well tops, deviation surveys, point sets or time-depth pairs in one call.
+
+        `client.imports.from_table(path, target, mapping, dry_run=...)` (ophiolite.imports.Imports).
+        """
+        # E87
         from .imports import Imports
         return Imports(self)
 
-    def exchange(self,work,**options):
-        """E70a: check for updates, get latest and send to project from a work folder (ophiolite.exchange.Exchange)."""
+    def exchange(self,work,**options) -> PresentedExchange:
+        """Check for updates, get the latest versions and send to the project, from a folder of your own.
+
+        Parameters
+        ----------
+        work
+            The folder that holds your copies.
+        **options
+            As ophiolite.exchange.Exchange takes them: `application` (the program that holds the copies), `codes`,
+            `lock_timeout` and `sentences`.
+
+        Returns
+        -------
+        PresentedExchange
+            The exchange; each outcome shows itself with a link to the Workspace.
+        """
+        # E70a; E104: the presented outcome
         from .exchange import ClientTransport
         from .presentation import PresentedExchange  # E104: the outcome shows itself with a link to this Workspace
         return PresentedExchange(ClientTransport(self),work,origin=self.url,**options)
 
-    def close(self):
+    def close(self) -> None:
+        """Close the connection, unless you gave the client your own httpx client."""
         if self._owns_http:self.http.close()
-    def __enter__(self):return self
-    def __exit__(self,*args):self.close()
+    def __enter__(self) -> Client:return self
+    def __exit__(self,*args:object) -> None:self.close()
 
     def _get(self,path,limit,*,ranged=None,answer=None):
         headers=self._headers()
@@ -416,7 +777,24 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             if isinstance(exc,OphioliteError):raise
             raise VerificationFailed('Scientific response is not valid JSON.') from None
 
-    def assets(self):
+    def assets(self) -> Iterator[AssetItem]:
+        """Every item in this project that you may read, one page asked at a time.
+
+        Returns
+        -------
+        Iterator[AssetItem]
+            Each item as the catalogue lists it: its id, exact revision, name, curves and what you may do with it.
+
+        Raises
+        ------
+        VerificationFailed
+            When a page or its cursor is not one the catalogue can serve.
+
+        Example
+        -------
+        for item in client.assets():
+            print(item['name'], item['revision'])
+        """
         cursor='';seen=set()
         while True:
             page=self._json(self.prefix+'?limit=100&cursor='+quote(cursor,safe=''),2_100_000)
@@ -426,11 +804,40 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             if not isinstance(cursor,str) or len(cursor)>2000 or cursor in seen:raise VerificationFailed('Invalid or repeated catalogue cursor.')
             seen.add(cursor)
 
-    def find_log(self,*,curves=(),quantity=None,name=None,operation='use-as-input'):
-        """E126a: the log in assets() that carries every mnemonic in `curves` (case-insensitive), has the exact `name`,
-        allows `operation`, and carries a curve whose declared quantity is `quantity` (filters combine as AND; a suggested
-        quantity never matches; nothing is renamed, there is no alias table). The largest sample_count wins (an unknown
-        count last), ties by name then asset id. Returns the catalogue item as served; no match is Refused naming each filter."""
+    def find_log(self,*,curves:str|Sequence[str]=(),quantity:str|None=None,name:str|None=None,operation:str='use-as-input') -> AssetItem:
+        """Find the one log in this project that matches every filter you give.
+
+        The filters combine: a log matches only when it meets all of them. Nothing is renamed and there is no alias
+        table. Of several matches the one with the most samples wins (an unknown count last), then by name, then by
+        item id.
+
+        Parameters
+        ----------
+        curves
+            Mnemonics the log must carry, compared without case.
+        quantity
+            A quantity one of its curves must declare; a suggested quantity never matches.
+        name
+            The log's exact name.
+        operation
+            What you must be allowed to do with it: 'read', 'export' or 'use-as-input'.
+
+        Returns
+        -------
+        AssetItem
+            The catalogue item, as `assets()` lists it.
+
+        Raises
+        ------
+        Refused
+            When no log matches (the sentence names each filter), or `operation` is not one of the three.
+
+        Example
+        -------
+        log = client.find_log(curves=['GR'], operation='read')
+        curves = client.read(log['asset_id'], log['revision'], ['GR'])
+        """
+        # E126a
         if operation not in ('read','export','use-as-input'):raise Refused('Choose read, export or use-as-input.')
         if isinstance(curves,str):curves=[curves]
         wanted={c.upper() for c in curves}
@@ -451,13 +858,35 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             raise Refused('Choose an asset, exact revision and value curve.')
         return self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe=''),'?curve='+quote(curve,safe='')
 
-    def describe(self,asset,revision,curve):
+    def describe(self,asset:str,revision:str,curve:str) -> ScientificAsset:
+        """What the server states about one curve of an exact version, checked, without reading its values."""
         path,query=self._path(asset,revision,curve)
         return _core.verify_descriptor(self._json(path+query+PROFILES,256*1024),self.project,asset,revision,curve)
 
-    def provenance(self,asset,revision):
-        """E122 s0: where one exact version came from, as the gateway serves it. `words` is the gateway's own sentence,
-        passed through unchanged (the SDK composes nothing); `record` is None for a version stored before records began."""
+    def provenance(self,asset:str,revision:str) -> Provenance:
+        """Where one exact version came from, as the server records it.
+
+        Parameters
+        ----------
+        asset
+            The item's id.
+        revision
+            The exact version.
+
+        Returns
+        -------
+        Provenance
+            `words` is the server's own sentence, passed on unchanged (nothing is composed here); `record` is None for
+            a version stored before records began.
+
+        Raises
+        ------
+        Refused
+            When the item or the version is not named.
+        VerificationFailed
+            When the answer is not about the version asked.
+        """
+        # E122 s0
         if not all(isinstance(x,str) and x for x in (asset,revision)):
             raise Refused('Choose an asset and its exact revision.')
         return _provenance_of(self._json(_provenance_path(self.prefix,asset,revision),PROVENANCE_BYTES),asset,revision)
@@ -473,11 +902,44 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             state['omitted']=NO_SOURCE_RECORDS;return None,None
         return _parts_of(found)
 
-    def read(self,asset,revision,curves,*,strict_interpretation=False,form=None):
-        """Read exact curves of one revision, verified. E183 s2c: with `form='ophiolite.well-log-curve/1'` each curve is
-        read in the well log form the gateway stored (a WellLogSet of WellLog views: the declared well, depth kind, unit
-        and datum, and the header as received); a curve that has no such form is Refused with the gateway's reasons, and
-        nothing falls back to the application curve. Without `form` the read is unchanged."""
+    def read(self,asset:str,revision:str,curves:list[str]|tuple[str,...],*,strict_interpretation:bool=False,form:str|None=None) -> CurveSet:
+        """Read chosen curves of one exact version, each checked against what the server stored.
+
+        Parameters
+        ----------
+        asset
+            The log's item id.
+        revision
+            The exact version.
+        curves
+            The curves to read, by mnemonic, each once.
+        strict_interpretation
+            True raises InterpretationChanged when the reading recorded at upload and today's reading of the file
+            differ; False warns and reads it, with both readings in the description.
+        form
+            'ophiolite.well-log-curve/1' reads each curve as the well log the server stored (a WellLogSet of WellLog
+            views: the declared well, depth kind, unit and datum, and the header as received); a curve without that
+            form is refused with the server's reasons, and nothing falls back. None reads the curves as before.
+
+        Returns
+        -------
+        CurveSet
+            The curves with their descriptions and the original file.
+
+        Raises
+        ------
+        Refused
+            When `curves` is empty or names a curve twice, `form` is another form, or a curve has no well log form.
+        InterpretationChanged
+            With `strict_interpretation`, when the recorded and today's reading of the file differ.
+
+        Example
+        -------
+        curves = client.read('log-id', 'revision-id', ['GR', 'DT'])
+        for curve in curves.curves:
+            print(curve.curve, len(curve.values))
+        """
+        # E183 s2c: form
         if not isinstance(curves,(list,tuple)) or not curves or len(set(curves))!=len(curves):
             raise Refused('Choose distinct value curves explicitly.')
         if form is not None:return self._read_well_logs(asset,revision,curves,form,strict_interpretation)
@@ -534,11 +996,14 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             out.extend(parts.accept(self._get(path,parts.part_bytes,ranged=parts.range(),answer=answer),answer))
         return bytes(out)
 
-    def curve_window(self,asset,revision,curve,top,base,*,level=None,rows=None,max_pages=64):
-        """E100a: the depth window top..base of one exact curve, for display (ophiolite.windows.CurveWindow).
+    def curve_window(self,asset:str,revision:str,curve:str,top:float,base:float,*,level:int|None=None,rows:int|None=None,max_pages:int=64) -> CurveWindow:
+        """The part of one exact curve between two depths, for display (ophiolite.windows.CurveWindow).
+
         Give exactly one of `level` (0 = every sample, exact; 1..17 = blocks of up to 2**level samples with
         their extrema) or `rows` (the server picks the finest level that fits). Pages are followed until the
-        window is complete, at most `max_pages`; each is verified against this curve's descriptor."""
+        window is complete, at most `max_pages`; each is verified against this curve's descriptor.
+        """
+        # E100a
         from .windows import Window,PAGE_BYTES
         window=Window(self.project,asset,revision,curve,top,base,level,rows,max_pages)
         path,query=self._path(asset,revision,curve)
@@ -548,8 +1013,34 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             answer={}
             if not window.accept(self._get(window.path(path),PAGE_BYTES,answer=answer),answer):return window.result()
 
-    def read_data(self,asset,revision):
-        """E11: read well tops, a trajectory or a regular-grid surface at an exact revision."""
+    def read_data(self,asset:str,revision:str) -> TypedData:
+        """Read well tops, a trajectory, a surface or another kind of data at one exact version, checked.
+
+        A seismic volume is described here and not downloaded; `read_slice` and `read_window` read its samples.
+
+        Parameters
+        ----------
+        asset
+            The item's id.
+        revision
+            The exact version.
+
+        Returns
+        -------
+        TypedData
+            The data in its own kind's form (ophiolite.typed), with its description and the original file.
+
+        Raises
+        ------
+        Refused
+            When the item or the version is not named.
+
+        Example
+        -------
+        tops = client.read_data('tops-id', 'revision-id')
+        print(type(tops).__name__)
+        """
+        # E11; E16: a volume is described only
         if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
         path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
         data=self._json(path+'?'+PROFILES[1:],256*1024)
@@ -564,15 +1055,43 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         result._client=self  # E58b: a kept table downloads itself as a file
         return result
 
-    def export_file(self,asset,revision,destination,*,format='parquet',curves=None):
-        """E58b: save an exact revision as one Parquet, GeoParquet (point sets) or CSV file at `destination`, written by the
-        server from what it stored for that revision: a kept table, well tops, a trajectory, a point set or a LAS log
-        (`curves` chooses curves; omitted, every stored curve). The body is checked against its stated SHA-256 and must
-        say it was written from `revision`; otherwise nothing is saved. The file's own `ophiolite.export` metadata names
-        the revision, the units and the missing-value markers. No pyarrow is needed to download.
-        E203 s1: a version published as a kind of table carries the kind's declaration and digest in a Parquet file's
-        record; a CSV file gets it beside it, as `<file>.table-kind.json` with the columns as exported, read before the
-        file is saved. `ophiolite data table-kinds check FILE` checks either without the server."""
+    def export_file(self,asset:str,revision:str,destination:str|os.PathLike[str],*,format:str='parquet',curves:list[str]|tuple[str,...]|None=None) -> Path:
+        """Save one exact version as a single Parquet, GeoParquet or CSV file, written by the server.
+
+        The server writes it from what it stored for that version: a kept table, well tops, a trajectory, a point set
+        (GeoParquet) or a LAS log. The file's own `ophiolite.export` metadata names the version, the units and the
+        missing-value markers. No pyarrow is needed to download. A version published as a kind of table carries the
+        kind's declaration and digest in a Parquet file; a CSV file gets it beside it, as `<file>.table-kind.json`.
+        `ophiolite data table-kinds check FILE` checks either without the server.
+
+        Parameters
+        ----------
+        asset
+            The item's id.
+        revision
+            The exact version.
+        destination
+            Where the file is saved.
+        format
+            'parquet', 'geoparquet' (point sets) or 'csv'.
+        curves
+            For a LAS log, the curves to write; None writes every stored curve.
+
+        Returns
+        -------
+        Path
+            The saved file.
+
+        Raises
+        ------
+        Refused
+            When the item, the version, the format or the curves are not given as above.
+        VerificationFailed
+            When the server wrote the file from another version; nothing is saved.
+        IntegrityConflict
+            When the file does not match the digest the server stated; nothing is saved.
+        """
+        # E58b; E203 s1: the kind of table beside a CSV file
         if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
         if format not in FILE_FORMATS:raise Refused('Download as one of %s.' % ', '.join(FILE_FORMATS))
         if curves is not None and (isinstance(curves,str) or not all(isinstance(c,str) and c for c in curves)):raise Refused('Give curves as a list of curve names.')
@@ -604,24 +1123,73 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                  for c in table.columns if c['read']]
         return table_kinds.sidecar(block,columns)
 
-    def read_window(self,asset,revision,*,inline=None,crossline=None,trace=None,sample=None,by=None,description=None):
-        """E141: part of a seismic volume (inline, crossline, sample) or of a 2D line (trace, sample) at an exact
-        revision, read and verified (ophiolite.volume_windows.VolumeWindowResult: .values in C order, .window_digest,
-        .to_numpy()). Ranges are n, (first, last) or 'first:last', both ends included; inline and crossline need
-        by='label' or 'ordinal'; a line is addressed by trace position in file order. A window the syntax or the server
-        refuses raises WindowRefused by name; the document is checked before any piece is asked, each piece against its
-        headers and digest. The whole window is held decoded (about 8-9 x its stored bytes); iter_window holds one piece.
-        `description=` reuses a previous result's `.description` of the same revision."""
+    def read_window(self,asset:str,revision:str,*,inline=None,crossline=None,trace=None,sample=None,by:str|None=None,description=None) -> VolumeWindowResult:
+        """Read part of a seismic volume or of a 2D line at one exact version, checked piece by piece.
+
+        Ranges are n, (first, last) or 'first:last', both ends included. The window is checked before any piece is
+        asked, and each piece against its headers and digest. The whole window is held decoded (about 8-9 x its
+        stored bytes); `iter_window` holds one piece at a time.
+
+        Parameters
+        ----------
+        asset
+            The volume's or line's item id.
+        revision
+            The exact version.
+        inline, crossline
+            A volume's range of inlines and crosslines; each needs `by`.
+        trace
+            A line's range of traces, by position in file order.
+        sample
+            The range of samples.
+        by
+            'label' (the numbers in the trace headers) or 'ordinal' (positions), for inline and crossline.
+        description
+            A previous result's `.description` of the same version, to skip asking for it again.
+
+        Returns
+        -------
+        VolumeWindowResult
+            `.values` in C order, `.window_digest` and `.to_numpy()` (ophiolite.volume_windows).
+
+        Raises
+        ------
+        WindowRefused
+            When the range is not well formed or the server refuses the window, with its reason.
+        Refused
+            When the item or the version is not named.
+        """
+        # E141
         reader=self.iter_window(asset,revision,inline=inline,crossline=crossline,trace=trace,sample=sample,by=by,description=description)
         from .volume_windows import VolumeWindowResult
         traces=[]
         for piece in reader:traces.extend(piece.values)
         return VolumeWindowResult(reader.window,traces)
 
-    def iter_window(self,asset,revision,*,inline=None,crossline=None,trace=None,sample=None,by=None,description=None):
-        """E141: the window of read_window as an iterator of verified pieces (ophiolite.volume_windows.WindowReader;
-        WindowPiece(index, count, traces, values)); `.complete` and `.window_digest` once the last piece is verified.
-        The document is asked and checked now; each piece when iterated, asked once more after a transport failure."""
+    def iter_window(self,asset:str,revision:str,*,inline=None,crossline=None,trace=None,sample=None,by:str|None=None,description=None) -> WindowReader:
+        """Read the window `read_window` reads, one checked piece at a time.
+
+        The window is asked and checked now; each piece when you iterate, asked once more after a network failure.
+
+        Parameters
+        ----------
+        asset, revision, inline, crossline, trace, sample, by, description
+            As `read_window` takes them.
+
+        Returns
+        -------
+        WindowReader
+            An iterator of WindowPiece(index, count, traces, values); `.complete` and `.window_digest` once the last
+            piece is checked (ophiolite.volume_windows).
+
+        Raises
+        ------
+        WindowRefused
+            When the range is not well formed or the server refuses the window, with its reason.
+        Refused
+            When the item or the version is not named.
+        """
+        # E141
         from .volume_windows import Window,WindowReader,asked,check_document,parse_window,window_path
         if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
         query=parse_window(inline=inline,crossline=crossline,trace=trace,sample=sample,by=by)
@@ -685,11 +1253,35 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         body=self._window_get(base+'/headers/%d?' % index+urlencode(list(query)+[('window',document['window_id'])]),length,answer)
         return body,answer
 
-    def read_slice(self,asset,revision,axis,label,*,volume=None):
-        """E16: one slice of a seismic volume at an exact revision. `axis` is 'inline', 'crossline'
-        or 'sample'; `label` is the inline or crossline number from the trace headers, or the
-        0-based sample number. Verified against the volume's description (read once and reusable
-        through `volume=`); only the chunks holding the slice are read on the server."""
+    def read_slice(self,asset:str,revision:str,axis:str,label:int,*,volume=None) -> SeismicSlice:
+        """Read one slice of a seismic volume at one exact version, checked against the volume's description.
+
+        Only the parts holding the slice are read on the server.
+
+        Parameters
+        ----------
+        asset
+            The volume's item id.
+        revision
+            The exact version.
+        axis
+            'inline', 'crossline' or 'sample'.
+        label
+            The inline or crossline number from the trace headers, or the sample number counted from 0.
+        volume
+            The volume as `read_data` returned it, to read its description once for many slices.
+
+        Returns
+        -------
+        SeismicSlice
+            The slice's values with its place in the volume (ophiolite.typed).
+
+        Raises
+        ------
+        Refused
+            When `axis` or `label` is not one of the above, or the item is not a seismic volume at this version.
+        """
+        # E16
         volume=self._volume(asset,revision,axis,label,volume)
         path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')+'/slices/'+quote(axis,safe='')+'/'+str(label)
         return _core.slice_result(volume,self._get(path,32*1024*1024),asset,revision,axis,label)
@@ -700,10 +1292,34 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if getattr(volume,'type',None)!='seismic-volume' or (volume.descriptor.asset_id,volume.descriptor.revision)!=(asset,revision):raise Refused('Slices come from a seismic volume at this exact revision.')
         return volume
 
-    def export_slices(self,asset,revision,slices,destination):
-        """E16: export chosen slices [(axis, label), ...] of one exact volume revision into a new
-        portable bundle (2.3). The bundle carries the volume's description and each slice with its
-        declared scope; the original volume is named by its digest and not included."""
+    def export_slices(self,asset:str,revision:str,slices,destination:str|os.PathLike[str]) -> Bundle:
+        """Export chosen slices of one exact version of a seismic volume into a new portable bundle.
+
+        The bundle carries the volume's description and each slice; the original volume is named by its digest and
+        not included.
+
+        Parameters
+        ----------
+        asset
+            The volume's item id.
+        revision
+            The exact version.
+        slices
+            [(axis, label), ...], 1 to 64 slices, each once, as `read_slice` takes them.
+        destination
+            The new bundle's folder.
+
+        Returns
+        -------
+        Bundle
+            The bundle, opened once it checks as a reader would.
+
+        Raises
+        ------
+        Refused
+            When the slices are not 1 to 64 distinct slices of a seismic volume.
+        """
+        # E16: bundle 2.3
         from .bundle import write_bundle
         chosen=self._slice_choice(slices)
         volume=self.read_data(asset,revision)
@@ -721,20 +1337,56 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if len(set(chosen))!=len(chosen):raise Refused('Each slice is chosen once.')
         return chosen
 
-    def read_many(self,selections,**options):
+    def read_many(self,selections,**options) -> list[CurveSet]:
+        """Read several exact versions' curves, one `read` each, in the order given.
+
+        Parameters
+        ----------
+        selections
+            [(asset, revision, curves), ...].
+        **options
+            As `read` takes them, for every read.
+
+        Returns
+        -------
+        list[CurveSet]
+            One per selection.
+        """
         return [self.read(asset,revision,curves,**options) for asset,revision,curves in selections]
 
-    def export(self,selections,destination,*,groups=True,entities=True,citation=None):
-        """Export exact revisions [(asset, revision, [curves] or None)] into a new portable bundle.
+    def export(self,selections,destination:str|os.PathLike[str],*,groups:bool=True,entities:bool=True,citation=None) -> Bundle:
+        """Export exact versions into a new portable bundle that anyone can check without the server.
 
-        Every item is read through the ordinary exact-read path, so the server's current
-        permissions apply to each representation; one refusal fails the whole export and
-        nothing is published. The bundle becomes visible only after it checks as a reader
-        would. Returns the opened Bundle.
+        Every item is read through the ordinary exact read, so the server's current permissions apply to each one;
+        one refusal fails the whole export and nothing is written. The bundle becomes visible only after it checks as
+        a reader would.
 
-        E147 s2: CITATION {title, description[, version]} makes a cited bundle (2.15): the creators are the
-        persons the selected versions' stories name, the publisher the project's organisation and the licence
-        the files' one open licence, or a notice."""
+        Parameters
+        ----------
+        selections
+            [(asset, revision, [curves] or None), ...]; None for data without curves (well tops, trajectories,
+            surfaces). A seismic volume is exported with `export_slices`.
+        destination
+            The new bundle's folder.
+        groups
+            True includes the result groups the items belong to.
+        entities
+            True includes the wells and wellbores the items name.
+        citation
+            {title, description[, version]} makes a cited bundle: the creators are the people the versions' stories
+            name, the publisher the project's organisation and the licence the files' one open licence, or a notice.
+
+        Returns
+        -------
+        Bundle
+            The opened bundle.
+
+        Raises
+        ------
+        Refused
+            When nothing is chosen, or a selection is a whole seismic volume.
+        """
+        # E147 s2: citation (bundle 2.15); E11: items without curves
         from .bundle import write_bundle
         from . import export_citation
         if not isinstance(selections,(list,tuple)) or not selections:raise Refused('Choose at least one exact revision to export.')
@@ -929,25 +1581,32 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
     def _post(self,area,operation,body,**options):
         from .publish import json_bytes,MAX_REQUEST_BYTES,CHECK_REQUEST_BYTES,FIGURE_REQUEST_BYTES
         if 'project_id' in body and body['project_id']!=self.project:raise Refused('The request belongs to another project.')
-        limit=CHECK_REQUEST_BYTES if (area,operation) in (('checks','publish'),('checks','compare')) else FIGURE_REQUEST_BYTES if (area,operation)==('attachments','add') else MAX_REQUEST_BYTES
+        limit=CHECK_REQUEST_BYTES if (area,operation) in (('checks','publish'),('checks','compare')) else FIGURE_REQUEST_BYTES if (area,operation) in (('attachments','add'),('documents','add')) else MAX_REQUEST_BYTES
         return self._post_bytes(area,operation,json_bytes({'project_id':self.project,**body},limit),**options)
 
-    def configure(self,asset=None,revision=None,*,curve,name,command_id=None,publication_profile='las-derived-curves/1',release_id=None,asset_index=0,runners=None):
-        """Configure exact input. Without a WorkFolder this is not recoverable after restart."""
+    def configure(self,asset:str|None=None,revision:str|None=None,*,curve:str,name:str,command_id:str|None=None,publication_profile:str='las-derived-curves/1',release_id=None,asset_index:int=0,runners=None) -> Binding:
+        """Configure an application's run on one exact curve, as a binding.
+
+        Without a WorkFolder this is not recoverable after a restart.
+        """
         import uuid
         from . import publish as planning
         from .models.api import Binding
         body=planning.configure_body(asset,revision,curve,name,command_id or uuid.uuid4().hex,publication_profile=publication_profile,release_id=release_id,asset_index=asset_index,runners=runners)
         return planning.verify_application_reply('configure',body,self._post('applications','configure',body),self.project,self)
 
-    def start(self,binding,*,application_version,parameters,command_id=None):
-        """Resolve a run. Without a WorkFolder this is not recoverable after restart."""
+    def start(self,binding,*,application_version,parameters,command_id:str|None=None) -> Run:
+        """Start a run of a binding with the application version and parameters you give.
+
+        Without a WorkFolder this is not recoverable after a restart.
+        """
         import uuid
         from . import publish as planning
         body=planning.start_body(binding,command_id or uuid.uuid4().hex,application_version,parameters)
         return planning.verify_application_reply('start',body,self._post('applications','start',body),self.project,self)
 
-    def run_input(self,run):
+    def run_input(self,run) -> tuple[bytes, ApplicationCurve]:
+        """The original file and the curve a run reads, each checked against what the run names."""
         from . import publish as planning
         from .models.generated import ApplicationCurve
         result=self._post('applications','original',{'id':run.id})
@@ -962,11 +1621,38 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         run._original_reference={k:v for k,v in result.items() if k!='payload_base64'}
         return original,view
 
-    def publish(self,run,*,derived_curves=None,changes=None,new_version_of=None):
-        """Publish reviewed values. Without a WorkFolder this is not recoverable after restart.
+    def publish(self,run,*,derived_curves=None,changes=None,new_version_of=None) -> Receipt:
+        """Publish the values you reviewed for a run as a result.
 
-        ``new_version_of`` (a receipt or exact result you author, or one your project lets you add versions
-        to, E70c) adds the values as the next version of that result; its revision is the expected parent."""
+        Without a WorkFolder this is not recoverable after a restart.
+
+        Parameters
+        ----------
+        run
+            The run whose input you read with `run_input`.
+        derived_curves
+            The curves you derived (a run configured for 'las-derived-curves/1'); give this or `changes`.
+        changes
+            The sample changes you made (a run configured for 'curve-edits/1'); give this or `derived_curves`.
+        new_version_of
+            A receipt or exact result you author, or one your project lets you add versions to: the values become
+            its next version, with its revision as the expected parent.
+
+        Returns
+        -------
+        Receipt
+            What was published.
+
+        Raises
+        ------
+        Refused
+            When the run's input was not read first, or the values do not fit how the run was configured.
+        ValidationFailed
+            When both or neither of `derived_curves` and `changes` are given, or they do not check.
+        VerificationFailed
+            When the input or the publication names another input than the run's.
+        """
+        # E70c: a version of a colleague's result
         from . import publish as planning
         if run._original is None or run._view is None:raise Refused('Read the exact run input before validating and publishing values.')
         body=planning.publication_body(run,run._original,run._view,derived_curves=derived_curves,changes=changes,new_version_of=new_version_of)
@@ -974,48 +1660,89 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if published.input_reference!=run.input_reference or published.input_sha256!=run.input_sha256:raise VerificationFailed('Publication changed the resolved scientific input.')
         return published.receipt
 
-    def download(self,receipt):
+    def download(self,receipt) -> bytes:
+        """The published file of a receipt, checked against the digest and size the receipt names."""
         from . import publish as planning
         result=self._post('applications','download',{'id':receipt.publication_id})
         return planning.decode_payload(result,sha256=receipt.manifest.sha256,length=receipt.manifest.bytes)
 
-    def results(self):
+    def results(self) -> list[ResultSummary | RestrictedResultSummary]:
+        """The results in this project you may see, each with only what you may open of it."""
         from . import publish as planning
         value=self._post('applications','result-list',{})
         if not isinstance(value.get('results'),list):raise VerificationFailed('Invalid result catalogue response.')
         return [planning.parse_result(item) for item in value['results']]
 
-    def ai_use(self,asset):
+    def ai_use(self,asset:str) -> dict[str, Any]:
         """Who may use this item for AI (as its owner) or your own permission (as a reader)."""
         return self._post('ai-use','get',{'asset_id':asset})
 
-    def grant_ai_use(self,asset,grants,*,expected_generation,command_id=None):
-        """Owner only: {person: ['embedding'|'training'|'evaluation', ...]} for people who can read the item."""
+    def grant_ai_use(self,asset:str,grants,*,expected_generation,command_id:str|None=None) -> dict[str, Any]:
+        """Allow people who can read an item you own to use it for AI.
+
+        `grants` is {person: ['embedding'|'training'|'evaluation', ...]}; `expected_generation` the one `ai_use`
+        returned.
+        """
         import uuid
         return self._post('ai-use','grant',{'asset_id':asset,'grants':grants,'expected_generation':expected_generation,'command_id':command_id or uuid.uuid4().hex})
 
-    def grant_own_ai_use(self,asset,purpose,granted=True,*,command_id=None):
-        """E134 s2: your own work in an item you uploaded or made may be used for purpose ('training' or 'evaluation'),
-        or with granted=False no longer (forward only). Returns {asset_id, purpose, state, sequence, at}."""
+    def grant_own_ai_use(self,asset,purpose,granted=True,*,command_id=None) -> dict[str, Any]:
+        """Allow your own work in an item you uploaded or made to be used for AI, or stop allowing it.
+
+        Parameters
+        ----------
+        asset
+            The item's id.
+        purpose
+            'training' or 'evaluation'.
+        granted
+            True allows it; False stops allowing it from now on.
+        command_id
+            The same id makes a retry return the first answer; None makes a new one.
+
+        Returns
+        -------
+        dict[str, Any]
+            {asset_id, purpose, state, sequence, at} as the server recorded it.
+        """
+        # E134 s2
         import uuid
         return self._post('ai-use','self-grant',{'asset_id':asset,'purpose':purpose,'state':'granted' if granted else 'withdrawn','command_id':command_id or uuid.uuid4().hex})
 
-    def search(self,text,*,method=None,limit=20):
-        """Rank what you may read by its description ('words', or 'embedding' with the deployment's local model)."""
+    def search(self,text,*,method=None,limit=20) -> dict[str, Any]:
+        """Find what you may read in this project by its description, best match first.
+
+        Parameters
+        ----------
+        text
+            What you look for, in your own words.
+        method
+            'words', or 'embedding' with the deployment's own local model; None is the server's default.
+        limit
+            The most matches to return.
+
+        Returns
+        -------
+        dict[str, Any]
+            The matches, ranked, as the server answered.
+        """
         return self._post('search','query',{'text':text,'limit':limit,**({'method':method} if method else {})})
 
-    def find(self,organization,text=None,*,method=None,kinds=None,well=None,bbox=None,since=None,until=None,published_by=None,projects=None,include_archived=False,limit=20,cursor=None):
-        """E145 s3: one page of the versions you may read in every project of `organization` (organizations/search):
-        an ophiolite.search/2 answer, or /3 when answered by meaning. A field left None is the server's default; the
-        server checks the question. bbox is {'minx','miny','maxx','maxy'[,'crs']}. find_all follows next_cursor."""
+    def find(self,organization:str,text:str|None=None,*,method:str|None=None,kinds=None,well=None,bbox=None,since=None,until=None,published_by=None,projects=None,include_archived:bool=False,limit:int=20,cursor:str|None=None) -> SearchAnswer | SearchAnswerByMeaning:
+        """One page of the versions you may read in every project of an organisation that match your question.
+
+        The answer is an ophiolite.search/2 page, or /3 when answered by meaning. A field left None is the server's
+        default; the server checks the question. `bbox` is {'minx','miny','maxx','maxy'[,'crs']}. `find_all` follows
+        `next_cursor`.
+        """
+        # E145 s3
         from . import publish as planning
         from .models.generated import SearchAnswer,SearchAnswerByMeaning
         given={'text':text,'method':method,'kinds':None if kinds is None else list(kinds),'well':well,'bbox':bbox,'since':since,'until':until,
                'published_by':published_by,'projects':None if projects is None else list(projects),'cursor':cursor}
         body={'organization_id':organization,**{k:v for k,v in given.items() if v is not None},**({'include_archived':True} if include_archived else {}),'limit':limit}
         from .errors import OphioliteError
-        from .access_history import _headers,_post  # the organisation-level read of person_history (no project in the body or headers)
-        try:answer=_post(self.http,self.url,'/api/v1/organizations/search',body,_headers(self.credential,self.url,None,self._sender),notifier=getattr(self,'_notifier',None))
+        try:answer=self._organization_search(body)
         except OphioliteError as refused:  # the server's sentence (the filter it names; E14's without a model), not the transport's generic one
             if not refused.server_message or refused.server_message==refused.message:raise
             raise type(refused)(refused.server_message,refused.recovery,status=refused.status,code=refused.code,remedy=refused.remedy,
@@ -1023,8 +1750,14 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         by_meaning=isinstance(answer,dict) and answer.get('schema')=='ophiolite.search/3'
         return planning.parse(SearchAnswerByMeaning if by_meaning else SearchAnswer,answer)
 
-    def find_all(self,organization,text=None,*,limit=50,**filters):
-        """E145 s3: every row of find(...) in the server's order, one page held at a time, following next_cursor to its end."""
+    def _organization_search(self,body):
+        """find's one POST (adhoc-async-client-find: the asynchronous client's worker sends it on its own loop)."""
+        from .access_history import _headers,_post  # the organisation-level read of person_history (no project in the body or headers)
+        return _post(self.http,self.url,'/api/v1/organizations/search',body,_headers(self.credential,self.url,None,self._sender),notifier=getattr(self,'_notifier',None))
+
+    def find_all(self,organization:str,text:str|None=None,*,limit:int=50,**filters) -> Iterator[SearchRow]:
+        """Every row `find` answers, in the server's order, with one page held at a time."""
+        # E145 s3
         cursor=None
         while True:
             page=self.find(organization,text,limit=limit,cursor=cursor,**filters)
@@ -1032,18 +1765,47 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             cursor=page.next_cursor
             if not cursor:return
 
-    def export_corpus(self,selections,destination,*,purpose,seed=0,fractions=(0.8,0.1,0.1),groups=None):
-        """An AI corpus of exact curves the server authorized for `purpose`; see ophiolite.corpus."""
+    def export_corpus(self,selections,destination,*,purpose,seed=0,fractions=(0.8,0.1,0.1),groups=None) -> dict[str, Any]:
+        """Write a corpus for AI from exact curves the server allows you to use for that purpose.
+
+        Parameters
+        ----------
+        selections
+            [(asset, revision, [curves]), ...]; every item names its curves.
+        destination
+            A new folder for the corpus.
+        purpose
+            What the corpus is for, such as 'training' or 'evaluation'; the server allows each item for it or not.
+        seed
+            The seed that splits the items: the same seed splits them the same way.
+        fractions
+            The shares of the train, validation and test splits, adding up to 1.
+        groups
+            {asset_id: group name}: the group an item stays with in one split, instead of its LAS well.
+
+        Returns
+        -------
+        dict[str, Any]
+            The summary of the corpus as written and checked (ophiolite.corpus).
+
+        Raises
+        ------
+        Refused
+            When the destination exists, nothing is chosen, an item names no curves or has no well or group to split
+            by, or the fractions do not add up to 1.
+        VerificationFailed
+            When the corpus as written does not check against itself and its bundle.
+        """
         from .corpus import export_corpus
         return export_corpus(self,selections,destination,purpose=purpose,seed=seed,fractions=fractions,groups=groups)
 
-    def result_groups(self):
+    def result_groups(self) -> list[ResultGroup]:
         """Project result groups you can see, with only the members and recommendation you may open."""
         from . import publish as planning
         from .models.api import ResultGroup
         return [planning.parse(ResultGroup,g) for g in self._post('result-groups','list',{})['groups']]
 
-    def diff(self,a,b):
+    def diff(self,a,b) -> ResultDiff:
         """Changes between two exact result versions: parameters, input and (when comparable) samples."""
         from . import publish as planning
         from .models.api import ResultDiff
@@ -1064,14 +1826,20 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             seen.add(cursor)
         raise VerificationFailed('The survey read did not end.')
 
-    def surveys(self):
-        """The project's surveys you may see (a member you may read, or your own), oldest first: dicts with survey_id,
-        name, identity, revision and count (the members you may read)."""
+    def surveys(self) -> Iterator[dict[str, Any]]:
+        """The project's surveys you may see, oldest first.
+
+        You see a survey with a member you may read, or your own. Each is a dict with survey_id, name, identity,
+        revision and count (the members you may read).
+        """
         for page in self._pages('list',{},'surveys'):yield from page['surveys']
 
-    def holder_pages(self,item=None,*,limit=None):
-        """E171 s1: the pages of exchange/holders (ophiolite.held-copies/1), first page first, each validated: which
-        member's application holds which version of the items you may read (of `item` alone when named)."""
+    def holder_pages(self,item:str|None=None,*,limit:int|None=None) -> Iterator[dict[str, Any]]:
+        """Which member's application holds which version of the items you may read, page by page.
+
+        Each page is an ophiolite.held-copies/1 document, checked, first page first; `item` names one item alone.
+        """
+        # E171 s1
         from . import publish as planning
         from .models.generated import HeldCopies
         body={**({'item':item} if item is not None else {}),**({'limit':limit} if limit else {})}
@@ -1086,9 +1854,12 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             seen.add(cursor)
         raise VerificationFailed('The holders read did not end.')
 
-    def holders(self,item=None):
-        """E171 s1: who holds which version, read whole: the first page's document with every page's rows and no
-        `next`. Plain words (who, which application, how far behind) are the CLI's `ophiolite data holders`."""
+    def holders(self,item:str|None=None) -> dict[str, Any]:
+        """Who holds which version, read whole: the first page's document with every page's rows and no `next`.
+
+        Plain words (who, which application, how far behind) are the CLI's `ophiolite data holders`.
+        """
+        # E171 s1
         whole=None
         for page in self.holder_pages(item):
             if whole is None:whole=dict(page,rows=list(page['rows']))
@@ -1096,10 +1867,13 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         whole['next']=None
         return whole
 
-    def receipt_pages(self,item,revision,*,limit=None):
-        """E184 s0a: the pages of exchange/receipts (ophiolite.transfer-receipts/1), first page first, each validated:
-        what the send that made this version of `item` and each get of it kept, changed and did not carry. Read by the
-        item's audience; an unknown and an unreadable version answer alike."""
+    def receipt_pages(self,item:str,revision:str,*,limit:int|None=None) -> Iterator[dict[str, Any]]:
+        """What the send that made a version and each get of it kept, changed and did not carry, page by page.
+
+        Each page is an ophiolite.transfer-receipts/1 document, checked, first page first. Read by the item's
+        audience; an unknown and an unreadable version answer alike.
+        """
+        # E184 s0a
         from . import publish as planning
         from .models.generated import TransferReceipts
         body={'item':item,'revision':revision,**({'limit':limit} if limit else {})}
@@ -1114,8 +1888,9 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             seen.add(cursor)
         raise VerificationFailed('The receipts read did not end.')
 
-    def receipts(self,item,revision):
-        """E184 s0a: one version's receipts read whole: the first page's document with every page's gets and no `next`."""
+    def receipts(self,item:str,revision:str) -> dict[str, Any]:
+        """One version's receipts read whole: the first page's document with every page's gets and no `next`."""
+        # E184 s0a
         whole=None
         for page in self.receipt_pages(item,revision):
             if whole is None:whole=dict(page,got=list(page['got']))
@@ -1123,9 +1898,13 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         whole['next']=None
         return whole
 
-    def affected_pages(self,item,*,against='head',limit=None):
-        """E177 s1: the pages of changes/affected (ophiolite.affected/1), first page first, each validated: what rests on
-        the versions of `item` other than its head (against='next': its head too, before a new version is published)."""
+    def affected_pages(self,item:str,*,against:str='head',limit:int|None=None) -> Iterator[dict[str, Any]]:
+        """What rests on the versions of an item other than its newest, page by page.
+
+        With against='next' its newest version counts too, before a new version is published. Each page is an
+        ophiolite.affected/1 document, checked, first page first.
+        """
+        # E177 s1
         from . import publish as planning
         from .models.generated import Affected
         body={'asset_id':item,'against':against,**({'limit':limit} if limit else {})}
@@ -1140,79 +1919,116 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             seen.add(cursor)
         raise VerificationFailed('The affected read did not end.')
 
-    def affected(self,item,*,against='head'):
-        """E177 s1: the whole answer, read page by page. A plain dict, not an ophiolite.affected/1 document: `rows` from
-        every page; `item`, `as_of`, `counts` and `without_inputs` from the last page read; `restricted` when any page
-        said so; `complete` only when every page did; `pages` the number of pages. Plain words are the CLI's
-        `ophiolite results affected`."""
+    def affected(self,item:str,*,against:str='head') -> dict[str, Any]:
+        """What rests on the versions of an item other than its newest, read whole.
+
+        A plain dict, not an ophiolite.affected/1 document: `rows` from every page; `item`, `as_of`, `counts` and
+        `without_inputs` from the last page read; `restricted` when any page said so; `complete` only when every page
+        did; `pages` the number of pages. Plain words are the CLI's `ophiolite results affected`.
+        """
+        # E177 s1
         return affected_whole(self.affected_pages(item,against=against))
 
-    def survey_pages(self,survey_id,revision=None,*,view='revision',limit=None):
+    def survey_pages(self,survey_id:str,revision=None,*,view:str='revision',limit:int|None=None) -> Iterator[SurveyPage]:
         """The pages of one survey revision (ophiolite.survey/1), first page first; see survey()."""
         from . import publish as planning
         from .models.generated import SurveyPage
         body={'survey_id':survey_id,'view':view,**({'revision':revision} if revision is not None else {}),**({'limit':limit} if limit else {})}
         for page in self._pages('get',body,'members'):yield planning.parse(SurveyPage,page)
 
-    def survey(self,survey_id,revision=None,*,view='revision'):
-        """A survey revision (the latest when none is named) with every member and relation you may read, read page
-        by page. view='latest' serves each member's newest revision you may read where its role still holds."""
+    def survey(self,survey_id:str,revision=None,*,view:str='revision') -> Survey:
+        """A survey revision, the latest when none is named, with every member and relation you may read.
+
+        It is read page by page. view='latest' serves each member's newest revision you may read where its role still
+        holds.
+        """
         return _surveys.gathered(self.survey_pages(survey_id,revision,view=view))
 
-    def survey_history(self,survey_id):
+    def survey_history(self,survey_id:str) -> Iterator[dict[str, Any]]:
         """The survey's events, newest first, each only when you may read every version it names."""
         for page in self._pages('history',{'survey_id':survey_id},'events'):yield from page['events']
 
     def _survey_command(self,kind,body,command_id):
         return self._post('surveys',kind,_surveys.command(body,command_id),retry=True)  # one command id across the retry
 
-    def create_survey(self,name,members,*,relations=(),identity=None,context=None,source=None,command_id=None):
+    def create_survey(self,name,members,*,relations=(),identity=None,context=None,source=None,command_id=None) -> dict[str, Any]:
         """A new survey of MEMBERS ({role, asset_id, revision}); identity {authority, key}, else provisional."""
         body={'name':name,'identity':identity or {'provisional':True},'context':context or {},'members':list(members),'relations':list(relations),
               **({'source':source} if source is not None else {})}
         return self._survey_command('create',body,command_id)
 
-    def add_survey_members(self,survey_id,expected_revision,members,*,command_id=None):
+    def add_survey_members(self,survey_id,expected_revision,members,*,command_id=None) -> dict[str, Any]:
+        """Add members ({role, asset_id, revision}) to the survey revision you read, in one new revision."""
         return self._survey_command('add',{'survey_id':survey_id,'expected_revision':expected_revision,'members':list(members)},command_id)
 
-    def remove_survey_members(self,survey_id,expected_revision,members,*,command_id=None):
+    def remove_survey_members(self,survey_id,expected_revision,members,*,command_id=None) -> dict[str, Any]:
         """Removes members (their relations close in the same revision)."""
         return self._survey_command('remove',{'survey_id':survey_id,'expected_revision':expected_revision,'members':[_surveys.key(m) for m in members]},command_id)
 
-    def replace_survey_member(self,survey_id,expected_revision,old,new,*,command_id=None):
+    def replace_survey_member(self,survey_id,expected_revision,old,new,*,command_id=None) -> dict[str, Any]:
         """Replaces OLD with NEW ({role, asset_id, revision}); relations are re-pointed and checked again."""
         return self._survey_command('replace',{'survey_id':survey_id,'expected_revision':expected_revision,'from':_surveys.key(old),'to':new},command_id)
 
-    def relate_survey_members(self,survey_id,expected_revision,relations,*,command_id=None):
+    def relate_survey_members(self,survey_id,expected_revision,relations,*,command_id=None) -> dict[str, Any]:
+        """Add relations between members of the survey revision you read, checked, in one new revision."""
         return self._survey_command('relate',{'survey_id':survey_id,'expected_revision':expected_revision,'relations':list(relations)},command_id)
 
-    def unrelate_survey_members(self,survey_id,expected_revision,relations,*,command_id=None):
+    def unrelate_survey_members(self,survey_id,expected_revision,relations,*,command_id=None) -> dict[str, Any]:
+        """Close relations between members of the survey revision you read, in one new revision."""
         return self._survey_command('unrelate',{'survey_id':survey_id,'expected_revision':expected_revision,'relations':list(relations)},command_id)
 
-    def rename_survey(self,survey_id,expected_revision,name,*,command_id=None):
+    def rename_survey(self,survey_id,expected_revision,name,*,command_id=None) -> dict[str, Any]:
+        """Give the survey revision you read a new name, in one new revision."""
         return self._survey_command('rename',{'survey_id':survey_id,'expected_revision':expected_revision,'name':name},command_id)
 
-    def identify_survey(self,survey_id,expected_revision,identity,*,command_id=None):
+    def identify_survey(self,survey_id,expected_revision,identity,*,command_id=None) -> dict[str, Any]:
         """Gives a provisional survey its identity {authority, key}; once per project and identity."""
         return self._survey_command('identify',{'survey_id':survey_id,'expected_revision':expected_revision,'identity':identity},command_id)
 
-    def restate_survey(self,survey_id,expected_revision,members,relations=(),*,name=None,command_id=None):
-        """E142 s2a: the survey's complete new lists in one revision: what is absent closes, what is new opens, unchanged
-        members stay; members you cannot read are kept. The same lists and name answer changed: False, no revision."""
+    def restate_survey(self,survey_id,expected_revision,members,relations=(),*,name=None,command_id=None) -> dict[str, Any]:
+        """State the survey's complete new lists of members and relations in one revision.
+
+        What is absent closes, what is new opens, unchanged members stay; members you cannot read are kept. The same
+        lists and name answer changed: False, with no new revision.
+        """
+        # E142 s2a
         body={'survey_id':survey_id,'expected_revision':expected_revision,'members':list(members),'relations':list(relations),
               **({'name':name} if name is not None else {})}
         return self._survey_command('restate',body,command_id)
 
-    def link_survey_members(self,survey_id,expected_revision,members,*,command_id=None):
-        """E142 s2a: items already in the project made members, as add does, recorded as a person's linking (kind link)."""
+    def link_survey_members(self,survey_id,expected_revision,members,*,command_id=None) -> dict[str, Any]:
+        """Make items already in the project members, as add does, recorded as a person's linking (kind link)."""
+        # E142 s2a
         return self._survey_command('link',{'survey_id':survey_id,'expected_revision':expected_revision,'members':list(members)},command_id)
 
-    def withdraw_survey(self,survey_id,expected_revision,*,command_id=None):
+    def withdraw_survey(self,survey_id,expected_revision,*,command_id=None) -> dict[str, Any]:
         """Withdraws the survey: no longer listed or read; nothing it names is changed."""
         return self._survey_command('withdraw',{'survey_id':survey_id,'expected_revision':expected_revision},command_id)
 
-    def history(self,asset):
-        """Every version of a result you can read, oldest first."""
+    def history(self,asset) -> History:
+        """Every version of a result you can read, oldest first.
+
+        Parameters
+        ----------
+        asset
+            A result or derived publication: its receipt, or {asset_id, revision, authority}.
+
+        Returns
+        -------
+        History
+            `head_revision`, `count` and `revisions`, each with its number, parent and who published it.
+
+        Raises
+        ------
+        Refused
+            For an uploaded original, whose versions are not listed here, or for a selection that is not exact.
+
+        Example
+        -------
+        result = {'asset_id': 'result-id', 'revision': 'revision-id', 'authority': 'ophiolite:derived'}
+        history = client.history(result)
+        print(history.head_revision, history.count)
+        """
         from . import publish as planning
         from .models.api import History
         target=planning.selection(asset)
@@ -1238,28 +2054,73 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if info.get('revision')!=asset['revision']:raise Refused('Recipients are set on the publication as a whole and share every version; select its current version to review them.')
         return {**asset,'authority':'ophiolite:publication'},info
 
-    def grants(self,asset):
+    def grants(self,asset) -> Grants:
+        """Who an item is shared with, as you would review it before `share`.
+
+        Parameters
+        ----------
+        asset
+            A result, a derived publication or an uploaded original: its receipt, or {asset_id, revision, authority}.
+
+        Returns
+        -------
+        Grants
+            The recipients and the `generation` to pass to `share`.
+
+        Raises
+        ------
+        Refused
+            When the selection is not exact, or names an earlier version of a derived publication (recipients are
+            set on the publication as a whole and share every version).
+        """
         from . import publish as planning
         asset,result=self._sharing_target(asset)
         return planning.grants(asset,result)
 
-    def share(self,asset,*,read,expected_generation,reuse=None,command_id=None,project=None):
-        """Replace recipients, conditionally.
+    def share(self,asset,*,read,expected_generation:int,reuse=None,command_id:str|None=None,project:bool|None=None) -> Grants | UploadResult | ResultSummary | RestrictedResultSummary:
+        """Replace who an item is shared with, only if no one changed it since you reviewed it.
 
         Recipients belong to the result or derived publication as a whole: sharing
         shares every version of it, earlier and later; an uploaded original has one.
-        Pass ``expected_generation`` from the ``client.grants(asset)`` snapshot you
-        reviewed. The request carries a command id; after an unknown outcome it is
-        replayed once, which returns the applied result or refuses with
-        IntegrityConflict if anyone changed the recipients meanwhile (a revocation
-        is never undone). Unconditional replacement ended with the E7 transition
-        release; servers refuse it (428).
+        The request carries a command id; after an unknown outcome it is replayed
+        once, which returns the applied result or refuses with IntegrityConflict if
+        anyone changed the recipients meanwhile (a revocation is never undone).
+        Servers refuse an unconditional replacement (428).
 
-        ``project=True`` also shares a derived publication with everyone in the
-        project, including people who join later; ``False`` withdraws that.
-        ``None`` (the default) leaves it as it is. Either explicit value needs a
-        server that reports it, is refused before anything is sent otherwise, and
-        is verified in the answer."""
+        Parameters
+        ----------
+        asset
+            A result, a derived publication or an uploaded original, as `grants` takes it.
+        read
+            The account names of the people who may read it from now on, each once.
+        expected_generation
+            The `generation` of the `client.grants(asset)` snapshot you reviewed.
+        reuse
+            Those of them who may also reuse it; None is no one.
+        command_id
+            1-64 characters; None makes a new one.
+        project
+            True also shares a derived publication with everyone in the project, including people who join
+            later; False withdraws that; None leaves it as it is. Either explicit value needs a server that
+            reports it, is refused before anything is sent otherwise, and is checked in the answer.
+
+        Returns
+        -------
+        Grants | UploadResult | ResultSummary | RestrictedResultSummary
+            The derived publication's recipients, or the uploaded original or result as shared.
+
+        Raises
+        ------
+        ValidationFailed
+            When `read` or `reuse` is not a list of distinct names, or `reuse` names someone not in `read`.
+        Refused
+            When an argument is not as above, or the server cannot share conditionally or with the whole project.
+        IntegrityConflict
+            When someone changed the recipients since your snapshot.
+        VerificationFailed
+            When the answer names another item or project audience.
+        """
+        # E7: unconditional replacement ended with its transition release
         import uuid
         from . import publish as planning
         from .errors import ShareOutcomeUnknown
@@ -1294,16 +2155,20 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if parsed.asset_id!=asset['asset_id'] or uploaded and parsed.revision!=asset['revision']:raise VerificationFailed('Sharing returned a different exact asset.')
         return parsed
 
-    def bindings(self):
+    def bindings(self) -> list[Binding]:
+        """The application bindings configured in this project that you may see."""
         from . import publish as planning
         from .models.api import Binding
         data=self._post('applications','list',{})
         if not isinstance(data.get('bindings'),list):raise VerificationFailed('Invalid application binding list.')
         return [planning.parse(Binding,item) for item in data['bindings']]
 
-    def options(self):return self._post('applications','options',{})
+    def options(self) -> dict[str, Any]:
+        """What an application binding may be configured with in this project, as the server answers."""
+        return self._post('applications','options',{})
 
-    def inspect(self,asset=None,revision=None,*,curve='',name='',release_id=None,asset_index=0):
+    def inspect(self,asset:str|None=None,revision:str|None=None,*,curve:str='',name:str='',release_id=None,asset_index:int=0) -> dict[str, Any]:
+        """What configuring a binding on this exact curve, or on an item of a release, would use, before you configure it."""
         body={'curve':curve,'name':name}
         if release_id is not None:body.update(release_id=release_id,asset_index=asset_index)
         else:body.update(asset_id=asset,asset_revision=revision)
@@ -1314,23 +2179,96 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from .auth import request
         return request(self.url+'/api/v1/application-access/status',{'id':headers['X-Ophiolite-Application-Grant']},_client_header.stamp(headers,self._sender),http=self.http,notifier=_deprecation.of(self))
 
-    def work_folder(self,path,**options):
+    def work_folder(self,path:str|os.PathLike[str],**options) -> WorkFolder:
+        """A private folder that keeps each request, so the work can be recovered after a restart.
+
+        No sign-in is saved in it.
+
+        Parameters
+        ----------
+        path
+            The folder; it is made private when it does not exist.
+        **options
+            `lock_timeout`, the seconds to wait for another process using the folder.
+
+        Returns
+        -------
+        WorkFolder
+            The folder, whose calls save each request before sending it (ophiolite.publish.WorkFolder).
+        """
         from .publish import WorkFolder
         return WorkFolder(self,path,**options)
 
-    def recover(self,path,through=None):
+    def recover(self,path:str|os.PathLike[str],through:str|None=None) -> Binding | Run | Receipt | UploadResult | None:
+        """Finish the requests a work folder saved before a restart, and return the last answer.
+
+        Parameters
+        ----------
+        path
+            The work folder.
+        through
+            The saved operation to recover through: 'configure', 'start', 'publish' or 'upload'; None is all.
+
+        Returns
+        -------
+        Binding | Run | Receipt | UploadResult | None
+            The answer of the last request sent again; None when every saved request already had its answer.
+
+        Raises
+        ------
+        RecoveryUnavailable
+            When the path is not the original work folder, it holds no saved request, or `through` is not one of
+            the above.
+        VerificationFailed
+            When a saved upload's answer names another file than the one saved.
+        """
         from .errors import RecoveryUnavailable
         path=Path(path)
         if not path.is_dir() or not (path/'owner.json').is_file():raise RecoveryUnavailable('Recovery requires the original private SDK work folder.')
         return self.work_folder(path).recover(through)
 
-    def upload_las(self,source,*,name,attribution,audience,rights_confirmed,filename=None,well_notes='',command_id=None,curve_declaration=None):
-        """Upload original bytes. Without a WorkFolder this is not recoverable after restart; with the same
-        `command_id`, a file sent in parts continues where it stopped (E54).
-        E183 s2b: `curve_declaration` ({'well', 'depth_kind': 'MD'|'TVD'|'TVDSS', 'depth_datum'}, all three; the
-        datum may be 'unknown') declares the curves' well, depth kind and datum, so the version also holds their well
-        log form. Only what you give is sent: nothing is read from the file's header. Without it the request is as
-        before."""
+    def upload_las(self,source,*,name,attribution,audience,rights_confirmed,filename=None,well_notes='',command_id=None,curve_declaration=None) -> UploadResult:
+        """Upload a LAS file as a new private original in this project.
+
+        Without a WorkFolder this is not recoverable after a restart; with the same `command_id`, a file sent in parts
+        continues where it stopped.
+
+        Parameters
+        ----------
+        source
+            The file's path, or its bytes.
+        name
+            The name the item is listed by.
+        attribution
+            Who the file is attributed to.
+        audience
+            The account names of the people who may see it besides you, each once.
+        rights_confirmed
+            True: you confirm that you may keep this file, make results from it and share it with the audience.
+        filename
+            The file name to record; by default the path's name, or 'input.las' for bytes.
+        well_notes
+            A note kept with the well the file names.
+        command_id
+            The same id makes a retry return the same item; None makes a new one.
+        curve_declaration
+            {'well', 'depth_kind': 'MD'|'TVD'|'TVDSS', 'depth_datum'}, all three (the datum may be 'unknown'): the
+            curves' well, depth kind and datum, so the version also holds their well log form. Only what you give is
+            sent: nothing is read from the file's header.
+
+        Returns
+        -------
+        UploadResult
+            The new item and its exact revision, the file's digest.
+
+        Raises
+        ------
+        ValidationFailed
+            When the rights are not confirmed, or the name, attribution or audience is not one the server takes.
+        VerificationFailed
+            When the revision the server answers is not the file's digest.
+        """
+        # E54: parts; E183 s2b: curve_declaration
         import uuid
         from . import publish as planning
         filename=filename or (Path(source).name if not isinstance(source,bytes) else 'input.las')
@@ -1340,23 +2278,69 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
 
     def upload_data(self,source,*,profile,name,attribution,audience,rights_confirmed,declared=None,filename=None,well_log=None,well_notes='',command_id=None,origin=None,
                     append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None,receipt=None,
-                    curve_declaration=None,made_for=None):
-        """E11/E18: upload an original of any supported type with the context you declare (units, CRS,
-        meanings; nothing is inferred). Starts private. A repeated command id returns the same asset.
-        E53: `append_to` (your uploaded wavelet, model or section) with `expected_parent` (its current revision)
-        adds the file as that result's next version; its audience stays the result's.
-        E122 s6: `application_source` ({system: 'application:<client id>', instance, container, id}) records the
-        application object the file came from, as a send's `source` does; `source` stays the file.
-        E173 s0b: `represents='horizon'` marks a point set (points-csv/1, petrel-points-attributes/1) as a horizon, in one
-        request or in parts; a later version keeps the mark without naming it.
-        E171 s1: `holder` (a work folder's holder id) and `application` ('application:<word>' or 'script') record that
-        the folder holds the version this upload adds; neither changes what a retry with the same command id matches.
-        E184 s0: `receipt` (an `ophiolite.transfer-receipt/1`) is kept with the version by a project whose capabilities
-        list its codes version (`transfer_codes_kept`); send it only to such a project.
-        E183 s2b: `curve_declaration`, as `upload_las` takes it, with profile 'las2/1' only.
-        E192 s2: `made_for` names 1-32 exact versions ({asset_id, revision} or (asset_id, revision)) the file was made
-        for, each one you may read; recorded as stated by you, never as what it was made from. Such a file goes in one
-        request; a project whose release does not record it refuses the whole upload."""
+                    curve_declaration=None,made_for=None) -> UploadResult:
+        """Upload a file of any supported kind as a new private original, with the context you declare.
+
+        Nothing is inferred: units, coordinate system and meanings are what you declare. A repeated command id
+        returns the same item.
+
+        Parameters
+        ----------
+        source
+            The file's path, or its bytes.
+        profile
+            The kind of file, as the server names it (for example 'las2/1' or 'points-csv/1').
+        name, attribution, audience, rights_confirmed, well_notes, command_id
+            As `upload_las` takes them.
+        declared
+            What the file's kind needs you to state: units, coordinate system and meanings.
+        filename
+            The file name to record; by default the path's name, or 'upload' for bytes.
+        well_log
+            {asset_id, revision}: the well log this file belongs to.
+        origin
+            Where the file came from, recorded as provenance (a bundle import records the bundle's item).
+        append_to, expected_parent
+            Your uploaded wavelet, model or section and its current revision: the file becomes that result's next
+            version, and its audience stays the result's.
+        provenance
+            The original kept beside this file, as staged by a bundle import.
+        application_source
+            {system: 'application:<client id>', instance, container, id}: the application object the file came from,
+            as a send's `source` records it.
+        represents
+            'horizon' marks a point set (points-csv/1, petrel-points-attributes/1) as a horizon; a later version
+            keeps the mark without naming it.
+        holder, application
+            A work folder's holder id, and 'application:<word>' or 'script': the folder holds the version this
+            upload adds. Neither changes what a retry with the same command id matches.
+        receipt
+            An `ophiolite.transfer-receipt/1`, kept with the version by a project whose capabilities list its codes
+            version (`transfer_codes_kept`); send it only to such a project.
+        curve_declaration
+            As `upload_las` takes it, with profile 'las2/1' only.
+        made_for
+            1-32 exact versions ({asset_id, revision} or (asset_id, revision)) you may read that the file was made
+            for, recorded as stated by you, never as what it was made from. Such a file goes in one request; a
+            project whose release does not record it refuses the whole upload.
+
+        Returns
+        -------
+        UploadResult
+            The new item, or the result's new version, and its exact revision, the file's digest.
+
+        Raises
+        ------
+        ValidationFailed
+            When the rights are not confirmed, a detail is not one the server takes, or only one of `append_to` and
+            `expected_parent` is given.
+        Refused
+            When a file too large for one request carries `made_for` or a kept original, or `made_for` is refused.
+        VerificationFailed
+            When the revision the server answers is not the file's digest.
+        """
+        # E11, E18; E53: append_to; E122 s6: application_source; E173 s0b: represents; E171 s1: holder; E184 s0: receipt;
+        # E183 s2b: curve_declaration; E192 s2: made_for
         import uuid
         from . import publish as planning
         filename=filename or (Path(source).name if not isinstance(source,bytes) else 'upload')
@@ -1373,20 +2357,41 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if getattr(self,'_capabilities_answer',None) is None:self._capabilities_answer=self._post('capabilities','describe',{},retry=True)
         return self._capabilities_answer
 
-    def transfer_codes_kept(self,version):
-        """E184 s0 (D-6): whether this deployment keeps transfer receipts of that code document version (its capabilities'
-        `transfer_receipts.codes`); an older deployment states none, and this SDK then sends no receipt."""
+    def transfer_codes_kept(self,version) -> bool:
+        """Whether this deployment keeps transfer receipts of that version of the code document.
+
+        It reads the capabilities' `transfer_receipts.codes`; an older deployment states none, and this SDK then
+        sends no receipt.
+        """
+        # E184 s0 (D-6)
         member=self._described().get('transfer_receipts')
         return isinstance(member,dict) and isinstance(member.get('codes'),list) and version in member['codes']
 
-    def upload_reads(self):
-        """E107a (R5-8): the deployment lets a folder upload say it reads read procedures (`upload_runs.reads`); without
-        that member this SDK never sends `reads`, and an older deployment answers as it always did."""
+    def upload_reads(self) -> bool:
+        """Whether this deployment lets a folder upload name the tools that read its files.
+
+        It reads the capabilities' `upload_runs.reads`; without that member this SDK never sends `reads`, and an older
+        deployment answers as it always did.
+        """
+        # E107a (R5-8): the read procedures
         member=self._described().get('upload_runs')
         return isinstance(member,dict) and 'procedures' in (member.get('reads') or [])
 
-    def served_limits(self):
-        """E54: this deployment's limits as its capabilities state them (`upload_bytes`, `file_bytes`, ...), read once."""
+    def served_limits(self) -> dict[str, Any]:
+        """This deployment's size limits, as it states them, read once per client.
+
+        Returns
+        -------
+        dict[str, Any]
+            The capabilities' `limits`: at least `upload_bytes` (the largest request) and `file_bytes` (the largest
+            file), each a whole number of bytes.
+
+        Raises
+        ------
+        VerificationFailed
+            When the deployment does not state its upload limits.
+        """
+        # E54
         if getattr(self,'_served_limits',None) is None:
             value=self._described().get('limits')
             if not isinstance(value,dict) or not all(isinstance(value.get(k),int) for k in ('upload_bytes','file_bytes')):
@@ -1444,39 +2449,137 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             view=self._post('las-uploads','state',ref,retry=True)
         return view
 
-    def download_original(self,asset,revision,destination,*,part_bytes=8*1024*1024):
-        """E54: save the exact original of a revision to `destination`, read by ranges and verified against the
-        whole digest the deployment states; nothing is left at `destination` unless every byte matched."""
-        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')+'/representations/artifact'
+    def download_original(self,asset:str,revision:str,destination:str|os.PathLike[str],*,part_bytes:int=8*1024*1024) -> Path:
+        """Save the original file of one exact version, checked byte for byte against the digest the server states.
+
+        Nothing is left at `destination` unless every byte matched. An original restored from a public dataset is
+        saved with `<destination>.NOTICE.txt` beside it (its licence and credits, from the version's describe); when
+        the notice cannot be written, nothing is saved.
+
+        Parameters
+        ----------
+        asset
+            The item's id.
+        revision
+            The exact version.
+        destination
+            Where the file is saved.
+        part_bytes
+            The size of each part asked for.
+
+        Returns
+        -------
+        Path
+            The saved file.
+
+        Raises
+        ------
+        IntegrityConflict
+            When the file does not match the one the server holds; nothing is saved.
+        """
+        return self._save_original(asset,revision,destination,part_bytes)
+
+    def _save_original(self,asset,revision,destination,part_bytes=8*1024*1024,*,described=True):
+        """`download_original`. DESCRIBED=False (E212 s1): the caller knows the revision's profile is served as its
+        original alone (`procedures.original_only`), which no describe serves, so no describe is asked and no notice
+        written."""
+        # E54; E212 s1: the notice from the version's describe
+        base=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
+        path=base+'/representations/artifact'
         def fill(out):
             parts=_ranges.Parts(part_bytes)
             while parts.pending():
                 answer={}
                 out.write(parts.accept(self._get(path,part_bytes,ranged=parts.range(),answer=answer),answer))
             return parts.digest(),parts.expected
-        return save_verified(destination,fill,mismatch='The downloaded original does not match the file the deployment holds; nothing was saved.')
+        saved=save_verified(destination,fill,mismatch='The downloaded original does not match the file the deployment holds; nothing was saved.')
+        if not described:return saved
+        notice=saved.with_name(saved.name+'.NOTICE.txt')
+        try:
+            link=self._public_dataset(base,saved)
+            if link is not None:
+                from .export_citation import notice_text
+                try:save_text(notice,notice_text(link))
+                except OSError as error:raise Refused(NOTICE_UNWRITTEN%(notice,error)) from None
+        except BaseException:
+            saved.unlink(missing_ok=True);raise
+        return saved
+
+    def _public_dataset(self,base,saved):
+        """E212 s1: the `public_dataset` the exact revision's describe answers, or None. A LAS file is described by one of
+        its curves (read from the saved file's header), as the deployment describes no LAS file without one."""
+        try:described=self._json(base+'?'+PROFILES[1:],256*1024)
+        except Incompatible as refused:
+            from .checks import las_curves
+            with open(saved,'rb') as f:curves=las_curves(f.read(256*1024))
+            if not curves:
+                # an original of a profile the scientific routes do not serve (a kept wells table, sql-wells/1) has no
+                # describe, so no public_dataset and no notice; the original itself is saved as before E212 s1
+                if UNSERVED_PROFILE in (refused.server_message or refused.message or ''):return None
+                raise
+            described=self._json(base+'?curve='+quote(curves[0][0],safe='')+PROFILES,256*1024)
+        from .export_citation import link_of
+        return link_of(described)
 
     def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None,
-                        holder=None,application=None,receipt=None,made_for=None,figures=None):
-        """E30b: publish a file you derived (a `WrittenOriginal` from ophiolite.writers) from exact revisions you
-        may reuse, with the method you declare. `command_id` is required: a network retry with the same id is
-        safe (the same receipt comes back); a fresh id on retry can create a second asset. Use
-        WorkFolder.publish_derived for automatic recovery (it saves a stable command id and the file's digest
-        before sending). `from_` names 1-32 parents (objects with asset_id and revision, or (asset_id, revision));
-        `new_version_of`/`expected_parent` add a version to an earlier publication of the same lineage: your own, or
-        (E70c) a colleague's when the project names you both; its author stays the author. `procedure` ({'id': run id,
-        'role': output role}, E106) publishes one output of a reported run: for a run made again the receipt may be the
-        earlier result, with its `outcome`. With `procedure['for_outcome']` (an outcome id, E120) the same result
-        is published again for that outcome: the receipt is the earlier result with `republished`. E122 s4a: `source`
-        ({system: 'application:<client id>', instance, container, id, as_new}) names the application object the file came
-        from; the version keeps it, and without `new_version_of` or `as_new` the server compares the send with what that
-        object sent before (receipt `source_change`: new, changed, or unchanged with nothing published). E171 s1: `holder`
-        and `application` record that a work folder holds the version published (a person's send only: an assistant
-        naming a holder is refused). E184 s0: `receipt` as `upload_data` takes it. E192 s2: `made_for` as `upload_data`
-        takes it, none also in `from_`. E191 s1: `figures`, a list of
-        {label, file, file_name?} (a path or bytes), is attached to the published version after its answer, one request
-        each with a command id made from `command_id`, so a retry adds none; the receipt then carries `figures` (each a
-        record, or {label, refused}) and, when one was refused, `figures_line` naming it by its label: the version stands."""
+                        holder=None,application=None,receipt=None,made_for=None,figures=None) -> PresentedReceipt:
+        """Publish a file you made from exact versions you may reuse, with the method you declare.
+
+        A network retry with the same `command_id` is safe (the same receipt comes back); a fresh id on retry can
+        create a second item. WorkFolder.publish_derived recovers by itself: it saves a stable command id and the
+        file's digest before sending.
+
+        Parameters
+        ----------
+        written
+            The file, a `WrittenOriginal` from ophiolite.writers.
+        name
+            The name the result is listed by.
+        from_
+            1-32 parents it was made from: objects with asset_id and revision, or (asset_id, revision).
+        method
+            How you made it, in your words.
+        command_id
+            Required; the same id returns the same receipt.
+        of_entity
+            The well or wellbore the result is of.
+        new_version_of, expected_parent
+            An earlier publication of the same lineage and its current revision: the file becomes its next version.
+            It may be your own, or a colleague's when the project names you both; its author stays the author.
+        procedure
+            {'id': run id, 'role': output role}: publishes one output of a reported run of a tool; for a run made
+            again the receipt may be the earlier result, with its `outcome`. With 'for_outcome' (an outcome id) the
+            same result is published again for that outcome, and the receipt is the earlier result with
+            `republished`.
+        source
+            {system: 'application:<client id>', instance, container, id, as_new}: the application object the file
+            came from. The version keeps it; without `new_version_of` or `as_new` the server compares the send with
+            what that object sent before (receipt `source_change`: new, changed, or unchanged with nothing published).
+        holder, application
+            Record that a work folder holds the version published; a person's send only (an assistant naming a
+            holder is refused).
+        receipt
+            As `upload_data` takes it.
+        made_for
+            As `upload_data` takes it; none of them also in `from_`.
+        figures
+            [{label, file, file_name?}] (a path or bytes), attached to the published version after its answer, one
+            request each with a command id made from `command_id`, so a retry adds none.
+
+        Returns
+        -------
+        PresentedReceipt
+            The receipt, which shows itself with a link to the Workspace. With `figures` it carries `figures` (each
+            a record, or {label, refused}) and, when one was refused, `figures_line` naming it by its label: the
+            version stands.
+
+        Raises
+        ------
+        Refused
+            When `made_for` is refused.
+        """
+        # E30b; E70c: a colleague's lineage; E106: procedure (a run's output); E120: for_outcome; E122 s4a: source;
+        # E171 s1: holder; E184 s0: receipt; E192 s2: made_for; E191 s1: figures; E104: the presented receipt
         from . import publish as planning
         from .models.api import PublicationReceipt
         body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,
@@ -1495,10 +2598,30 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                                                        **({'figures_line':refused_line(attached)} if refused_line(attached) else {}))
         return PresentedReceipt.present(receipt,{'origin':self.url,'project':self.project,'family':'m','recipe':recipe})
 
-    def preview_change(self,asset_id,revision,change):
-        """E64: what changing one exact revision would make, stored nowhere: {'profile', 'method', 'method_key', 'samples',
-        'declared'}. CHANGE is {'kind': 'coordinates', 'to': 'EPSG:25831', 'values': 'bilinear'} or {'kind': 'units',
-        'curves': {'DT': 'us/m'}}. A change that cannot be made raises with the sentence the Workspace shows."""
+    def preview_change(self,asset_id,revision,change) -> dict[str, Any]:
+        """Show what changing the coordinates or units of one exact version would make, without storing anything.
+
+        Parameters
+        ----------
+        asset_id
+            The item's id.
+        revision
+            The exact version.
+        change
+            {'kind': 'coordinates', 'to': 'EPSG:25831', 'values': 'bilinear'} or {'kind': 'units', 'curves':
+            {'DT': 'us/m'}}.
+
+        Returns
+        -------
+        dict[str, Any]
+            {'profile', 'method', 'method_key', 'samples', 'declared'} as the server answered.
+
+        Raises
+        ------
+        OphioliteError
+            When the change cannot be made, with the sentence the Workspace shows.
+        """
+        # E64
         from .entities import _in_its_words
         return _in_its_words(lambda:self._post('publications','transform-preview',{'asset_id':asset_id,'revision':revision,'change':change},retry=True))
 
@@ -1510,24 +2633,104 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from .entities import _in_its_words
         return planning.parse(PublicationReceipt,_in_its_words(lambda:self._post('publications','transform',body,retry=True)))
 
-    def change_coordinates(self,asset_id,revision,*,to,name,command_id,values='bilinear'):
-        """E64: a new version of the same type in the system TO, made on the server by the one operation it selects
-        for these points (the method record names it, its published accuracy, area and any grid with its SHA-256).
-        The original is never changed. A grid is resampled once onto cell centres (VALUES: 'bilinear' or 'nearest').
-        `command_id` is required: a retry with the same id returns the same receipt."""
+    def change_coordinates(self,asset_id:str,revision:str,*,to:str,name:str,command_id:str,values:str='bilinear') -> PublicationReceipt:
+        """Make a new version of the same kind in another coordinate system, on the server.
+
+        The server uses the one operation it selects for these points; the method record names it, its published
+        accuracy, area and any grid with its SHA-256. The original is never changed.
+
+        Parameters
+        ----------
+        asset_id
+            The item's id.
+        revision
+            The exact version.
+        to
+            The coordinate system, such as 'EPSG:25831'.
+        name
+            The new version's name.
+        command_id
+            Required; a retry with the same id returns the same receipt.
+        values
+            How a grid is resampled once onto cell centres: 'bilinear' or 'nearest'.
+
+        Returns
+        -------
+        PublicationReceipt
+            The new version.
+
+        Raises
+        ------
+        OphioliteError
+            When the change cannot be made, with the sentence the Workspace shows.
+        """
+        # E64
         return self._change(asset_id,revision,{'kind':'coordinates','to':to,'values':values},name,command_id)
 
-    def change_units(self,asset_id,revision,*,curves,name,command_id):
-        """E64: a new version of a LAS log with each curve in CURVES ({mnemonic: unit}, the depth axis by its own
-        mnemonic) converted by the one units table; the method record keeps the coefficients. Nothing is guessed: a
-        curve whose unit is not stated, of another kind or not in the table raises with its sentence."""
+    def change_units(self,asset_id:str,revision:str,*,curves:Mapping[str,str],name:str,command_id:str) -> PublicationReceipt:
+        """Make a new version of a LAS log with chosen curves converted to other units, on the server.
+
+        The one units table converts them; the method record keeps the coefficients. Nothing is guessed.
+
+        Parameters
+        ----------
+        asset_id
+            The log's item id.
+        revision
+            The exact version.
+        curves
+            {mnemonic: unit}; the depth axis by its own mnemonic.
+        name
+            The new version's name.
+        command_id
+            Required; a retry with the same id returns the same receipt.
+
+        Returns
+        -------
+        PublicationReceipt
+            The new version.
+
+        Raises
+        ------
+        OphioliteError
+            When a curve's unit is not stated, of another kind or not in the table, with its sentence.
+        """
+        # E64
         return self._change(asset_id,revision,{'kind':'units','curves':dict(curves)},name,command_id)
 
-    def import_bundle(self,bundle,*,audience,attribution,rights_confirmed,well_logs=None):
-        """E18: upload every original a portable bundle carries as your own new, private upload, with
-        the context the bundle declares and its origin recorded as provenance (not authority). History,
-        groups, grants and lineage stay behind. Safe to repeat: each asset's upload uses a stable
-        command, so a retry after a lost answer returns the same destination asset."""
+    def import_bundle(self,bundle,*,audience,attribution,rights_confirmed,well_logs=None) -> list[dict[str, Any]]:
+        """Upload every original file a portable bundle carries as your own new, private upload.
+
+        Each keeps the context the bundle declares, and its origin is recorded as provenance (not authority).
+        History, groups, grants and lineage stay behind. Safe to repeat: each item's upload uses a stable command, so
+        a retry after a lost answer returns the same item.
+
+        Parameters
+        ----------
+        bundle
+            The opened bundle.
+        audience
+            The account names of the people who may see the uploads besides you.
+        attribution
+            Who the files are attributed to.
+        rights_confirmed
+            True: you confirm that you may keep these files, make results from them and share them with the audience.
+        well_logs
+            {exported well log id: (asset_id, revision)}: the imported well log each dependent item belongs to.
+
+        Returns
+        -------
+        list[dict[str, Any]]
+            One row per item of the bundle: its `state` ('imported' with its `destination`, or why not).
+
+        Raises
+        ------
+        ValidationFailed
+            When `rights_confirmed` is not True.
+        ImportIncomplete
+            When an upload fails; the rows so far are in `details['assets']`, and repeating continues the import.
+        """
+        # E18
         from .bundle import import_plan
         from .errors import ImportIncomplete,ValidationFailed
         if rights_confirmed is not True:raise ValidationFailed(['Confirm that you may retain these files, derive results and share them within the audience; holding a bundle grants no rights.'])
@@ -1570,14 +2773,16 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             raise VerificationFailed('The deployment staged another original than the one sent.')
         return reference
 
-    def inspect_las(self,source):
+    def inspect_las(self,source) -> dict[str, Any]:
+        """What the server reads in a LAS file, its well and curves, without keeping the file."""
         import base64
         from . import publish as planning
         raw=planning.upload_bytes(source)
         header=base64.b64encode(planning.json_bytes({'project_id':self.project})).decode()
         return self._post_bytes('las-uploads','inspect',raw,extra_headers={'Content-Type':'application/octet-stream','X-Ophiolite-Upload':header})
 
-    def upload_info(self,asset):
+    def upload_info(self,asset) -> UploadResult:
+        """The record of one exact uploaded original, checked to be the one you named."""
         from . import publish as planning
         from .models.api import UploadResult
         chosen=planning.selection(asset)
@@ -1585,27 +2790,35 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if result.asset_id!=chosen['asset_id'] or result.revision!=chosen['revision']:raise VerificationFailed('The upload response refers to a different exact asset.')
         return result
 
-    def members(self):return self._post('las-uploads','members',{})
+    def members(self) -> dict[str, Any]:
+        """The account names of the project's members, for an upload's audience: {'members': [...]}."""
+        return self._post('las-uploads','members',{})
 
-    def proposals(self):
-        """E151 s2: what your agents wait for you on in this project, newest first: every pending plan and every job
-        waiting at a step for your choice. Each is a dict of ophiolite.agent-proposals/1 (`plan`, `operation`,
+    def proposals(self) -> list[dict[str, Any]]:
+        """What your agents wait for you on in this project, newest first.
+
+        Every pending plan, and every job waiting at a step for your choice. Each is a dict of ophiolite.agent-proposals/1 (`plan`, `operation`,
         `summary`, `evidence`, `budget`, `expires_at`, `review_url`; a waiting job also `question`, `choices` and
         `choice_token`). The answer is checked against that contract (VerificationFailed otherwise). Only a person's
         credential reads it; an agent's is refused by the gateway."""
+        # E151 s2
         from . import publish as planning
         return planning.parse_proposals(self._post('agents','proposals',{},retry=True))
 
-    def answer(self,choice_token,choice):
-        """E151 s2: answer the question a job of your agent waits on, with one offered choice id ('c1' ... 'c8'), by the
-        `choice_token` of `proposals()` or of the agent's `ChoiceRequired`. Returns {plan, step, state: 'running',
+    def answer(self,choice_token:str,choice:str) -> dict[str, Any]:
+        """Answer the question a job of your agent waits on, with one of the choices it offered.
+
+        The choice is its id ('c1' ... 'c8'); the token is the `choice_token` of `proposals()` or of the agent's
+        `ChoiceRequired`. Returns {plan, step, state: 'running',
         choice}; the agent's `resume(plan)` then carries on from that step. A used, foreign or stale token, or one of
         another person's job, raises ChoiceRefused with the gateway's reason in `details['reason']` (token-used,
         token-foreign, token-stale, not-the-delegator). Only the job's delegator answers; an agent's credential is
         refused by the gateway."""
+        # E151 s2
         return self._post('jobs','answer',{'choice_token':choice_token,'choice':choice})
 
-    def result_preview(self,asset):
+    def result_preview(self,asset) -> ResultPreview | RestrictedResultPreview:
+        """A preview of one exact result, with only what you may open of its input."""
         from . import publish as planning
         from .models.api import ResultPreview,RestrictedResultPreview
         chosen=planning.selection(asset)
@@ -1615,7 +2828,8 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if result.asset_id!=chosen['asset_id'] or result.revision!=chosen['revision']:raise VerificationFailed('The preview refers to a different exact result.')
         return result
 
-    def result_download(self,asset):
+    def result_download(self,asset) -> tuple[bytes, Receipt | RestrictedReceipt, Run | RestrictedRun]:
+        """The file of one exact result with its receipt and run, checked against the receipt's digest."""
         from . import publish as planning
         from .models.api import RestrictedRun,Receipt,RestrictedReceipt
         chosen=planning.selection(asset)
@@ -1647,6 +2861,24 @@ def save_verified(destination,fill,*,mismatch=DOWNLOAD_MISMATCH):
             written,stated=fill(out)
             out.flush();os.fsync(out.fileno())
         if not stated or written!=stated:raise IntegrityConflict(mismatch)
+        os.replace(partial,destination)
+    except BaseException:
+        partial.unlink(missing_ok=True);raise
+    return destination
+
+
+NOTICE_UNWRITTEN='The licence notice %s could not be written (%s), so the downloaded original was not saved.'  # E212 s1
+UNSERVED_PROFILE='serves registered profiles only'  # E212 s1: the gateway's refusal of a profile its scientific routes do not serve
+
+
+def save_text(destination,text):
+    """E212 s1: TEXT at DESTINATION, whole or not at all (a private partial file, fsynced, then renamed)."""
+    import uuid
+    destination=Path(destination)
+    partial=destination.with_name('.'+destination.name+'.'+uuid.uuid4().hex[:12]+'.partial')
+    try:
+        with partial.open('x',encoding='utf-8') as out:
+            out.write(text);out.flush();os.fsync(out.fileno())
         os.replace(partial,destination)
     except BaseException:
         partial.unlink(missing_ok=True);raise

@@ -10,7 +10,13 @@ From slice 3 `ophiolite exchange deliver NAME --as OUTCOME` (`Client.deliver(...
 delivery runs only when the version is accepted under the outcome's current version and goes to its declared
 destination; every claim, claimed or refused, is kept on the server (`ophiolite.outcome-claim/1`, `outcome_claims`).
 """
+from __future__ import annotations  # E217 s0 (D1): annotations stay strings; nothing below is imported to run
+
 import uuid
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # E217 s0 (D1): read by a type checker only
+    from typing import Any
 
 KIND = 'well-residual/1'
 RULE = 'well-residual-within/1'
@@ -92,24 +98,27 @@ class OutcomeClient:
     """Mixed into `Client` (uses its `_post`). Each write sends a new command id unless one is given; the same id with
     the same body answers the stored result."""
 
-    def outcome_list(self):
+    def outcome_list(self) -> list[dict[str, Any]]:
         """The project's outcomes in the order they were first declared, withdrawn ones included."""
         return self._post('outcomes', 'list', {}, retry=True)['outcomes']
 
-    def outcome_get(self, outcome_id):
+    def outcome_get(self, outcome_id: str) -> dict[str, Any]:
         """One outcome with every version and every action on it."""
         return self._post('outcomes', 'get', {'outcome_id': outcome_id}, retry=True)
 
-    def outcome_named(self, label):
+    def outcome_named(self, label: str) -> dict[str, Any]:
         """The outcome that is not withdrawn and carries this name (names are compared without case)."""
         from .errors import Refused
         found = [o for o in self.outcome_list() if o['state'] != 'withdrawn' and o['label'].casefold() == label.casefold()]
         if not found: raise Refused('This project has no outcome named "%s".' % label)
         return found[0]
 
-    def tool_declaration(self, label, tool, version, settings, procedure, destination, kind=KIND):
-        """E179 s1: `tool_declaration` for "<tool> version <version>" of the catalogue (`procedure_list`, by its name),
-        refused before anything is sent when the project lists no such version or more than one."""
+    def tool_declaration(self, label: str, tool: str, version: int, settings, procedure, destination, kind: str = KIND) -> dict[str, Any]:
+        """The tool declaration of an outcome, for "<tool> version <version>" of the catalogue (by the tool's name).
+
+        It is refused before anything is sent when the project lists no such version or more than one.
+        """
+        # E179 s1
         from .errors import Refused
         found = [v for v in self.procedure_list(tool) if v['version'] == version]
         if not found: raise Refused('This project lists no version %d of the tool "%s".' % (version, tool))
@@ -120,40 +129,46 @@ class OutcomeClient:
     def _outcome_write(self, operation, body, command_id):
         return self._post('outcomes', operation, {'command_id': command_id or '%s-%s' % (operation, uuid.uuid4().hex), **body}, retry=True)
 
-    def outcome_declare(self, declaration, *, command_id=None):
+    def outcome_declare(self, declaration, *, command_id: str | None = None) -> dict[str, Any]:
         """Declare an outcome (project administrators); it is enabled at version 1."""
         return self._outcome_write('declare', {'declaration': declaration}, command_id)
 
-    def outcome_revise(self, outcome_id, declaration, *, command_id=None):
+    def outcome_revise(self, outcome_id: str, declaration, *, command_id: str | None = None) -> dict[str, Any]:
         """Its next version, when anything differs (refused `unchanged` otherwise); earlier versions stay as they were."""
         return self._outcome_write('revise', {'outcome_id': outcome_id, 'declaration': declaration}, command_id)
 
-    def outcome_enable(self, outcome_id, *, command_id=None):
+    def outcome_enable(self, outcome_id: str, *, command_id: str | None = None) -> dict[str, Any]:
+        """Enable a disabled outcome again, so results of its kind are judged against it (project administrators)."""
         return self._outcome_write('enable', {'outcome_id': outcome_id}, command_id)
 
-    def outcome_disable(self, outcome_id, *, command_id=None):
+    def outcome_disable(self, outcome_id: str, *, command_id: str | None = None) -> dict[str, Any]:
+        """Disable an outcome until it is enabled again; nothing is judged against it meanwhile (project administrators)."""
         return self._outcome_write('disable', {'outcome_id': outcome_id}, command_id)
 
-    def outcome_withdraw(self, outcome_id, *, command_id=None):
+    def outcome_withdraw(self, outcome_id: str, *, command_id: str | None = None) -> dict[str, Any]:
         """Withdraw for good; the name is free again."""
         return self._outcome_write('withdraw', {'outcome_id': outcome_id}, command_id)
 
     # --- E120 s1: the states of a result version ---------------------------------------------------------------------
 
-    def outcome_states(self, asset_id, revision):
-        """{asset_id, revision, outcomes: [{outcome_id, label, version, state, reason, check_id, line,
-        earlier_publications, earlier_versions}]} for a result version you can read (refused `result` otherwise)."""
+    def outcome_states(self, asset_id: str, revision: str) -> dict[str, Any]:
+        """What each outcome says about a result version you can read (refused `result` otherwise).
+
+        The answer is {asset_id, revision, outcomes: [{outcome_id, label, version, state, reason, check_id, line,
+        earlier_publications, earlier_versions}]}.
+        """
         return self._post('outcomes', 'states', {'asset_id': asset_id, 'revision': revision}, retry=True)
 
-    def outcome_evaluate(self, asset_id, revision):
+    def outcome_evaluate(self, asset_id: str, revision: str) -> dict[str, Any]:
         """Evaluate again where no record exists yet (a missed evaluation), then the states; a record is never changed."""
         return self._post('outcomes', 'evaluate', {'asset_id': asset_id, 'revision': revision}, retry=True)
 
     # --- E176 s1: try a result before publishing it ---------------------------------------------------------------------
 
-    def try_output(self, raw, header, *, report=None, role=None, outcome_ids=None):
-        """What each enabled outcome of the result's kind would say about these bytes, were they published: the
-        `ophiolite.outcome-trial/1` answer. `header` is the publications/derive header (`publish.derive_request`'s
+    def try_output(self, raw: bytes, header, *, report=None, role: str | None = None, outcome_ids=None) -> dict[str, Any]:
+        """What each enabled outcome of the result's kind would say about these bytes, were they published.
+
+        The answer is `ophiolite.outcome-trial/1`. `header` is the publications/derive header (`publish.derive_request`'s
         body): with its `run` for a reported run, or without it and with `report` (the procedure-runs/report body) and
         `role` for a run not yet reported. Nothing is published, reported or kept."""
         import base64
@@ -163,10 +178,12 @@ class OutcomeClient:
         if outcome_ids is not None: body['outcome_ids'] = list(outcome_ids)
         return self._post('outcomes', 'try', body, retry=True)
 
-    def try_result(self, folder, *, role=None, outcomes=None):
-        """Try a run folder's outputs before `procedure_publish`: read as it reads them (each output's SHA-256 checked),
-        and for each output whose kind outcomes are declared over (or the one `role` names) the header publication
-        would carry and the report it would send. `outcomes` names outcomes (by name) to try; every enabled one of the
+    def try_result(self, folder, *, role: str | None = None, outcomes=None) -> dict[str, dict[str, Any]]:
+        """Try a run folder's outputs against the project's outcomes before you publish them.
+
+        The folder is read as `procedure_publish` reads it (each output's SHA-256 checked), and for each output whose
+        kind outcomes are declared over (or the one `role` names) the header publication would carry and the report it
+        would send are tried. `outcomes` names outcomes (by name) to try; every enabled one of the
         kind when None. Nothing is reported, so the folder and a later `procedure_publish` of it are unchanged.
         Returns {role: the outcome-trial answer}."""
         import uuid
@@ -194,17 +211,22 @@ class OutcomeClient:
 
     # --- E120 s3: the claims "Deliver as" made -------------------------------------------------------------------------
 
-    def outcome_claims(self):
-        """The project's "Deliver as" claims you may see now, oldest first: {claim_id, state, reason, sentence,
-        delivery_id, outcome, result, check, destination, by, delivery}. `state` is the gate's (claimed or refused) and
+    def outcome_claims(self) -> list[dict[str, Any]]:
+        """The project's "Deliver as" claims you may see now, oldest first.
+
+        Each is {claim_id, state, reason, sentence, delivery_id, outcome, result, check, destination, by, delivery}.
+        `state` is the gate's (claimed or refused) and
         never changes; `delivery` {state, line} is what became of a claimed claim's delivery, as the result's story
         tells it (claimed, confirmed, not-sent, unknown or mismatch; adhoc-e121-claims)."""
         return self._post('outcomes', 'claims', {}, retry=True)['claims']
 
-    def result_version(self, text):
-        """(asset_id, revision) of `ITEM[@N]`: the project item by its name and its version number (default its latest),
-        as `procedures again --item` names one; or of `@ASSET:REVISION`, exactly that version when it is one you can
-        see (adhoc-e121-identity, E121 B10)."""
+    def result_version(self, text: str) -> tuple[str, str]:
+        """The (asset_id, revision) of a version named as `ITEM[@N]` or `@ASSET:REVISION`.
+
+        `ITEM[@N]` is the project item by its name and its version number (default its latest), as
+        `procedures again --item` names one; `@ASSET:REVISION` is exactly that version when it is one you can see.
+        """
+        # adhoc-e121-identity, E121 B10
         import tempfile
         from .errors import Refused
         from .exchange import ClientTransport, Exchange

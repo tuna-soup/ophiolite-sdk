@@ -1,0 +1,10 @@
+{
+  "id": "ophiolite.scientific-asset/1",
+  "version": "1.39.0",
+  "path": "assets/v1/schema.json",
+  "canonical": "the released document as JSON with keys sorted, separators ',' and ':', UTF-8, no trailing newline",
+  "canonical_sha256": "f99808a6423bc2952eac91c925ec1ced52dde345a88f0ca373c0a4a4155fb1ca",
+  "file_sha256": "4465b4395d3c1f266cfb7e6fd8a73bf3e6f9e07e9c689684726636d70da5c4d9",
+  "file": "the released file bytes as main served them before E212 s1 (f54888442): the document with indent 2 and one trailing newline",
+  "frozen_by": "E212 s1: 1.40.0 minus its public_dataset property, the five PublicDataset definitions, the record and line unions of PublicSources and that definition's 1.40.0 sentence, version set back, is these bytes"
+}
